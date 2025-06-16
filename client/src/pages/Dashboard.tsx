@@ -157,27 +157,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Recent Activity / Stats */}
-        <div className="mt-8 grid md:grid-cols-3 gap-6">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="text-2xl font-bold text-ugga-primary mb-2">5,000+</div>
-              <div className="text-sm text-gray-600">Network Members</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="text-2xl font-bold text-ugga-primary mb-2">50</div>
-              <div className="text-sm text-gray-600">States Represented</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="text-2xl font-bold text-ugga-primary mb-2">1,000+</div>
-              <div className="text-sm text-gray-600">Resources Available</div>
-            </CardContent>
-          </Card>
-        </div>
+
       </div>
     </div>
   );
