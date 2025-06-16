@@ -102,7 +102,7 @@ export default function ChatWidget({ title, placeholder, endpoint, icon }: ChatW
                 <p className="text-sm">
                   {title === "Find-a-Grower AI" 
                     ? "Ask me to help you find growers with specific expertise or in certain regions"
-                    : "Get AI-powered analysis and recommendations for your greenhouse operation"
+                    : "Find growers"
                   }
                 </p>
               </div>
