@@ -6,7 +6,7 @@
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(20, 14.3%, 4.1%);
   --muted: hsl(60, 4.8%, 95.9%);
-  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --muted-foreground: hsl(25, 5.3%, 35%);
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(20, 14.3%, 4.1%);
   --card: hsl(0, 0%, 100%);
@@ -24,13 +24,13 @@
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
   
-  /* UGGA Custom Colors */
-  --ugga-primary: hsl(142, 31%, 25%);
-  --ugga-secondary: hsl(67, 55%, 34%);
-  --ugga-accent: hsl(142, 31%, 56%);
-  --ugga-success: hsl(120, 61%, 34%);
-  --ugga-warning: hsl(43, 100%, 50%);
-  --ugga-error: hsl(0, 73%, 57%);
+  /* UGGA Custom Colors - Enhanced for better contrast */
+  --ugga-primary: hsl(142, 35%, 20%);
+  --ugga-secondary: hsl(67, 60%, 30%);
+  --ugga-accent: hsl(142, 35%, 45%);
+  --ugga-success: hsl(120, 65%, 30%);
+  --ugga-warning: hsl(43, 100%, 45%);
+  --ugga-error: hsl(0, 75%, 50%);
 }
 
 .dark {
