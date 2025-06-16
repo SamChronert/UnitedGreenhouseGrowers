@@ -344,6 +344,147 @@ export class DatabaseStorage implements IStorage {
       recentCount
     };
   }
+
+  // Forum operations
+  async getAllForumPosts(searchQuery?: string): Promise<(ForumPost & { user: User & { profile: Profile }; comments: (ForumComment & { user: User & { profile: Profile } })[]; commentCount: number })[]> {
+    const posts = await db
+      .select()
+      .from(forumPosts)
+      .leftJoin(users, eq(forumPosts.userId, users.id))
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .orderBy(desc(forumPosts.createdAt));
+
+    const postsWithDetails = await Promise.all(
+      posts.map(async (post) => {
+        const comments = await db
+          .select()
+          .from(forumComments)
+          .leftJoin(users, eq(forumComments.userId, users.id))
+          .leftJoin(profiles, eq(users.id, profiles.userId))
+          .where(eq(forumComments.postId, post.forum_posts.id))
+          .orderBy(forumComments.createdAt);
+
+        return {
+          ...post.forum_posts,
+          user: { ...post.users!, profile: post.profiles! },
+          comments: comments.map(c => ({
+            ...c.forum_comments,
+            user: { ...c.users!, profile: c.profiles! }
+          })),
+          commentCount: comments.length
+        };
+      })
+    );
+
+    if (searchQuery) {
+      return postsWithDetails.filter(post => 
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+      );
+    }
+
+    return postsWithDetails;
+  }
+
+  async getForumPost(id: string): Promise<(ForumPost & { user: User & { profile: Profile }; comments: (ForumComment & { user: User & { profile: Profile } })[] }) | undefined> {
+    const [post] = await db
+      .select()
+      .from(forumPosts)
+      .leftJoin(users, eq(forumPosts.userId, users.id))
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .where(eq(forumPosts.id, id));
+
+    if (!post) return undefined;
+
+    const comments = await db
+      .select()
+      .from(forumComments)
+      .leftJoin(users, eq(forumComments.userId, users.id))
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .where(eq(forumComments.postId, id))
+      .orderBy(forumComments.createdAt);
+
+    return {
+      ...post.forum_posts,
+      user: { ...post.users!, profile: post.profiles! },
+      comments: comments.map(c => ({
+        ...c.forum_comments,
+        user: { ...c.users!, profile: c.profiles! }
+      }))
+    };
+  }
+
+  async createForumPost(postData: InsertForumPost): Promise<ForumPost> {
+    const [post] = await db
+      .insert(forumPosts)
+      .values({
+        id: randomUUID(),
+        ...postData,
+      })
+      .returning();
+    return post;
+  }
+
+  async updateForumPost(id: string, updates: Partial<ForumPost>): Promise<ForumPost> {
+    const [post] = await db
+      .update(forumPosts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(forumPosts.id, id))
+      .returning();
+    return post;
+  }
+
+  async deleteForumPost(id: string): Promise<void> {
+    await db.delete(forumPosts).where(eq(forumPosts.id, id));
+  }
+
+  async createForumComment(commentData: InsertForumComment): Promise<ForumComment> {
+    const [comment] = await db
+      .insert(forumComments)
+      .values({
+        id: randomUUID(),
+        ...commentData,
+      })
+      .returning();
+    return comment;
+  }
+
+  async deleteForumComment(id: string): Promise<void> {
+    await db.delete(forumComments).where(eq(forumComments.id, id));
+  }
+
+  // Assessment training data operations
+  async getAllAssessmentTrainingData(): Promise<AssessmentTrainingData[]> {
+    return await db
+      .select()
+      .from(assessmentTrainingData)
+      .orderBy(desc(assessmentTrainingData.createdAt));
+  }
+
+  async createAssessmentTrainingData(data: InsertAssessmentTrainingData): Promise<AssessmentTrainingData> {
+    const [trainingData] = await db
+      .insert(assessmentTrainingData)
+      .values({
+        id: randomUUID(),
+        ...data,
+      })
+      .returning();
+    return trainingData;
+  }
+
+  async updateAssessmentTrainingData(id: string, updates: Partial<AssessmentTrainingData>): Promise<AssessmentTrainingData> {
+    const [trainingData] = await db
+      .update(assessmentTrainingData)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(assessmentTrainingData.id, id))
+      .returning();
+    return trainingData;
+  }
+
+  async deleteAssessmentTrainingData(id: string): Promise<void> {
+    await db.delete(assessmentTrainingData).where(eq(assessmentTrainingData.id, id));
+  }
 }
 
 export const storage = new DatabaseStorage();
