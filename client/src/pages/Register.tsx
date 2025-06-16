@@ -90,9 +90,9 @@ export default function Register() {
         <div className="text-center mb-8">
           <img src={uggaLogo} alt="UGGA Logo" className="h-12 w-12 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Join UGGA</h1>
-          <p className="text-gray-600">
-            Connect with greenhouse growers nationwide and access AI-powered tools
-          </p>
+          <p className="text-gray-600">Connect with greenhouse growers across the country and access practical tools built with growers in mind.
+
+</p>
         </div>
 
         <Card>

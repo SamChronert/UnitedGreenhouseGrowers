@@ -162,7 +162,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <p className="text-sm text-[#f9fafb]">Phone</p>
-                  <p className="font-medium text-gray-900">415-686-9620</p>
+                  <p className="font-medium text-[#f9fafb]">415-686-9620</p>
                 </div>
               </div>
             </div>
