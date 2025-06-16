@@ -1,0 +1,172 @@
+🌿  PROJECT   United Greenhouse Growers Association (UGGA) Web App
+===============================================================
+
+1. PURPOSE & MVP SCOPE
+----------------------
+Goal ▸ Public-facing site + gated member portal that surfaces AI tools and a “Find-a-Grower” network.
+MVP ▸ Everything listed here; fancy styling, payments, and mobile app are out-of-scope for now.
+
+2. TECH STACK
+-------------
+• Framework        Next.js 14 “App Router” (TypeScript)  
+• UI               TailwindCSS + Headless UI  
+• DB               Replit Postgres → Prisma ORM (schema.prisma + migrations)  
+• Auth             Replit Auth OR NextAuth + bcrypt → JWT cookie (httpOnly, SameSite=Lax)  
+• Email            SendGrid (transactional emails)  
+• AI               OpenAI Chat Completions v1 (Assistants API coming later)  
+• DevOps           Replit Autoscale deploy + GitHub backup
+
+3. PUBLIC ROUTES
+----------------
+/                   – Home (hero, mission, CTA)
+/about              – Org history & board bios
+/contact            – Form → POST /api/contact → SendGrid
+/blog               – Blog index (MDX files in /content/posts)
+/blog/[slug]        – Blog article
+/resources          – Curated docs (static for MVP)
+
+4. AUTH & USER FLOWS
+--------------------
+/register  ▸ Form (name, phone, state, employer, job_title, farm_type, email, username, pw)  
+            └ POST /api/auth/register  
+               • hash pw  • create user + profile • email “verify” link  
+/verify    ▸ On click → marks email_verified = true  
+/login     ▸ POST /api/auth/login → set JWT cookie  
+/logout    ▸ POST /api/auth/logout → clear cookie  
+/reset-pw  ▸ Email flow (token TTL 30 min) – **nice-to-have**
+
+Roles: `guest`, `member`, `admin` (simple ENUM column).  
+Middleware `/lib/auth.ts` redirects non-members off `/dashboard/*`.
+
+5. MEMBER PORTAL (protected)
+----------------------------
+/dashboard                  – Welcome card + profile snippet  
+/dashboard/profile          – Edit profile (PUT /api/profile)  
+/dashboard/find-a-grower    – GPT chat widget  
+                              • POST /api/ai/find-grower  
+                              • System prompt: “Given question + member directory, suggest growers…”  
+/dashboard/assessment       – AI Farm Assessment tool (multi-turn)  
+                              • Streamed responses with Server-Sent Events  
+/dashboard/resources        – Same as public resources but filtered by member.state & farm_type  
+
+ADMIN EXTRAS (role = admin)
+---------------------------
+/admin/resources            – CRUD resources  
+/admin/blog                 – CRUD blog posts  
+/admin/members              – View/search member directory
+
+6. DATABASE MODEL  (Prisma syntax)
+----------------------------------
+model User {
+  id            String   @id @default(uuid())
+  username      String   @unique
+  email         String   @unique
+  emailVerified DateTime?
+  passwordHash  String
+  role          Role     @default(MEMBER)
+  createdAt     DateTime @default(now())
+  profile       Profile?
+  chatLogs      ChatLog[]
+}
+
+model Profile {
+  userId   String   @id
+  user     User     @relation(fields: [userId], references: [id])
+  name     String
+  phone    String
+  state    String
+  employer String?
+  jobTitle String?
+  farmType String?
+}
+
+model BlogPost {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  contentMd   String
+  publishedAt DateTime @default(now())
+}
+
+model Resource {
+  id    String   @id @default(uuid())
+  title String
+  url   String
+  tags  String[]
+}
+
+model ChatLog {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  type      String   // FIND_GROWER | ASSESSMENT
+  prompt    String
+  response  Json
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  GUEST
+  MEMBER
+  ADMIN
+}
+
+Indexes ▸ `Profile(state, farmType)` to speed up grower lookup.
+
+7. API CONTRACT
+---------------
+GET   /api/blog                     – list posts
+GET   /api/blog/[slug]              – single post
+POST  /api/contact                  – {name,email,message}
+POST  /api/auth/register            – registration
+POST  /api/auth/login               – login
+GET   /api/auth/me                  – current user
+POST  /api/ai/find-grower           – {question:string}
+POST  /api/ai/assessment            – {input:string, sessionId?}
+PUT   /api/profile                  – update profile
+*Admin*
+POST  /api/admin/resources          – CRUD
+POST  /api/admin/blog               – CRUD
+
+8. ENV VARS
+-----------
+DATABASE_URL
+JWT_SECRET
+SENDGRID_API_KEY
+OPENAI_API_KEY
+FROM_EMAIL          = info@greenhousegrowers.org
+DOMAIN_URL          = https://www.greenhousegrowers.org
+
+9. SECURITY & COMPLIANCE
+------------------------
+• Rate-limit AI endpoints (express-rate-limit)  
+• Password policy: min 12 chars  
+• CSRF middleware for POST routes  
+• Store only public profile data in AI prompts (no phone/email unless opted in)  
+• Daily DB snapshot (Replit auto + pg_dump cron)
+
+10. DEPLOYMENT STEPS
+--------------------
+1. Replit ▸ Create Next.js template → add Postgres integration  
+2. Push to GitHub (Replit VC)  
+3. Deploy “Autoscale” → obtain *.repl.co URL  
+4. Link custom domain `www.greenhousegrowers.org` (CNAME)  
+5. Verify SSL → green lock  
+6. Create staging branch + separate deployment for QA
+
+11. TEST & QUALITY
+------------------
+• Unit: vitest for API utilities  
+• Integration: supertest for API routes  
+• E2E: Playwright (register → dashboard → AI chat)  
+• GitHub → CI workflow triggers on PR
+
+12. ROADMAP AFTER MVP
+---------------------
+• Payment gateway (Stripe) for paid membership tiers  
+• Fine-tuned OpenAI Assistants with vector store of greenhouse best practices  
+• Mobile-first redesign  
+• Multi-tenant support for partner associations
+
+===============================================================
+✅  Please scaffold these pages, API routes, Prisma models, and a basic Tailwind layout so I can iterate in the Replit IDE.  Thank you!
