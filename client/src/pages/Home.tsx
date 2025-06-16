@@ -82,7 +82,46 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+              <Card key={index} className="text-center hover:shadow-lg transition-shadow overflow-hidden">
+                {/* Banner Image */}
+                <div className={`h-32 ${feature.color} flex items-center justify-center relative`}>
+                  <svg width="80" height="60" viewBox="0 0 80 60" className="text-white opacity-80">
+                    {index === 0 && (
+                      // Connect with Fellow Growers - Network/greenhouse icon
+                      <g fill="currentColor">
+                        <rect x="10" y="20" width="60" height="20" rx="10" fill="none" stroke="currentColor" strokeWidth="2"/>
+                        <circle cx="20" cy="30" r="3"/>
+                        <circle cx="35" cy="25" r="3"/>
+                        <circle cx="50" cy="30" r="3"/>
+                        <circle cx="65" cy="25" r="3"/>
+                        <line x1="23" y1="30" x2="32" y2="26" stroke="currentColor" strokeWidth="1"/>
+                        <line x1="38" y1="25" x2="47" y2="29" stroke="currentColor" strokeWidth="1"/>
+                        <line x1="53" y1="30" x2="62" y2="26" stroke="currentColor" strokeWidth="1"/>
+                      </g>
+                    )}
+                    {index === 1 && (
+                      // Shape the Tools You Need - Tools/building icon
+                      <g fill="currentColor">
+                        <rect x="20" y="15" width="40" height="30" rx="2" fill="none" stroke="currentColor" strokeWidth="2"/>
+                        <rect x="25" y="20" width="10" height="8" rx="1"/>
+                        <rect x="45" y="20" width="10" height="8"/>
+                        <rect x="25" y="32" width="30" height="8"/>
+                        <path d="M15 15 L40 5 L65 15" fill="none" stroke="currentColor" strokeWidth="2"/>
+                      </g>
+                    )}
+                    {index === 2 && (
+                      // Grower-Reviewed Resources - Book/library icon
+                      <g fill="currentColor">
+                        <rect x="25" y="15" width="30" height="30" rx="2" fill="none" stroke="currentColor" strokeWidth="2"/>
+                        <rect x="20" y="18" width="35" height="27" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                        <rect x="15" y="21" width="35" height="24" rx="2" fill="none" stroke="currentColor" strokeWidth="1"/>
+                        <line x1="30" y1="28" x2="42" y2="28" stroke="currentColor" strokeWidth="1"/>
+                        <line x1="30" y1="32" x2="42" y2="32" stroke="currentColor" strokeWidth="1"/>
+                        <line x1="30" y1="36" x2="38" y2="36" stroke="currentColor" strokeWidth="1"/>
+                      </g>
+                    )}
+                  </svg>
+                </div>
                 <CardContent className="p-6">
                   <div className={`inline-flex items-center justify-center w-16 h-16 ${feature.color} rounded-full mb-4`}>
                     <span className="text-white">{feature.icon}</span>
