@@ -14,7 +14,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import uggaLogo from "@assets/UGGA Logo_1750099625455.png";
+import uggaLogo from "@assets/2_1750100657577.png";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();

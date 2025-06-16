@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Target, Award } from "lucide-react";
-import uggaLogo from "@assets/UGGA Logo_1750099625455.png";
+import uggaLogo from "@assets/2_1750100657577.png";
 
 export default function About() {
   const values = [

@@ -1,7 +1,7 @@
 import ChatWidget from "@/components/ChatWidget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, MapPin, Briefcase } from "lucide-react";
-import uggaLogo from "@assets/UGGA Logo_1750099625455.png";
+import uggaLogo from "@assets/2_1750100657577.png";
 
 export default function FindGrower() {
   const tips = [

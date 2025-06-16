@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Users, TrendingUp, BookOpen } from "lucide-react";
-import uggaLogo from "@assets/UGGA Logo_1750099625455.png";
+import uggaLogo from "@assets/2_1750100657577.png";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();

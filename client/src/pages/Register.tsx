@@ -12,7 +12,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import uggaLogo from "@assets/UGGA Logo_1750099625455.png";
+import uggaLogo from "@assets/2_1750100657577.png";
 
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
