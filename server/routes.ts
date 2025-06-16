@@ -21,6 +21,7 @@ import {
   insertProfileSchema, 
   insertBlogPostSchema, 
   insertResourceSchema,
+  insertGrowerChallengeSchema,
   Role 
 } from "@shared/schema";
 import { randomUUID } from "crypto";
@@ -342,6 +343,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Resource deleted" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete resource" });
+    }
+  });
+
+  // Grower challenge routes
+  app.post("/api/challenges", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertGrowerChallengeSchema.parse({
+        ...req.body,
+        userId: req.user!.id,
+      });
+      
+      const challenge = await storage.createGrowerChallenge(validatedData);
+      res.status(201).json(challenge);
+    } catch (error) {
+      console.error("Create challenge error:", error);
+      res.status(500).json({ message: "Failed to submit challenge" });
+    }
+  });
+
+  // Admin grower challenge routes
+  app.get("/api/admin/challenges", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const challenges = await storage.getAllGrowerChallenges();
+      res.json(challenges);
+    } catch (error) {
+      console.error("Get challenges error:", error);
+      res.status(500).json({ message: "Failed to fetch challenges" });
+    }
+  });
+
+  app.patch("/api/admin/challenges/:id/flag", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { adminFlag } = req.body;
+      const challenge = await storage.updateGrowerChallengeFlag(req.params.id, adminFlag);
+      res.json(challenge);
+    } catch (error) {
+      console.error("Update challenge flag error:", error);
+      res.status(500).json({ message: "Failed to update challenge flag" });
+    }
+  });
+
+  app.get("/api/admin/challenges/stats", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const stats = await storage.getGrowerChallengeStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Get challenge stats error:", error);
+      res.status(500).json({ message: "Failed to fetch challenge statistics" });
     }
   });
 
