@@ -64,7 +64,7 @@ export default function Dashboard() {
             Welcome Back, {user?.profile?.name || user?.username}
           </h1>
           <p className="text-gray-600">
-            Manage your profile, connect with growers, and access AI tools
+            Manage your profile, connect with growers, and access member tools
           </p>
         </div>
 
@@ -106,12 +106,12 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* AI Tools Section */}
+          {/* Member Tools Section */}
           <div className="lg:col-span-2 space-y-6">
             {/* Find-a-Grower Widget */}
             <div className="h-80">
               <ChatWidget
-                title="Find-a-Grower AI"
+                title="Find-a-Grower"
                 placeholder="e.g., Find tomato growers in Florida with hydroponic experience"
                 endpoint="/api/ai/find-grower"
                 icon={<Users className="h-5 w-5" />}
@@ -128,7 +128,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">
-                  Get AI-powered analysis and recommendations for your greenhouse operation
+                  Get analysis and recommendations for your greenhouse operation
                 </p>
                 <Link href="/dashboard/assessment">
                   <Button className="bg-ugga-secondary hover:bg-ugga-secondary/90">
