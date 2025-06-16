@@ -50,13 +50,13 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {isAuthenticated ? (
                 <Link href="/dashboard">
-                  <Button size="lg" className="bg-ugga-accent hover:bg-ugga-accent/90 text-ugga-primary px-10 py-5 text-xl font-bold shadow-xl border-2 border-ugga-accent rounded-xl transform hover:scale-105 transition-all duration-300">
+                  <Button size="lg" className="bg-white hover:bg-gray-100 text-ugga-primary px-10 py-5 text-xl font-bold shadow-xl border-2 border-white rounded-xl transform hover:scale-105 transition-all duration-300">
                     Go to Dashboard
                   </Button>
                 </Link>
               ) : (
                 <Link href="/register">
-                  <Button size="lg" className="bg-ugga-accent hover:bg-ugga-accent/90 text-ugga-primary px-10 py-5 text-xl font-bold shadow-xl border-2 border-ugga-accent rounded-xl transform hover:scale-105 transition-all duration-300">
+                  <Button size="lg" className="bg-white hover:bg-gray-100 text-ugga-primary px-10 py-5 text-xl font-bold shadow-xl border-2 border-white rounded-xl transform hover:scale-105 transition-all duration-300">
                     Become a founding member
                   </Button>
                 </Link>
