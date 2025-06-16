@@ -54,26 +54,7 @@ export default function Contact() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const contactInfo = [
-    {
-      icon: <Mail className="h-6 w-6" />,
-      title: "Email",
-      content: "info@greenhousegrowers.org",
-      color: "bg-ugga-primary"
-    },
-    {
-      icon: <Phone className="h-6 w-6" />,
-      title: "Phone",
-      content: "(555) 123-GROW",
-      color: "bg-ugga-secondary"
-    },
-    {
-      icon: <MapPin className="h-6 w-6" />,
-      title: "Address",
-      content: "Agricultural Center\nNationwide Network",
-      color: "bg-ugga-accent"
-    }
-  ];
+
 
   return (
     <div className="min-h-screen py-16">
@@ -163,18 +144,28 @@ export default function Contact() {
           </Card>
 
           {/* Contact Info */}
-          <div className="grid md:grid-cols-3 gap-8 text-center">
-            {contactInfo.map((info, index) => (
-              <Card key={index}>
-                <CardContent className="p-6">
-                  <div className={`inline-flex items-center justify-center w-12 h-12 ${info.color} rounded-full mb-4`}>
-                    <span className="text-white">{info.icon}</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{info.title}</h3>
-                  <p className="text-gray-600 whitespace-pre-line">{info.content}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="bg-gray-50 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Get in Touch</h3>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-8">
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 bg-ugga-primary rounded-full">
+                  <Mail className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Email</p>
+                  <p className="font-medium text-gray-900">sam@growbig.ag</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 bg-ugga-secondary rounded-full">
+                  <Phone className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Phone</p>
+                  <p className="font-medium text-gray-900">415-686-9620</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
