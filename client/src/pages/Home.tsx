@@ -135,7 +135,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section style={{backgroundColor: '#e6f2e6'}} className="py-16">
+      <section style={{backgroundColor: '#c8e6c9'}} className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto">
             <img src={uggaLogo} alt="UGGA Logo" className="h-16 w-16 mx-auto mb-6" />
@@ -148,7 +148,7 @@ export default function Home() {
             {!isAuthenticated && (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/register">
-                  <Button size="lg" className="bg-ugga-primary text-white hover:bg-ugga-primary/90">
+                  <Button size="lg" className="bg-ugga-primary text-white hover:bg-ugga-primary/90 shadow-lg border-2 border-ugga-primary font-bold px-8 py-4 text-lg rounded-lg transform hover:scale-105 transition-all duration-200">
                     Become a founding member
                   </Button>
                 </Link>
