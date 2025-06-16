@@ -70,7 +70,7 @@ export default function About() {
               The Problem We're Solving
             </h2>
             <div className="bg-gray-50 rounded-lg p-8">
-              <p className="text-lg text-gray-700 mb-4">
+              <p className="text-lg text-gray-800 mb-4">
                 <strong>Fragmentation.</strong> Growers are isolated. Research rarely makes it to the farm. Technology is everywhere but often untested. Growers are solving the same problems in silos.
               </p>
               <p className="text-lg text-ugga-primary font-semibold">
@@ -109,7 +109,7 @@ export default function About() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               We're Just Getting Started
             </h2>
-            <p className="text-lg text-gray-700 mb-4">
+            <p className="text-lg text-gray-800 mb-4">
               UGGA is a nonprofit in its pilot phase. We're actively inviting growers to join and help shape the tools and resources we build together.
             </p>
             <p className="text-gray-600">

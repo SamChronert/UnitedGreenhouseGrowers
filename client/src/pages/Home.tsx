@@ -42,9 +42,9 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center">
             <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
-              Connecting growers, <span className="text-ugga-accent">sharing knowledge</span>, strengthening greenhouses
+              Connecting growers, <span className="text-green-300">sharing knowledge</span>, strengthening greenhouses
             </h1>
-            <p className="text-xl text-gray-200 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-white mb-8 max-w-3xl mx-auto">
               UGGA is a new nonprofit network where greenhouse growers across the country can connect, share trusted resources, and help each other navigate a changing industry. We're just getting started — and we want your input to make this association truly helpful.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -142,7 +142,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-white mb-4">
               Help Shape a Network Built for Growers
             </h2>
-            <p className="text-lg text-green-100 mb-8">
+            <p className="text-lg text-white mb-8">
               Join our pilot group and help us build the tools and resources that will actually make a difference in your operation. Your input will directly shape what gets built first.
             </p>
             {!isAuthenticated && (
