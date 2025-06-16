@@ -5,6 +5,9 @@ import {
   resources,
   chatLogs,
   growerChallenges,
+  forumPosts,
+  forumComments,
+  assessmentTrainingData,
   type User,
   type InsertUser,
   type Profile,
@@ -17,6 +20,12 @@ import {
   type InsertChatLog,
   type GrowerChallenge,
   type InsertGrowerChallenge,
+  type ForumPost,
+  type InsertForumPost,
+  type ForumComment,
+  type InsertForumComment,
+  type AssessmentTrainingData,
+  type InsertAssessmentTrainingData,
   Role
 } from "@shared/schema";
 import { db } from "./db";
@@ -62,6 +71,21 @@ export interface IStorage {
   getAllGrowerChallenges(): Promise<(GrowerChallenge & { user: User & { profile: Profile } })[]>;
   updateGrowerChallengeFlag(id: string, adminFlag: string): Promise<GrowerChallenge>;
   getGrowerChallengeStats(): Promise<{ totalCount: number; categoryCounts: Record<string, number>; recentCount: number }>;
+  
+  // Forum operations
+  getAllForumPosts(searchQuery?: string): Promise<(ForumPost & { user: User & { profile: Profile }; comments: (ForumComment & { user: User & { profile: Profile } })[]; commentCount: number })[]>;
+  getForumPost(id: string): Promise<(ForumPost & { user: User & { profile: Profile }; comments: (ForumComment & { user: User & { profile: Profile } })[] }) | undefined>;
+  createForumPost(post: InsertForumPost): Promise<ForumPost>;
+  updateForumPost(id: string, updates: Partial<ForumPost>): Promise<ForumPost>;
+  deleteForumPost(id: string): Promise<void>;
+  createForumComment(comment: InsertForumComment): Promise<ForumComment>;
+  deleteForumComment(id: string): Promise<void>;
+  
+  // Assessment training data operations
+  getAllAssessmentTrainingData(): Promise<AssessmentTrainingData[]>;
+  createAssessmentTrainingData(data: InsertAssessmentTrainingData): Promise<AssessmentTrainingData>;
+  updateAssessmentTrainingData(id: string, updates: Partial<AssessmentTrainingData>): Promise<AssessmentTrainingData>;
+  deleteAssessmentTrainingData(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {

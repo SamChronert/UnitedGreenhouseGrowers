@@ -24,6 +24,8 @@ import AdminResources from "@/pages/AdminResources";
 import AdminBlog from "@/pages/AdminBlog";
 import AdminMembers from "@/pages/AdminMembers";
 import AdminChallenges from "@/pages/AdminChallenges";
+import AdminAssessmentTrainer from "@/pages/AdminAssessmentTrainer";
+import Forum from "@/pages/Forum";
 
 function Router() {
   return (
@@ -59,6 +61,11 @@ function Router() {
           <Assessment />
         </AuthGuard>
       </Route>
+      <Route path="/forum">
+        <AuthGuard requireMember>
+          <Forum />
+        </AuthGuard>
+      </Route>
 
       {/* Admin routes */}
       <Route path="/admin/resources">
@@ -79,6 +86,11 @@ function Router() {
       <Route path="/admin/challenges">
         <AuthGuard requireAdmin>
           <AdminChallenges />
+        </AuthGuard>
+      </Route>
+      <Route path="/admin/assessment-trainer">
+        <AuthGuard requireAdmin>
+          <AdminAssessmentTrainer />
         </AuthGuard>
       </Route>
 
