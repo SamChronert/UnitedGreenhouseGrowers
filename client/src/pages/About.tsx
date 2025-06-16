@@ -55,7 +55,7 @@ export default function About() {
 
         {/* Mission Section */}
         <div className="mb-16">
-          <div className="bg-ugga-primary text-white rounded-lg p-8 text-center">
+          <div className="text-white rounded-lg p-8 text-center bg-[#2d543a]">
             <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
             <p className="text-xl">
               We exist to help greenhouse growers connect, share knowledge, and have a stronger voice in research and innovation.
