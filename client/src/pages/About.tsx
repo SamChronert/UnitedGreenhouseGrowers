@@ -71,10 +71,11 @@ export default function About() {
             </h2>
             <div className="bg-gray-50 rounded-lg p-8">
               <p className="text-lg text-gray-800 mb-4">
-                <strong>Fragmentation.</strong> Growers are isolated. Research rarely makes it to the farm. Technology is everywhere but often untested. Growers are solving the same problems in silos.
+                Greenhouse growers are solving the same problems alone.
+                Research doesn't always reach the farm. Technology is advancing, but support is often missing. And too often, growers are left without a place to turn.
               </p>
               <p className="text-lg text-ugga-primary font-semibold">
-                UGGA wants to change that — together.
+                UGGA exists to change that — by bringing us together.
               </p>
             </div>
           </div>
@@ -92,10 +93,6 @@ export default function About() {
             {values.map((value, index) => (
               <Card key={index} className="text-center">
                 <CardContent className="p-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-ugga-primary rounded-full mb-4">
-                    <span className="text-white">{value.icon}</span>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{value.title}</h3>
                   <p className="text-gray-600">{value.description}</p>
                 </CardContent>
               </Card>

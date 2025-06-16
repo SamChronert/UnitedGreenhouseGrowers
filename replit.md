@@ -123,6 +123,7 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
   - Enhanced homepage messaging to emphasize collaboration over isolation: "Greenhouse growers shouldn't have to solve the same problems in isolation. We're building a place to connect, share, and lead — together."
   - Updated footer description to reflect grower-first values: "Bringing greenhouse growers together to share hard-earned knowledge, tackle real-world challenges, and strengthen the industry — together."
   - Added custom SVG banner images to feature boxes for better visual engagement
+  - Refined problem statement messaging on About page to be more personal and empathetic: "Greenhouse growers are solving the same problems alone" replacing corporate "fragmentation" language
 
 ## Mission & Voice
 
