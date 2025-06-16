@@ -70,6 +70,47 @@ export const growerChallenges = pgTable("grower_challenges", {
   createdAtIdx: index("grower_challenges_created_at_idx").on(table.createdAt),
 }));
 
+export const forumPosts = pgTable("forum_posts", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  title: varchar("title").notNull(),
+  content: text("content").notNull(),
+  tags: text("tags").array().default([]), // AI-generated topic tags
+  attachments: text("attachments").array().default([]), // file URLs for images/documents
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdx: index("forum_posts_user_idx").on(table.userId),
+  createdAtIdx: index("forum_posts_created_at_idx").on(table.createdAt),
+}));
+
+export const forumComments = pgTable("forum_comments", {
+  id: varchar("id").primaryKey().notNull(),
+  postId: varchar("post_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  postIdx: index("forum_comments_post_idx").on(table.postId),
+  userIdx: index("forum_comments_user_idx").on(table.userId),
+  createdAtIdx: index("forum_comments_created_at_idx").on(table.createdAt),
+}));
+
+export const assessmentTrainingData = pgTable("assessment_training_data", {
+  id: varchar("id").primaryKey().notNull(),
+  adminId: varchar("admin_id").notNull(),
+  title: varchar("title").notNull(),
+  content: text("content").notNull(),
+  attachments: text("attachments").array().default([]), // file URLs for reference materials
+  tags: text("tags").array().default([]), // categorization tags
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  adminIdx: index("assessment_training_admin_idx").on(table.adminId),
+  createdAtIdx: index("assessment_training_created_at_idx").on(table.createdAt),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, {
@@ -97,6 +138,32 @@ export const chatLogsRelations = relations(chatLogs, ({ one }) => ({
 export const growerChallengesRelations = relations(growerChallenges, ({ one }) => ({
   user: one(users, {
     fields: [growerChallenges.userId],
+    references: [users.id],
+  }),
+}));
+
+export const forumPostsRelations = relations(forumPosts, ({ one, many }) => ({
+  user: one(users, {
+    fields: [forumPosts.userId],
+    references: [users.id],
+  }),
+  comments: many(forumComments),
+}));
+
+export const forumCommentsRelations = relations(forumComments, ({ one }) => ({
+  post: one(forumPosts, {
+    fields: [forumComments.postId],
+    references: [forumPosts.id],
+  }),
+  user: one(users, {
+    fields: [forumComments.userId],
+    references: [users.id],
+  }),
+}));
+
+export const assessmentTrainingDataRelations = relations(assessmentTrainingData, ({ one }) => ({
+  admin: one(users, {
+    fields: [assessmentTrainingData.adminId],
     references: [users.id],
   }),
 }));
@@ -130,6 +197,24 @@ export const insertGrowerChallengeSchema = createInsertSchema(growerChallenges).
   createdAt: true,
 });
 
+export const insertForumPostSchema = createInsertSchema(forumPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertForumCommentSchema = createInsertSchema(forumComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAssessmentTrainingDataSchema = createInsertSchema(assessmentTrainingData).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -143,3 +228,9 @@ export type ChatLog = typeof chatLogs.$inferSelect;
 export type InsertChatLog = z.infer<typeof insertChatLogSchema>;
 export type GrowerChallenge = typeof growerChallenges.$inferSelect;
 export type InsertGrowerChallenge = z.infer<typeof insertGrowerChallengeSchema>;
+export type ForumPost = typeof forumPosts.$inferSelect;
+export type InsertForumPost = z.infer<typeof insertForumPostSchema>;
+export type ForumComment = typeof forumComments.$inferSelect;
+export type InsertForumComment = z.infer<typeof insertForumCommentSchema>;
+export type AssessmentTrainingData = typeof assessmentTrainingData.$inferSelect;
+export type InsertAssessmentTrainingData = z.infer<typeof insertAssessmentTrainingDataSchema>;
