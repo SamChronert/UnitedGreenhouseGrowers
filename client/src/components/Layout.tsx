@@ -70,8 +70,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Link href="/" className="flex items-center">
-                <img src={uggaLogo} alt="UGGA Logo" className="h-8 w-8 mr-2" />
-                <span className="font-bold text-xl text-ugga-primary">UGGA</span>
+                <img src={uggaLogo} alt="UGGA Logo" className="h-8 w-8 mr-3" />
+                <span className="font-bold text-lg text-ugga-primary hidden sm:block">United Greenhouse Growers Association</span>
+                <span className="font-bold text-lg text-ugga-primary sm:hidden">UGGA</span>
               </Link>
               
               {/* Desktop Navigation */}
