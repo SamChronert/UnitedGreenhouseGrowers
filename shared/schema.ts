@@ -57,6 +57,19 @@ export const chatLogs = pgTable("chat_logs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const growerChallenges = pgTable("grower_challenges", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  category: varchar("category"), // irrigation, disease, labor, economics, policy, etc.
+  description: text("description").notNull(),
+  adminFlag: varchar("admin_flag"), // reviewed, important, needs_follow_up
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdx: index("grower_challenges_user_idx").on(table.userId),
+  categoryIdx: index("grower_challenges_category_idx").on(table.category),
+  createdAtIdx: index("grower_challenges_created_at_idx").on(table.createdAt),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, {
@@ -64,6 +77,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     references: [profiles.userId],
   }),
   chatLogs: many(chatLogs),
+  growerChallenges: many(growerChallenges),
 }));
 
 export const profilesRelations = relations(profiles, ({ one }) => ({
@@ -76,6 +90,13 @@ export const profilesRelations = relations(profiles, ({ one }) => ({
 export const chatLogsRelations = relations(chatLogs, ({ one }) => ({
   user: one(users, {
     fields: [chatLogs.userId],
+    references: [users.id],
+  }),
+}));
+
+export const growerChallengesRelations = relations(growerChallenges, ({ one }) => ({
+  user: one(users, {
+    fields: [growerChallenges.userId],
     references: [users.id],
   }),
 }));
@@ -104,6 +125,11 @@ export const insertChatLogSchema = createInsertSchema(chatLogs).omit({
   createdAt: true,
 });
 
+export const insertGrowerChallengeSchema = createInsertSchema(growerChallenges).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -115,3 +141,5 @@ export type Resource = typeof resources.$inferSelect;
 export type InsertResource = z.infer<typeof insertResourceSchema>;
 export type ChatLog = typeof chatLogs.$inferSelect;
 export type InsertChatLog = z.infer<typeof insertChatLogSchema>;
+export type GrowerChallenge = typeof growerChallenges.$inferSelect;
+export type InsertGrowerChallenge = z.infer<typeof insertGrowerChallengeSchema>;

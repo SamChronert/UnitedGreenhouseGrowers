@@ -1,0 +1,86 @@
+Hi Replit Agent — I’d like to add a new feature to the member dashboard of my UGGA site that allows growers to submit their real-world challenges in plain language, and gives the admin team tools to visualize and act on those submissions.
+
+Please build the following functionality:
+
+🌱 Grower-Facing Feature: “Submit a Challenge”
+In the member dashboard, add a new section called “Share Your Challenge” or “What’s Hard on Your Farm?”
+
+This should include:
+
+A large free-text input (textarea) where growers can describe:
+
+Operational challenges they’re facing
+
+Areas where they need better support, knowledge, or policy changes
+
+Suggestions or observations about what’s missing in research or technology
+
+An optional category dropdown to tag the type of issue (e.g. irrigation, disease, labor, economics, policy, etc.)
+
+A submit button — after submission, show a confirmation message (e.g., “Thanks for sharing — your insight helps shape what we build next.”)
+
+Submissions should be saved to the database and linked to the user’s ID
+
+Users should be able to submit more than once, but should not be able to view or edit others’ submissions
+
+📊 Admin Dashboard Feature: “Grower Challenges Insights”
+Create a new section of the admin dashboard to help synthesize and act on these submissions.
+
+This admin-only view should include:
+
+Submission List View
+
+Table with timestamp, member ID (or name/email), category (if provided), and submission text
+
+Sortable by date or category
+
+Option to export to CSV
+
+Visualization Panel
+
+Show a chart or dashboard that quantifies:
+
+Most frequently mentioned categories
+
+Submission volume over time
+
+Optionally include basic keyword clustering or tag cloud if you can process common themes
+
+Admin Notes or Flagging
+
+Ability for admins to mark submissions as “Reviewed,” “Important,” or “Needs Follow-Up”
+
+These flags should be saved to the database for internal use
+
+🔐 Permissions & Access
+Only admins can access the insights dashboard
+
+Grower submissions are not publicly visible, but admins can view them all
+
+🗃️ Database Notes
+Please create a table like grower_challenges with fields such as:
+
+id (UUID)
+
+user_id
+
+category (optional string or enum)
+
+description (text)
+
+created_at
+
+admin_flag (optional string: “reviewed”, “important”, etc.)
+
+This feature will help the association understand where growers are struggling and guide advocacy, research, and policy decisions.
+
+Let me know if you need clarification or want feedback on the UX! Thanks!
+
+
+
+
+
+
+
+
+

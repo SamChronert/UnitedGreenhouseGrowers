@@ -4,6 +4,7 @@ import {
   blogPosts,
   resources,
   chatLogs,
+  growerChallenges,
   type User,
   type InsertUser,
   type Profile,
@@ -14,6 +15,8 @@ import {
   type InsertResource,
   type ChatLog,
   type InsertChatLog,
+  type GrowerChallenge,
+  type InsertGrowerChallenge,
   Role
 } from "@shared/schema";
 import { db } from "./db";
@@ -53,6 +56,12 @@ export interface IStorage {
   
   // Member directory
   searchMembers(query?: string, state?: string, farmType?: string): Promise<(User & { profile: Profile })[]>;
+  
+  // Grower challenge operations
+  createGrowerChallenge(challenge: InsertGrowerChallenge): Promise<GrowerChallenge>;
+  getAllGrowerChallenges(): Promise<(GrowerChallenge & { user: User & { profile: Profile } })[]>;
+  updateGrowerChallengeFlag(id: string, adminFlag: string): Promise<GrowerChallenge>;
+  getGrowerChallengeStats(): Promise<{ totalCount: number; categoryCounts: Record<string, number>; recentCount: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -241,6 +250,75 @@ export class DatabaseStorage implements IStorage {
       ...result.users,
       profile: result.profiles
     }));
+  }
+
+  // Grower challenge operations
+  async createGrowerChallenge(challengeData: InsertGrowerChallenge): Promise<GrowerChallenge> {
+    const [challenge] = await db
+      .insert(growerChallenges)
+      .values({
+        id: randomUUID(),
+        ...challengeData,
+      })
+      .returning();
+    return challenge;
+  }
+
+  async getAllGrowerChallenges(): Promise<(GrowerChallenge & { user: User & { profile: Profile } })[]> {
+    const results = await db
+      .select()
+      .from(growerChallenges)
+      .leftJoin(users, eq(growerChallenges.userId, users.id))
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .orderBy(desc(growerChallenges.createdAt));
+
+    return results.map((result: any) => ({
+      ...result.grower_challenges,
+      user: {
+        ...result.users,
+        profile: result.profiles
+      }
+    }));
+  }
+
+  async updateGrowerChallengeFlag(id: string, adminFlag: string): Promise<GrowerChallenge> {
+    const [challenge] = await db
+      .update(growerChallenges)
+      .set({ adminFlag })
+      .where(eq(growerChallenges.id, id))
+      .returning();
+    return challenge;
+  }
+
+  async getGrowerChallengeStats(): Promise<{ totalCount: number; categoryCounts: Record<string, number>; recentCount: number }> {
+    // Get total count
+    const totalResults = await db.select().from(growerChallenges);
+    const totalCount = totalResults.length;
+
+    // Get category counts
+    const categoryCounts: Record<string, number> = {};
+    totalResults.forEach(challenge => {
+      if (challenge.category) {
+        categoryCounts[challenge.category] = (categoryCounts[challenge.category] || 0) + 1;
+      }
+    });
+
+    // Get recent count (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const recentResults = await db
+      .select()
+      .from(growerChallenges)
+      .where(eq(growerChallenges.createdAt, thirtyDaysAgo));
+    
+    const recentCount = recentResults.length;
+
+    return {
+      totalCount,
+      categoryCounts,
+      recentCount
+    };
   }
 }
 
