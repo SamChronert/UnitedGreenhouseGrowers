@@ -47,7 +47,7 @@ export default function Resources() {
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Resources</h1>
-          <p className="text-gray-600">Discover helpful links to organizations, government resources, industry partners, and upcoming events.</p>
+          <p className="text-gray-600">We're building a grower-reviewed resource library of guides, case studies, and extension bulletins — everything from irrigation best practices to supplier insights. Founding members will help decide what gets included, reviewed, and prioritized.</p>
         </div>
 
         {/* Organizations Section */}

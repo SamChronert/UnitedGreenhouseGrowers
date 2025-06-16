@@ -1,0 +1,97 @@
+Hi Replit Agent — I’m building a site for the United Greenhouse Growers Association (UGGA), a nonprofit association that’s just getting started.
+
+Please update the content and site experience across the homepage, about page, resources page, navbar, and blog to reflect the following voice, purpose, and sample language.
+
+🌱 Mission & Purpose:
+UGGA is a nonprofit, grower-first network in its pilot phase.
+We exist to help greenhouse growers connect, share knowledge, and have a stronger voice in research and innovation.
+
+We’re trying to solve a real problem: fragmentation. Growers are isolated. Research rarely makes it to the farm. Technology is everywhere but often untested. Growers are solving the same problems in silos.
+
+UGGA wants to change that — together.
+
+Please make that message clear throughout the site. We’re not selling software or AI — we’re building something with growers, not for them. Use friendly, conversational, plainspoken language that farmers and operators will relate to.
+
+🧭 Goals for the Website Content:
+Make it clear that:
+
+The site and association are in early development.
+
+We’re actively inviting growers to join the pilot and help shape the tools and resources we build.
+
+Membership includes access to a dashboard that we’re co-designing with members — it will include:
+
+Tools for making decisions on greenhouse improvements
+
+A curated resource library (peer-reviewed + grower-approved)
+
+A way to connect with fellow growers to share questions and answers
+
+We need feedback to prioritize what gets built.
+
+UGGA will help amplify the voice of growers to researchers, universities, and lobbying groups.
+
+💬 Sample Taglines & Language (feel free to use or adapt):
+Primary Tagline:
+
+Connecting growers, sharing knowledge, strengthening greenhouses.
+
+Status Banner / Development Notice:
+
+🚧 UGGA is a nonprofit in its early stages. Join the pilot group and help shape the tools you need.
+
+Home Page Welcome Message (sample):
+
+UGGA is a new nonprofit network where greenhouse growers across the country can connect, share trusted resources, and help each other navigate a changing industry. We’re just getting started — and we want your input to make this association truly helpful.
+
+Join CTA (sample):
+
+Become a founding member and help shape a network built by growers, for growers.
+
+About Page Copy (sample):
+
+United Greenhouse Growers Association is a nonprofit forming to connect greenhouse growers across the U.S., share vetted knowledge, and give growers a stronger voice in research and policy. Our founding members, Sam Chronert and Dr. Melanie Yelton, started UGGA because they saw the same gap from both sides: growers tackling problems alone, and researchers unsure how to help. We’re here to close that gap — but we need your help to do it.
+
+Resources Page Preview Text (sample):
+
+We’re building a grower-reviewed resource library of guides, case studies, and extension bulletins — everything from irrigation best practices to supplier insights. Founding members will help decide what gets included, reviewed, and prioritized.
+
+Navbar Banner / Ribbon (sample):
+
+🚧 UGGA is in beta — growers wanted to shape the future!
+
+👤 Founding Members
+Please add a section (on the About page or footer) that highlights:
+
+Sam Chronert — commercial greenhouse grower who has seen firsthand how helpful it is to connect with other growers facing the same challenges.
+
+Dr. Melanie Yelton — long-time industry professional and researcher who wants to help give growers a stronger voice in academic and innovation circles.
+
+📝 Blog Post
+Please include one blog post to start — it should talk about the fragmentation in the greenhouse industry: research is scattered, growers are siloed, and tech is over-marketed but under-explained. The post should explain how UGGA is an effort to unify growers and give them a place to collaborate and be heard.
+
+Suggested title:
+
+"Fragmented Yet Full of Potential: A Call to Greenhouse Growers"
+
+Suggested tone: warm, honest, not corporate.
+
+✨ Design Preferences
+Let the theme feel natural, clean, and non-corporate.
+
+Avoid highlighting or naming “AI” directly — tools may use it under the hood, but we don’t want to sound flashy or overly tech-forward.
+
+This is for real people who farm. Keep the tone honest, grounded, and helpful.
+
+Emphasize community, usefulness, and grower empowerment.
+
+Thanks! Please go ahead and make those updates. Once it’s applied, I’d be happy to give feedback or iterate further.
+
+
+
+
+
+
+
+
+

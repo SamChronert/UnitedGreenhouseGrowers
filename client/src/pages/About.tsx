@@ -6,67 +6,88 @@ export default function About() {
   const values = [
     {
       icon: <Users className="h-8 w-8" />,
-      title: "Community First",
-      description: "We believe in the power of connection and collaboration among growers."
+      title: "Grower-First",
+      description: "Every decision we make starts with what's best for greenhouse growers and their operations."
     },
     {
       icon: <Target className="h-8 w-8" />,
-      title: "Innovation Driven",
-      description: "Leveraging cutting-edge AI technology to solve real agricultural challenges."
+      title: "Real Solutions",
+      description: "We focus on practical tools and resources that solve actual problems growers face every day."
     },
     {
       icon: <Award className="h-8 w-8" />,
-      title: "Excellence Focused",
-      description: "Committed to providing the highest quality resources and support."
+      title: "Peer-Reviewed",
+      description: "Everything we recommend has been tested and approved by growers who've been in your shoes."
     }
   ];
 
-  const team = [
+  const foundingMembers = [
     {
-      name: "Dr. Sarah Martinez",
-      role: "Executive Director",
-      bio: "30+ years in agricultural research and greenhouse management. Former USDA research scientist."
+      name: "Sam Chronert",
+      role: "Commercial Greenhouse Grower",
+      description: "Sam has seen firsthand how helpful it is to connect with other growers facing the same challenges. Through years of running greenhouse operations, Sam understands the value of shared knowledge and peer support in solving complex growing problems."
     },
     {
-      name: "Michael Chen",
-      role: "Technology Director",
-      bio: "AI and agricultural technology expert. Previously led innovation at major agtech companies."
-    },
-    {
-      name: "Jennifer Williams",
-      role: "Member Relations Manager",
-      bio: "Dedicated to building strong connections within our growing community of professionals."
+      name: "Dr. Melanie Yelton",
+      role: "Industry Professional & Researcher",
+      description: "Dr. Yelton is a long-time industry professional and researcher who wants to help give growers a stronger voice in academic and innovation circles. She bridges the gap between research institutions and practical farming operations."
     }
   ];
 
   return (
     <div className="min-h-screen py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Header Section */}
         <div className="text-center mb-16">
-          <img src={uggaLogo} alt="UGGA Logo" className="h-16 w-16 mx-auto mb-6" />
-          <h1 className="text-4xl font-bold text-gray-900 mb-6">About UGGA</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            The United Greenhouse Growers Association has been connecting and empowering 
-            greenhouse professionals across the nation for over two decades.
-          </p>
+          <img src={uggaLogo} alt="UGGA Logo" className="h-24 w-24 mx-auto mb-8" />
+          <h1 className="text-4xl font-bold text-gray-900 mb-6">
+            About United Greenhouse Growers Association
+          </h1>
+          <div className="max-w-4xl mx-auto">
+            <p className="text-xl text-gray-600 mb-6">
+              United Greenhouse Growers Association is a nonprofit forming to connect greenhouse growers across the U.S., share vetted knowledge, and give growers a stronger voice in research and policy.
+            </p>
+            <p className="text-lg text-gray-600">
+              Our founding members, Sam Chronert and Dr. Melanie Yelton, started UGGA because they saw the same gap from both sides: growers tackling problems alone, and researchers unsure how to help. We're here to close that gap — but we need your help to do it.
+            </p>
+          </div>
         </div>
 
         {/* Mission Section */}
-        <section className="mb-16">
-          <div className="bg-white rounded-xl shadow-sm p-8 border">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Our Mission</h2>
-            <p className="text-lg text-gray-700 leading-relaxed text-center max-w-4xl mx-auto">
-              To advance the greenhouse growing industry through innovation, education, and collaboration. 
-              We provide our members with cutting-edge AI tools, comprehensive resources, and a powerful 
-              professional network that enables sustainable growth and success in modern agriculture.
+        <div className="mb-16">
+          <div className="bg-ugga-primary text-white rounded-lg p-8 text-center">
+            <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
+            <p className="text-xl">
+              We exist to help greenhouse growers connect, share knowledge, and have a stronger voice in research and innovation.
             </p>
           </div>
-        </section>
+        </div>
+
+        {/* Problem Statement */}
+        <div className="mb-16">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
+              The Problem We're Solving
+            </h2>
+            <div className="bg-gray-50 rounded-lg p-8">
+              <p className="text-lg text-gray-700 mb-4">
+                <strong>Fragmentation.</strong> Growers are isolated. Research rarely makes it to the farm. Technology is everywhere but often untested. Growers are solving the same problems in silos.
+              </p>
+              <p className="text-lg text-ugga-primary font-semibold">
+                UGGA wants to change that — together.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Values Section */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Our Values</h2>
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Values</h2>
+            <p className="text-lg text-gray-600">
+              Everything we do is guided by these core principles
+            </p>
+          </div>
           <div className="grid md:grid-cols-3 gap-8">
             {values.map((value, index) => (
               <Card key={index} className="text-center">
@@ -80,73 +101,93 @@ export default function About() {
               </Card>
             ))}
           </div>
-        </section>
+        </div>
 
-        {/* History Section */}
-        <section className="mb-16">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Our History</h2>
-              <div className="space-y-4 text-gray-700">
-                <p>
-                  Founded in 2002, the United Greenhouse Growers Association began as a small 
-                  collective of passionate growers sharing knowledge and best practices.
-                </p>
-                <p>
-                  Over the years, we've evolved into a comprehensive platform that combines 
-                  traditional agricultural wisdom with modern technology, serving thousands 
-                  of members across all 50 states.
-                </p>
-                <p>
-                  Today, we're proud to be at the forefront of agricultural innovation, 
-                  pioneering the use of AI to connect growers and optimize operations.
-                </p>
-              </div>
-            </div>
-            <div className="bg-gray-100 rounded-xl p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">By the Numbers</h3>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-ugga-primary mb-2">5,000+</div>
-                  <div className="text-sm text-gray-600">Active Members</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-ugga-primary mb-2">50</div>
-                  <div className="text-sm text-gray-600">States Represented</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-ugga-primary mb-2">22</div>
-                  <div className="text-sm text-gray-600">Years of Service</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-ugga-primary mb-2">1,000+</div>
-                  <div className="text-sm text-gray-600">Resources Available</div>
-                </div>
-              </div>
-            </div>
+        {/* Current Status */}
+        <div className="mb-16">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              We're Just Getting Started
+            </h2>
+            <p className="text-lg text-gray-700 mb-4">
+              UGGA is a nonprofit in its pilot phase. We're actively inviting growers to join and help shape the tools and resources we build together.
+            </p>
+            <p className="text-gray-600">
+              Your feedback will directly influence what gets prioritized and how we develop our member dashboard, resource library, and grower network.
+            </p>
           </div>
-        </section>
+        </div>
 
-        {/* Team Section */}
-        <section>
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Leadership Team</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {team.map((member, index) => (
+        {/* Founding Members */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Founding Members</h2>
+            <p className="text-lg text-gray-600">
+              The people who saw a problem and decided to do something about it
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            {foundingMembers.map((member, index) => (
               <Card key={index}>
-                <CardContent className="p-6 text-center">
-                  <div className="w-20 h-20 bg-ugga-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl font-bold text-white">
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
+                <CardContent className="p-6">
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">{member.name}</h3>
                   <p className="text-ugga-primary font-medium mb-3">{member.role}</p>
-                  <p className="text-gray-600 text-sm">{member.bio}</p>
+                  <p className="text-gray-600">{member.description}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
-        </section>
+        </div>
+
+        {/* What We're Building */}
+        <div className="mb-16">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+              What We're Building With You
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white border rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Member Dashboard</h3>
+                <p className="text-gray-600">
+                  Co-designed tools for making decisions on greenhouse improvements, built based on real grower feedback and needs.
+                </p>
+              </div>
+              <div className="bg-white border rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Curated Resource Library</h3>
+                <p className="text-gray-600">
+                  Peer-reviewed guides, case studies, and extension bulletins that growers have actually tested and approved.
+                </p>
+              </div>
+              <div className="bg-white border rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Grower Network</h3>
+                <p className="text-gray-600">
+                  A way to connect with fellow growers to share questions, answers, and real-world solutions to common challenges.
+                </p>
+              </div>
+              <div className="bg-white border rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Stronger Voice</h3>
+                <p className="text-gray-600">
+                  Amplify grower perspectives to researchers, universities, and lobbying groups who need to hear from you.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Call to Action */}
+        <div className="text-center">
+          <div className="bg-ugga-primary rounded-lg p-8 text-white">
+            <h2 className="text-2xl font-bold mb-4">
+              Help Us Build Something Better
+            </h2>
+            <p className="text-lg mb-6">
+              Join our pilot group and help shape a network that's truly built by growers, for growers.
+            </p>
+            <p className="text-green-100">
+              Together, we can solve the fragmentation problem and give greenhouse growers the connected, supportive community they deserve.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
