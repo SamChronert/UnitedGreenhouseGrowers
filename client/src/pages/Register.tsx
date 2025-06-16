@@ -66,8 +66,8 @@ export default function Register() {
     mutationFn: (data: RegisterForm) => apiRequest("POST", "/api/auth/register", data),
     onSuccess: () => {
       toast({
-        title: "Registration successful!",
-        description: "Welcome to UGGA! You can now log in to your account.",
+        title: "Welcome to the pilot program!",
+        description: "You're now a founding member. Log in to help shape the tools we build together.",
       });
       setLocation("/login");
     },

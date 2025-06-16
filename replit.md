@@ -2,7 +2,7 @@
 
 ## Overview
 
-The United Greenhouse Growers Association (UGGA) platform is a full-stack web application designed to connect greenhouse professionals nationwide. It features AI-powered tools for member matching, farm assessments, and resource recommendations, built with a modern tech stack optimized for Replit deployment.
+The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first network in its pilot phase designed to connect greenhouse growers nationwide, share vetted knowledge, and give growers a stronger voice in research and policy. The platform features tools for grower networking, decision-making assistance, and a curated resource library, all co-designed with founding members based on real grower feedback.
 
 ## System Architecture
 
@@ -111,9 +111,29 @@ The United Greenhouse Growers Association (UGGA) platform is a full-stack web ap
 
 ## Changelog
 
-Changelog:
-- June 16, 2025. Initial setup
+- June 16, 2025: Initial UGGA platform setup with authentication and database
+- June 16, 2025: Updated entire site messaging to reflect nonprofit, grower-first mission
+  - Homepage redesigned with new tagline "Connecting growers, sharing knowledge, strengthening greenhouses"
+  - Added development banner highlighting pilot program status
+  - About page updated with founding members Sam Chronert and Dr. Melanie Yelton
+  - Resources page restructured with grower-reviewed library concept
+  - Created foundational blog post "Fragmented Yet Full of Potential" addressing industry challenges
+  - Registration updated to welcome "founding members" rather than generic users
+  - Removed corporate AI-focused language in favor of practical, peer-to-peer messaging
+
+## Mission & Voice
+
+UGGA is a nonprofit, grower-first network solving fragmentation in the greenhouse industry. We exist to help growers connect, share knowledge, and have a stronger voice in research and innovation. The site emphasizes:
+
+- Practical solutions tested by real growers
+- Peer-reviewed resources over corporate marketing
+- Community building and knowledge sharing
+- Grower empowerment in research and policy decisions
+- Pilot program status with active member input on development
 
 ## User Preferences
 
-Preferred communication style: Simple, everyday language.
+- Communication style: Friendly, conversational, plainspoken language that farmers relate to
+- Tone: Warm, honest, non-corporate, grounded and helpful
+- Avoid: Highlighting "AI" directly, flashy tech-forward language
+- Emphasize: Community, usefulness, grower empowerment, peer collaboration
