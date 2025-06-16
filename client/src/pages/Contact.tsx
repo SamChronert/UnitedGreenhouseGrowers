@@ -152,7 +152,7 @@ export default function Contact() {
                   <Mail className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Email</p>
+                  <p className="text-sm text-[#ffffff]">Email</p>
                   <p className="font-medium text-gray-900">sam@growbig.ag</p>
                 </div>
               </div>
