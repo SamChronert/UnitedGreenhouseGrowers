@@ -49,18 +49,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { path: "/contact", label: "Contact" },
   ];
 
-  const memberRoutes = [
-    { path: "/dashboard", label: "Dashboard" },
+  const memberDashboardRoutes = [
+    { path: "/dashboard", label: "Overview" },
+    { path: "/dashboard/profile", label: "Profile" },
     { path: "/dashboard/find-grower", label: "Find Grower" },
     { path: "/dashboard/assessment", label: "Assessment" },
     { path: "/dashboard/resources", label: "Resources" },
+    { path: "/forum", label: "Forum" },
   ];
 
-  const adminRoutes = [
-    { path: "/admin/blog", label: "Manage Blog" },
-    { path: "/admin/resources", label: "Manage Resources" },
-    { path: "/admin/members", label: "View Members" },
-    { path: "/admin/challenges", label: "Challenge Insights" },
+  const adminDashboardRoutes = [
+    { path: "/admin/blog", label: "Blog Management" },
+    { path: "/admin/resources", label: "Resource Management" },
+    { path: "/admin/members", label: "Member Insights" },
+    { path: "/admin/challenges", label: "Challenge Analytics" },
+    { path: "/admin/assessment-trainer", label: "Assessment Trainer" },
   ];
 
   return (
@@ -95,33 +98,67 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   
                   {isAuthenticated && (
                     <>
-                      {memberRoutes.map((route) => (
-                        <Link
-                          key={route.path}
-                          href={route.path}
-                          className={`px-3 py-2 text-sm font-medium transition-colors ${
-                            location === route.path
-                              ? "text-ugga-primary"
-                              : "text-gray-600 hover:text-ugga-primary"
-                          }`}
-                        >
-                          {route.label}
-                        </Link>
-                      ))}
+                      {/* Member Dashboard Dropdown */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            className={`px-3 py-2 text-sm font-medium transition-colors ${
+                              location.startsWith('/dashboard') || location === '/forum'
+                                ? "text-ugga-primary"
+                                : "text-gray-600 hover:text-ugga-primary"
+                            }`}
+                          >
+                            Dashboard
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          {memberDashboardRoutes.map((route) => (
+                            <DropdownMenuItem key={route.path} asChild>
+                              <Link
+                                href={route.path}
+                                className={`w-full ${
+                                  location === route.path ? "bg-gray-100" : ""
+                                }`}
+                              >
+                                {route.label}
+                              </Link>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       
-                      {isAdmin && adminRoutes.map((route) => (
-                        <Link
-                          key={route.path}
-                          href={route.path}
-                          className={`px-3 py-2 text-sm font-medium transition-colors ${
-                            location === route.path
-                              ? "text-ugga-primary"
-                              : "text-gray-600 hover:text-ugga-primary"
-                          }`}
-                        >
-                          {route.label}
-                        </Link>
-                      ))}
+                      {/* Admin Dashboard Dropdown */}
+                      {isAdmin && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              className={`px-3 py-2 text-sm font-medium transition-colors ${
+                                location.startsWith('/admin')
+                                  ? "text-ugga-primary"
+                                  : "text-gray-600 hover:text-ugga-primary"
+                              }`}
+                            >
+                              Admin Dashboard
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start">
+                            {adminDashboardRoutes.map((route) => (
+                              <DropdownMenuItem key={route.path} asChild>
+                                <Link
+                                  href={route.path}
+                                  className={`w-full ${
+                                    location === route.path ? "bg-gray-100" : ""
+                                  }`}
+                                >
+                                  {route.label}
+                                </Link>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </>
                   )}
                 </div>
@@ -214,35 +251,47 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               
               {isAuthenticated ? (
                 <>
-                  {memberRoutes.map((route) => (
-                    <Link
-                      key={route.path}
-                      href={route.path}
-                      className={`block px-3 py-2 text-base font-medium transition-colors ${
-                        location === route.path
-                          ? "text-ugga-primary bg-gray-50"
-                          : "text-gray-600 hover:text-ugga-primary hover:bg-gray-50"
-                      }`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {route.label}
-                    </Link>
-                  ))}
+                  <div className="border-t pt-2">
+                    <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                      Dashboard
+                    </div>
+                    {memberDashboardRoutes.map((route) => (
+                      <Link
+                        key={route.path}
+                        href={route.path}
+                        className={`block px-3 py-2 text-base font-medium transition-colors ${
+                          location === route.path
+                            ? "text-ugga-primary bg-gray-50"
+                            : "text-gray-600 hover:text-ugga-primary hover:bg-gray-50"
+                        }`}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {route.label}
+                      </Link>
+                    ))}
+                  </div>
                   
-                  {isAdmin && adminRoutes.map((route) => (
-                    <Link
-                      key={route.path}
-                      href={route.path}
-                      className={`block px-3 py-2 text-base font-medium transition-colors ${
-                        location === route.path
-                          ? "text-ugga-primary bg-gray-50"
-                          : "text-gray-600 hover:text-ugga-primary hover:bg-gray-50"
-                      }`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {route.label}
-                    </Link>
-                  ))}
+                  {isAdmin && (
+                    <div className="border-t pt-2">
+                      <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                        Admin Dashboard
+                      </div>
+                      {adminDashboardRoutes.map((route) => (
+                        <Link
+                          key={route.path}
+                          href={route.path}
+                          className={`block px-3 py-2 text-base font-medium transition-colors ${
+                            location === route.path
+                              ? "text-ugga-primary bg-gray-50"
+                              : "text-gray-600 hover:text-ugga-primary hover:bg-gray-50"
+                          }`}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {route.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                   
                   <div className="border-t pt-2">
                     <Link

@@ -1,0 +1,71 @@
+Hi Replit Agent – I’d like to implement several improvements to the UGGA site. Please help with the following updates and new features:
+
+🧭 1. Navigation Bar Redesign (Dynamic Based on User Role)
+Please update the top navigation bar so it’s cleaner and grouped by role:
+
+When a logged-in member views the site:
+
+The nav bar should include “Dashboard” as a top-level item.
+
+All member pages (e.g. Profile, Resources, Assessments, Find-a-Grower, etc.) should be shown in a dropdown menu under “Dashboard” — rather than listed individually in the nav bar.
+
+When an admin is logged in:
+
+Add a top-level item called “Admin Dashboard.”
+
+All admin-specific pages (e.g. blog editor, member insights, grower challenges, farm assessment training) should be grouped under this in a dropdown menu.
+
+Make the navigation dynamic based on whether the user is logged in and their role (MEMBER vs ADMIN).
+
+💬 2. Member Forum Feature (with Smart Search & Media Upload)
+Create a new Forum section where members can post and comment. This should include:
+
+A public forum board where:
+
+Members can make posts with titles, text, and optional image or file uploads
+
+Other members can comment on posts
+
+Posts and comments are visible to all logged-in members
+
+A search function that allows members to search for topics or questions — not just by exact keywords, but by semantic meaning.
+
+Please implement this as:
+
+Each forum post is automatically tagged with keywords or topic labels using AI (e.g. OpenAI Embeddings or similar)
+
+The search bar should return semantically relevant posts, even if the user doesn’t type in the exact matching words
+
+Example: If someone posts about “humidity control in propagation,” the search should return that post if another user types “damp seedlings” or “wet leaves nursery.”
+
+🧪 3. Farm Assessment Tool – Upload Support + Admin Training Interface
+Please enhance the existing Farm Assessment Tool with the following features:
+
+For Members:
+When submitting an assessment, members should be able to upload images and files (e.g. photos of their grow space, nutrient data, equipment specs)
+
+These uploads should be tied to the user’s submission so they can be analyzed as part of their assessment
+
+For Admins:
+Add a new page in the Admin Dashboard called “Farm Assessment Trainer” or similar
+
+On this page, admins should be able to:
+
+Add context to the Farm Assessment system by typing notes or uploading files/images
+
+These admin submissions should go into a database or vector store the Farm Assessment tool can use for reference when generating feedback or recommendations
+
+This lets us "teach" the tool how to give better, more relevant assessments over time
+
+The goal is for the Farm Assessment system to continuously improve based on real examples and expert content.
+
+Let me know if you need clarification on any part of this. Once these features are in place, I’d be happy to test and provide feedback. Thanks!
+
+
+
+
+
+
+
+
+
