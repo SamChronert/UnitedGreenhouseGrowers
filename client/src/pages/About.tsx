@@ -176,7 +176,7 @@ export default function About() {
 
         {/* Call to Action */}
         <div className="text-center">
-          <div className="bg-ugga-primary rounded-lg p-8 text-white">
+          <div className="rounded-lg p-8 text-white bg-[#2d543a]">
             <h2 className="text-2xl font-bold mb-4 text-white">
               Help Us Build Something Better
             </h2>
