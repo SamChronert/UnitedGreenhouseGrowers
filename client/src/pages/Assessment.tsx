@@ -138,7 +138,7 @@ export default function Assessment() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
-                  AI Farm Assessment
+                  Farm Assessment
                   <Badge variant="secondary" className="ml-auto">Session: {sessionId.slice(-6)}</Badge>
                 </CardTitle>
               </CardHeader>
