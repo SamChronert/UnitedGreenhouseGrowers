@@ -50,19 +50,19 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {isAuthenticated ? (
                 <Link href="/dashboard">
-                  <Button size="lg" className="bg-ugga-accent hover:bg-ugga-accent/90 text-ugga-primary px-8 py-4">
+                  <Button size="lg" className="bg-ugga-accent hover:bg-ugga-accent/90 text-ugga-primary px-10 py-5 text-xl font-bold shadow-xl border-2 border-ugga-accent rounded-xl transform hover:scale-105 transition-all duration-300">
                     Go to Dashboard
                   </Button>
                 </Link>
               ) : (
                 <Link href="/register">
-                  <Button size="lg" className="bg-ugga-accent hover:bg-ugga-accent/90 text-ugga-primary px-8 py-4">
+                  <Button size="lg" className="bg-ugga-accent hover:bg-ugga-accent/90 text-ugga-primary px-10 py-5 text-xl font-bold shadow-xl border-2 border-ugga-accent rounded-xl transform hover:scale-105 transition-all duration-300">
                     Become a founding member
                   </Button>
                 </Link>
               )}
               <Link href="#features">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-ugga-primary px-8 py-4">
+                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-ugga-primary px-10 py-5 text-xl font-semibold shadow-lg border-2 rounded-xl transform hover:scale-105 transition-all duration-300">
                   Learn More
                 </Button>
               </Link>
@@ -77,7 +77,7 @@ export default function Home() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Built by growers, for growers</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              We're solving the real problem of fragmentation in the greenhouse industry — together
+              Greenhouse growers shouldn't have to solve the same problems in isolation. We're building a place to connect, share, and lead — together.
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
@@ -135,25 +135,25 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section style={{backgroundColor: '#c8e6c9'}} className="py-16">
+      <section className="py-16 bg-primary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto">
             <img src={uggaLogo} alt="UGGA Logo" className="h-16 w-16 mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl font-bold text-white mb-4">
               Help Shape a Network Built for Growers
             </h2>
-            <p className="text-lg text-gray-700 mb-8">
+            <p className="text-lg text-gray-100 mb-8">
               Join our pilot group and help us build the tools and resources that will actually make a difference in your operation. Your input will directly shape what gets built first.
             </p>
             {!isAuthenticated && (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/register">
-                  <Button size="lg" className="bg-ugga-primary text-white hover:bg-ugga-primary/90 shadow-lg border-2 border-ugga-primary font-bold px-8 py-4 text-lg rounded-lg transform hover:scale-105 transition-all duration-200">
+                  <Button size="lg" className="bg-white text-primary hover:bg-gray-100 shadow-lg border-2 border-white font-bold px-8 py-4 text-lg rounded-lg transform hover:scale-105 transition-all duration-200">
                     Become a founding member
                   </Button>
                 </Link>
                 <Link href="/about">
-                  <Button size="lg" variant="outline" className="border-ugga-primary text-ugga-primary hover:bg-ugga-primary hover:text-white">
+                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
                     Learn About Our Mission
                   </Button>
                 </Link>
