@@ -23,6 +23,7 @@ import Assessment from "@/pages/Assessment";
 import AdminResources from "@/pages/AdminResources";
 import AdminBlog from "@/pages/AdminBlog";
 import AdminMembers from "@/pages/AdminMembers";
+import AdminChallenges from "@/pages/AdminChallenges";
 
 function Router() {
   return (
@@ -73,6 +74,11 @@ function Router() {
       <Route path="/admin/members">
         <AuthGuard requireAdmin>
           <AdminMembers />
+        </AuthGuard>
+      </Route>
+      <Route path="/admin/challenges">
+        <AuthGuard requireAdmin>
+          <AdminChallenges />
         </AuthGuard>
       </Route>
 

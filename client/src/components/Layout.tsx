@@ -60,6 +60,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { path: "/admin/blog", label: "Manage Blog" },
     { path: "/admin/resources", label: "Manage Resources" },
     { path: "/admin/members", label: "View Members" },
+    { path: "/admin/challenges", label: "Challenge Insights" },
   ];
 
   return (
