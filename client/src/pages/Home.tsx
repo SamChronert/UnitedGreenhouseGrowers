@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { Users, TrendingUp, BookOpen, Sprout } from "lucide-react";
+import { Users, TrendingUp, BookOpen } from "lucide-react";
+import uggaLogo from "@assets/UGGA Logo_1750099625455.png";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
@@ -95,7 +96,7 @@ export default function Home() {
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto">
-            <Sprout className="h-16 w-16 text-ugga-primary mx-auto mb-6" />
+            <img src={uggaLogo} alt="UGGA Logo" className="h-16 w-16 mx-auto mb-6" />
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               Ready to Grow Your Network?
             </h2>

@@ -12,8 +12,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Sprout, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import uggaLogo from "@assets/UGGA Logo_1750099625455.png";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -69,7 +70,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Link href="/" className="flex items-center">
-                <Sprout className="h-8 w-8 text-ugga-primary mr-2" />
+                <img src={uggaLogo} alt="UGGA Logo" className="h-8 w-8 mr-2" />
                 <span className="font-bold text-xl text-ugga-primary">UGGA</span>
               </Link>
               
@@ -293,7 +294,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="grid md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
               <div className="flex items-center mb-4">
-                <Sprout className="h-8 w-8 text-ugga-accent mr-2" />
+                <img src={uggaLogo} alt="UGGA Logo" className="h-8 w-8 mr-2" />
                 <span className="font-bold text-xl">United Greenhouse Growers Association</span>
               </div>
               <p className="text-gray-300 mb-4">
