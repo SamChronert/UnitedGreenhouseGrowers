@@ -177,13 +177,13 @@ export default function About() {
         {/* Call to Action */}
         <div className="text-center">
           <div className="bg-ugga-primary rounded-lg p-8 text-white">
-            <h2 className="text-2xl font-bold mb-4">
+            <h2 className="text-2xl font-bold mb-4 text-white">
               Help Us Build Something Better
             </h2>
-            <p className="text-lg mb-6">
+            <p className="text-lg mb-6 text-white">
               Join our pilot group and help shape a network that's truly built by growers, for growers.
             </p>
-            <p className="text-green-100">
+            <p className="text-white opacity-90">
               Together, we can solve the fragmentation problem and give greenhouse growers the connected, supportive community they deserve.
             </p>
           </div>
