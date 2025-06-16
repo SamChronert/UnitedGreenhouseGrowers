@@ -52,12 +52,12 @@ export default function AdminChallenges() {
   const queryClient = useQueryClient();
 
   // Fetch challenges
-  const { data: challenges = [], isLoading } = useQuery({
+  const { data: challenges = [], isLoading } = useQuery<ChallengeWithUser[]>({
     queryKey: ["/api/admin/challenges"],
   });
 
   // Fetch stats
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<{ totalCount: number; categoryCounts: Record<string, number>; recentCount: number }>({
     queryKey: ["/api/admin/challenges/stats"],
   });
 

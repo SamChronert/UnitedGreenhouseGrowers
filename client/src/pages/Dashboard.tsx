@@ -13,6 +13,7 @@ import {
   Calendar,
   MessageSquare
 } from "lucide-react";
+
 import ChatWidget from "@/components/ChatWidget";
 import ChallengeSubmissionForm from "@/components/ChallengeSubmissionForm";
 
@@ -110,7 +111,7 @@ export default function Dashboard() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Member Since:</span>
                   <span className="font-medium">
-                    {user?.createdAt ? formatDate(user.createdAt) : "Unknown"}
+                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "Unknown"}
                   </span>
                 </div>
                 {user?.profile?.employer && (
