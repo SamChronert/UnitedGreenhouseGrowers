@@ -32,7 +32,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Development Banner */}
-      <div className="bg-ugga-primary text-white py-2 text-center text-sm">
+      <div style={{backgroundColor: '#e6f2e6'}} className="text-gray-800 py-2 text-center text-sm">
         🚧 UGGA is a nonprofit in its early stages. Join the pilot group and help shape the tools you need.
       </div>
 
@@ -135,25 +135,25 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-ugga-primary">
+      <section style={{backgroundColor: '#e6f2e6'}} className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto">
             <img src={uggaLogo} alt="UGGA Logo" className="h-16 w-16 mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">
               Help Shape a Network Built for Growers
             </h2>
-            <p className="text-lg text-white mb-8">
+            <p className="text-lg text-gray-700 mb-8">
               Join our pilot group and help us build the tools and resources that will actually make a difference in your operation. Your input will directly shape what gets built first.
             </p>
             {!isAuthenticated && (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/register">
-                  <Button size="lg" className="bg-white text-ugga-primary hover:bg-gray-100">
+                  <Button size="lg" className="bg-ugga-primary text-white hover:bg-ugga-primary/90">
                     Become a founding member
                   </Button>
                 </Link>
                 <Link href="/about">
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-ugga-primary">
+                  <Button size="lg" variant="outline" className="border-ugga-primary text-ugga-primary hover:bg-ugga-primary hover:text-white">
                     Learn About Our Mission
                   </Button>
                 </Link>

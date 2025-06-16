@@ -290,47 +290,47 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <main>{children}</main>
 
       {/* Footer */}
-      <footer className="bg-ugga-primary text-white">
+      <footer style={{backgroundColor: '#e6f2e6'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
               <div className="flex items-center mb-4">
                 <img src={uggaLogo} alt="UGGA Logo" className="h-8 w-8 mr-2" />
-                <span className="font-bold text-xl">United Greenhouse Growers Association</span>
+                <span className="font-bold text-xl text-gray-800">United Greenhouse Growers Association</span>
               </div>
-              <p className="text-gray-300 mb-4">
+              <p className="text-gray-700 mb-4">
                 Connecting professional greenhouse growers nationwide with AI-powered tools, 
                 expert networks, and comprehensive resources for sustainable agricultural success.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-lg mb-4">Quick Links</h3>
+              <h3 className="font-semibold text-lg mb-4 text-gray-800">Quick Links</h3>
               <ul className="space-y-2">
-                <li><Link href="/about" className="text-gray-300 hover:text-ugga-accent transition-colors">About Us</Link></li>
-                <li><Link href="/resources" className="text-gray-300 hover:text-ugga-accent transition-colors">Resources</Link></li>
-                <li><Link href="/blog" className="text-gray-300 hover:text-ugga-accent transition-colors">Blog</Link></li>
-                <li><Link href="/contact" className="text-gray-300 hover:text-ugga-accent transition-colors">Contact</Link></li>
+                <li><Link href="/about" className="text-gray-700 hover:text-ugga-primary transition-colors">About Us</Link></li>
+                <li><Link href="/resources" className="text-gray-700 hover:text-ugga-primary transition-colors">Resources</Link></li>
+                <li><Link href="/blog" className="text-gray-700 hover:text-ugga-primary transition-colors">Blog</Link></li>
+                <li><Link href="/contact" className="text-gray-700 hover:text-ugga-primary transition-colors">Contact</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold text-lg mb-4">Member Portal</h3>
+              <h3 className="font-semibold text-lg mb-4 text-gray-800">Member Portal</h3>
               <ul className="space-y-2">
                 {isAuthenticated ? (
                   <>
-                    <li><Link href="/dashboard" className="text-gray-300 hover:text-ugga-accent transition-colors">Dashboard</Link></li>
-                    <li><Link href="/dashboard/profile" className="text-gray-300 hover:text-ugga-accent transition-colors">Profile</Link></li>
+                    <li><Link href="/dashboard" className="text-gray-700 hover:text-ugga-primary transition-colors">Dashboard</Link></li>
+                    <li><Link href="/dashboard/profile" className="text-gray-700 hover:text-ugga-primary transition-colors">Profile</Link></li>
                   </>
                 ) : (
                   <>
-                    <li><Link href="/login" className="text-gray-300 hover:text-ugga-accent transition-colors">Member Login</Link></li>
-                    <li><Link href="/register" className="text-gray-300 hover:text-ugga-accent transition-colors">Join UGGA</Link></li>
+                    <li><Link href="/login" className="text-gray-700 hover:text-ugga-primary transition-colors">Member Login</Link></li>
+                    <li><Link href="/register" className="text-gray-700 hover:text-ugga-primary transition-colors">Join UGGA</Link></li>
                   </>
                 )}
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-600 mt-8 pt-8 text-center">
-            <p className="text-gray-300">
+          <div className="border-t border-gray-400 mt-8 pt-8 text-center">
+            <p className="text-gray-700">
               © 2024 United Greenhouse Growers Association. All rights reserved.
             </p>
           </div>
