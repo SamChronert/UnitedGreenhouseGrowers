@@ -153,7 +153,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <p className="text-sm text-[#ffffff]">Email</p>
-                  <p className="font-medium text-gray-900">sam@growbig.ag</p>
+                  <p className="font-medium text-[#f9fafb]">sam@growbig.ag</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
