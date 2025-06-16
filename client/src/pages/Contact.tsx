@@ -144,7 +144,7 @@ export default function Contact() {
           </Card>
 
           {/* Contact Info */}
-          <div className="bg-gray-50 rounded-lg p-6">
+          <div className="rounded-lg p-6 bg-[#e6f2e6]">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Get in Touch</h3>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-8">
               <div className="flex items-center gap-3">
