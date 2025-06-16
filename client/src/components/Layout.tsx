@@ -299,8 +299,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <span className="font-bold text-xl text-gray-800">United Greenhouse Growers Association</span>
               </div>
               <p className="text-gray-700 mb-4">
-                Connecting professional greenhouse growers nationwide with AI-powered tools, 
-                expert networks, and comprehensive resources for sustainable agricultural success.
+                Bringing greenhouse growers together to share hard-earned knowledge, tackle real-world challenges, and strengthen the industry — together.
               </p>
             </div>
             <div>
