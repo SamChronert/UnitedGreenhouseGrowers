@@ -73,21 +73,6 @@ export default function Dashboard() {
 
         {/* Main Dashboard Grid */}
         <div className="grid lg:grid-cols-3 gap-8 mb-8">
-          {/* Challenge Submission Section */}
-          <Card className="lg:col-span-3">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-ugga-secondary" />
-                Share Your Challenge
-              </CardTitle>
-              <p className="text-gray-600">
-                Tell us about operational challenges, knowledge gaps, or areas where the industry needs better support
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ChallengeSubmissionForm />
-            </CardContent>
-          </Card>
           {/* Profile Summary Card */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -157,6 +142,22 @@ export default function Dashboard() {
             </Card>
           </div>
         </div>
+
+        {/* Challenge Submission Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-ugga-secondary" />
+              Share Your Challenge
+            </CardTitle>
+            <p className="text-gray-600">
+              Tell us about operational challenges, knowledge gaps, or areas where the industry needs better support
+            </p>
+          </CardHeader>
+          <CardContent>
+            <ChallengeSubmissionForm />
+          </CardContent>
+        </Card>
 
         {/* Quick Actions Grid */}
         <div className="grid md:grid-cols-4 gap-4">
