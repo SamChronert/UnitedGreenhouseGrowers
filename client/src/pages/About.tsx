@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Sprout, Users, Target, Award } from "lucide-react";
+import { Users, Target, Award } from "lucide-react";
+import uggaLogo from "@assets/UGGA Logo_1750099625455.png";
 
 export default function About() {
   const values = [
@@ -43,7 +44,7 @@ export default function About() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <Sprout className="h-16 w-16 text-ugga-primary mx-auto mb-6" />
+          <img src={uggaLogo} alt="UGGA Logo" className="h-16 w-16 mx-auto mb-6" />
           <h1 className="text-4xl font-bold text-gray-900 mb-6">About UGGA</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             The United Greenhouse Growers Association has been connecting and empowering 

@@ -11,7 +11,8 @@ import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Sprout, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import uggaLogo from "@assets/UGGA Logo_1750099625455.png";
 
 const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -87,7 +88,7 @@ export default function Register() {
     <div className="min-h-screen py-16 bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <Sprout className="h-12 w-12 text-ugga-primary mx-auto mb-4" />
+          <img src={uggaLogo} alt="UGGA Logo" className="h-12 w-12 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Join UGGA</h1>
           <p className="text-gray-600">
             Connect with greenhouse growers nationwide and access AI-powered tools
@@ -107,8 +108,10 @@ export default function Register() {
                   <Input
                     id="name"
                     {...form.register("name")}
-                    error={form.formState.errors.name?.message}
                   />
+                  {form.formState.errors.name && (
+                    <p className="text-sm text-red-600">{form.formState.errors.name.message}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number *</Label>

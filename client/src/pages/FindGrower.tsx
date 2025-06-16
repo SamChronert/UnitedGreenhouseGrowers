@@ -1,6 +1,7 @@
 import ChatWidget from "@/components/ChatWidget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, MapPin, Briefcase, Sprout } from "lucide-react";
+import { Users, MapPin, Briefcase } from "lucide-react";
+import uggaLogo from "@assets/UGGA Logo_1750099625455.png";
 
 export default function FindGrower() {
   const tips = [
@@ -10,7 +11,7 @@ export default function FindGrower() {
       description: "Ask for growers in specific states, regions, or near certain cities"
     },
     {
-      icon: <Sprout className="h-5 w-5" />,
+      icon: <img src={uggaLogo} alt="UGGA" className="h-5 w-5" />,
       title: "Crop Expertise",
       description: "Search by specific crops, growing methods, or agricultural specialties"
     },
