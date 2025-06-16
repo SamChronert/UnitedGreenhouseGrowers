@@ -161,7 +161,7 @@ export default function Contact() {
                   <Phone className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Phone</p>
+                  <p className="text-sm text-[#f9fafb]">Phone</p>
                   <p className="font-medium text-gray-900">415-686-9620</p>
                 </div>
               </div>
