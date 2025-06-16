@@ -62,7 +62,7 @@ export default function Home() {
                 </Link>
               )}
               <Link href="#features">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-ugga-primary px-10 py-5 text-xl font-semibold shadow-lg border-2 rounded-xl transform hover:scale-105 transition-all duration-300">
+                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-ugga-primary bg-transparent px-10 py-5 text-xl font-semibold shadow-lg border-2 rounded-xl transform hover:scale-105 transition-all duration-300">
                   Learn More
                 </Button>
               </Link>
@@ -153,7 +153,7 @@ export default function Home() {
                   </Button>
                 </Link>
                 <Link href="/about">
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+                  <Button size="lg" variant="outline" className="border-white text-white bg-transparent hover:bg-white hover:text-primary">
                     Learn About Our Mission
                   </Button>
                 </Link>
