@@ -186,7 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fromEmail = process.env.FROM_EMAIL || "info@greenhousegrowers.org";
       
       await sendEmail(process.env.SENDGRID_API_KEY!, {
-        to: fromEmail,
+        to: "sam@growbig.ag",
         from: fromEmail,
         subject: `[UGGA ${type.toUpperCase()}] ${subject}`,
         html: `
