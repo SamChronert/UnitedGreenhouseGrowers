@@ -176,6 +176,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Member feedback form
+  app.post("/api/feedback", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const { subject, message, type } = req.body;
+      const user = await storage.getUser(req.user!.id);
+      const profile = await storage.getProfile(req.user!.id);
+      
+      const fromEmail = process.env.FROM_EMAIL || "info@greenhousegrowers.org";
+      
+      await sendEmail(process.env.SENDGRID_API_KEY!, {
+        to: fromEmail,
+        from: fromEmail,
+        subject: `[UGGA ${type.toUpperCase()}] ${subject}`,
+        html: `
+          <h2>New ${type} from UGGA Member</h2>
+          <p><strong>From:</strong> ${profile?.firstName} ${profile?.lastName} (${user?.email})</p>
+          <p><strong>Member Since:</strong> ${user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}</p>
+          <p><strong>Organization:</strong> ${profile?.employer || 'Not specified'}</p>
+          <p><strong>State:</strong> ${profile?.state || 'Not specified'}</p>
+          <p><strong>Type:</strong> ${type}</p>
+          <p><strong>Subject:</strong> ${subject}</p>
+          <p><strong>Message:</strong></p>
+          <p>${message.replace(/\n/g, '<br>')}</p>
+          <hr>
+          <p><em>This message was sent through the UGGA member dashboard. Reply directly to respond to the member.</em></p>
+        `,
+      });
+
+      res.json({ message: "Feedback sent successfully" });
+    } catch (error) {
+      console.error("Feedback error:", error);
+      res.status(500).json({ message: "Failed to send feedback" });
+    }
+  });
+
   // Blog routes
   app.get("/api/blog", async (req, res) => {
     try {
