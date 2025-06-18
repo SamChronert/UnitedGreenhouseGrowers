@@ -106,10 +106,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(userData: InsertUser): Promise<User> {
-    const id = randomUUID();
+    const userWithId = {
+      id: randomUUID(),
+      ...userData
+    };
     const [user] = await db
       .insert(users)
-      .values({ ...userData, id })
+      .values(userWithId)
       .returning();
     return user;
   }
@@ -184,22 +187,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFilteredResources(state?: string, farmType?: string): Promise<Resource[]> {
-    let query = db.select().from(resources);
-    
-    if (state || farmType) {
-      const tags = [];
-      if (state) tags.push(state);
-      if (farmType) tags.push(farmType);
-      
-      // This is a simplified filter - in production you'd want more sophisticated tag matching
-      query = query.where(
-        tags.some(tag => 
-          resources.tags.includes ? like(resources.tags, `%${tag}%`) : eq(resources.tags, [tag])
-        )
-      ) as any;
+    if (!state && !farmType) {
+      return await db.select().from(resources);
     }
     
-    return await query;
+    const conditions = [];
+    if (state) {
+      conditions.push(sql`${resources.tags} @> ${[state]}`);
+    }
+    if (farmType) {
+      conditions.push(sql`${resources.tags} @> ${[farmType]}`);
+    }
+    
+    return await db
+      .select()
+      .from(resources)
+      .where(sql`${conditions.join(' OR ')}`);
   }
 
   async createResource(resourceData: InsertResource): Promise<Resource> {
@@ -235,39 +238,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserChatLogs(userId: string, type?: string): Promise<ChatLog[]> {
-    let query = db.select().from(chatLogs).where(eq(chatLogs.userId, userId));
+    let conditions = [eq(chatLogs.userId, userId)];
     
     if (type) {
-      query = query.where(and(eq(chatLogs.userId, userId), eq(chatLogs.type, type)));
+      conditions.push(eq(chatLogs.type, type));
     }
     
-    return await query.orderBy(desc(chatLogs.createdAt));
+    return await db
+      .select()
+      .from(chatLogs)
+      .where(and(...conditions))
+      .orderBy(desc(chatLogs.createdAt));
   }
 
   // Member directory
   async searchMembers(query?: string, state?: string, farmType?: string): Promise<(User & { profile: Profile })[]> {
-    let dbQuery = db
-      .select()
-      .from(users)
-      .innerJoin(profiles, eq(users.id, profiles.userId))
-      .where(eq(users.role, Role.MEMBER));
+    let conditions = [eq(users.role, Role.MEMBER)];
 
     if (state) {
-      dbQuery = dbQuery.where(and(eq(users.role, Role.MEMBER), eq(profiles.state, state))) as any;
+      conditions.push(eq(profiles.state, state));
     }
 
     if (farmType) {
-      dbQuery = dbQuery.where(and(eq(users.role, Role.MEMBER), eq(profiles.farmType, farmType))) as any;
+      conditions.push(eq(profiles.farmType, farmType));
     }
 
     if (query) {
-      dbQuery = dbQuery.where(
-        and(
-          eq(users.role, Role.MEMBER),
-          like(profiles.name, `%${query}%`)
-        )
-      ) as any;
+      conditions.push(like(profiles.name, `%${query}%`));
     }
+
+    const dbQuery = db
+      .select()
+      .from(users)
+      .innerJoin(profiles, eq(users.id, profiles.userId))
+      .where(and(...conditions));
 
     const results = await dbQuery;
     return results.map((result: any) => ({
