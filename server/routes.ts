@@ -191,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subject: `[UGGA ${type.toUpperCase()}] ${subject}`,
         html: `
           <h2>New ${type} from UGGA Member</h2>
-          <p><strong>From:</strong> ${profile?.firstName} ${profile?.lastName} (${user?.email})</p>
+          <p><strong>From:</strong> ${profile?.name} (${user?.email})</p>
           <p><strong>Member Since:</strong> ${user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}</p>
           <p><strong>Organization:</strong> ${profile?.employer || 'Not specified'}</p>
           <p><strong>State:</strong> ${profile?.state || 'Not specified'}</p>
