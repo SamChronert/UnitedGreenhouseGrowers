@@ -29,7 +29,7 @@ import {
   Role
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, like, desc } from "drizzle-orm";
+import { eq, and, like, desc, gte, ilike, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -334,7 +334,7 @@ export class DatabaseStorage implements IStorage {
     const recentResults = await db
       .select()
       .from(growerChallenges)
-      .where(eq(growerChallenges.createdAt, thirtyDaysAgo));
+      .where(gte(growerChallenges.createdAt, thirtyDaysAgo));
     
     const recentCount = recentResults.length;
 

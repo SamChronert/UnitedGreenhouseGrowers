@@ -429,6 +429,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Forum routes
+  app.get("/api/forum/posts", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const { search } = req.query;
+      const posts = await storage.getAllForumPosts(search as string);
+      res.json(posts);
+    } catch (error) {
+      console.error("Get forum posts error:", error);
+      res.status(500).json({ message: "Failed to fetch forum posts" });
+    }
+  });
+
+  app.post("/api/forum/posts", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const postData = {
+        ...req.body,
+        userId: req.user!.id,
+      };
+      const post = await storage.createForumPost(postData);
+      res.status(201).json(post);
+    } catch (error) {
+      console.error("Create forum post error:", error);
+      res.status(500).json({ message: "Failed to create forum post" });
+    }
+  });
+
+  app.post("/api/forum/posts/:postId/comments", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const commentData = {
+        postId: req.params.postId,
+        userId: req.user!.id,
+        content: req.body.content,
+      };
+      const comment = await storage.createForumComment(commentData);
+      res.status(201).json(comment);
+    } catch (error) {
+      console.error("Create forum comment error:", error);
+      res.status(500).json({ message: "Failed to create comment" });
+    }
+  });
+
+  // Assessment training data routes
+  app.get("/api/admin/assessment-training", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const trainingData = await storage.getAllAssessmentTrainingData();
+      res.json(trainingData);
+    } catch (error) {
+      console.error("Get assessment training data error:", error);
+      res.status(500).json({ message: "Failed to fetch training data" });
+    }
+  });
+
+  app.post("/api/admin/assessment-training", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const trainingData = await storage.createAssessmentTrainingData(req.body);
+      res.status(201).json(trainingData);
+    } catch (error) {
+      console.error("Create assessment training data error:", error);
+      res.status(500).json({ message: "Failed to create training data" });
+    }
+  });
+
+  app.put("/api/admin/assessment-training/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const trainingData = await storage.updateAssessmentTrainingData(req.params.id, req.body);
+      res.json(trainingData);
+    } catch (error) {
+      console.error("Update assessment training data error:", error);
+      res.status(500).json({ message: "Failed to update training data" });
+    }
+  });
+
+  app.delete("/api/admin/assessment-training/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      await storage.deleteAssessmentTrainingData(req.params.id);
+      res.json({ message: "Training data deleted" });
+    } catch (error) {
+      console.error("Delete assessment training data error:", error);
+      res.status(500).json({ message: "Failed to delete training data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
