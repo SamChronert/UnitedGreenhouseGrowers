@@ -41,7 +41,10 @@ export default function Forum() {
   // Fetch forum posts with search
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ["/api/forum/posts", searchQuery],
-    queryFn: () => apiRequest("GET", `/api/forum/posts?search=${encodeURIComponent(searchQuery)}`),
+    queryFn: async () => {
+      const searchParam = searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : '';
+      return apiRequest("GET", `/api/forum/posts${searchParam}`);
+    },
   });
 
   // Create new post mutation
@@ -189,7 +192,7 @@ export default function Forum() {
 
         {/* Forum Posts */}
         <div className="space-y-4">
-          {posts.length === 0 ? (
+          {!Array.isArray(posts) || posts.length === 0 ? (
             <Card>
               <CardContent className="text-center py-12">
                 <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -203,7 +206,7 @@ export default function Forum() {
               </CardContent>
             </Card>
           ) : (
-            posts.map((post: PostWithDetails) => (
+            Array.isArray(posts) && posts.map((post: PostWithDetails) => (
               <Card key={post.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
