@@ -1,27 +1,47 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Calendar, ArrowRight, Loader2 } from "lucide-react";
+import { Calendar, ArrowRight, Loader2 } from "lucide-react";
 import { type BlogPost } from "@shared/schema";
 
 export default function Blog() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTopic, setSelectedTopic] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 6;
 
   const { data: posts, isLoading, error } = useQuery<BlogPost[]>({
     queryKey: ["/api/blog"],
   });
 
-  const filteredPosts = posts?.filter(post =>
-    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.contentMd.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  // Extract unique topics from posts (assuming posts have tags or categories)
+  const availableTopics = posts ? 
+    Array.from(new Set(posts.flatMap(post => post.contentMd.match(/#\w+/g) || []))).map(tag => tag.slice(1)) :
+    [];
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const filteredPosts = posts?.filter(post => {
+    if (selectedTopic === "all") return true;
+    return post.contentMd.toLowerCase().includes(`#${selectedTopic.toLowerCase()}`) ||
+           post.title.toLowerCase().includes(selectedTopic.toLowerCase());
+  }) || [];
+
+  // Reset to first page when filter changes
+  if (currentPage > totalPages && totalPages > 0) {
+    setCurrentPage(1);
+  }
+
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  const paginatedPosts = filteredPosts.slice(
+    (currentPage - 1) * postsPerPage,
+    currentPage * postsPerPage
+  );
+
+  const formatDate = (dateString: string | Date) => {
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -69,16 +89,24 @@ export default function Blog() {
             Insights, tips, and success stories from greenhouse growers
           </p>
           
-          {/* Search */}
-          <div className="max-w-md mx-auto relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              type="text"
-              placeholder="Search articles..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+          {/* Topic Filter */}
+          <div className="max-w-xs mx-auto">
+            <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by Topic" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Topics</SelectItem>
+                {availableTopics.map(topic => (
+                  <SelectItem key={topic} value={topic}>
+                    {topic.charAt(0).toUpperCase() + topic.slice(1)}
+                  </SelectItem>
+                ))}
+                <SelectItem value="grower-stories">Grower Stories</SelectItem>
+                <SelectItem value="industry-insights">Industry Insights</SelectItem>
+                <SelectItem value="best-practices">Best Practices</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -86,13 +114,13 @@ export default function Blog() {
         {filteredPosts.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-600">
-              {searchTerm ? "No articles found matching your search." : "No blog posts available yet."}
+              {selectedTopic !== "all" ? "No articles found for this topic." : "No blog posts available yet."}
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.map((post) => (
-              <Card key={post.id} className="hover:shadow-lg transition-shadow">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {paginatedPosts.map((post) => (
+              <Card key={post.id} className="shadow-sm">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between mb-2">
                     <Badge variant="secondary" className="bg-ugga-primary/10 text-ugga-primary">
@@ -123,11 +151,25 @@ export default function Blog() {
           </div>
         )}
 
-        {/* Load More (placeholder for pagination) */}
-        {filteredPosts.length > 0 && (
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              Load More Articles
+        {/* Pagination - only show if there are multiple pages */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center space-x-4 mt-12">
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button 
+              variant="outline" 
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next
             </Button>
           </div>
         )}
