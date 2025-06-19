@@ -66,17 +66,17 @@ export default function Contact() {
       
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Get in Touch</h1>
-            <p className="text-lg text-gray-600">
-              Have questions about membership or need support? We're here to help.
-            </p>
-          </div>
+          <div className="max-w-3xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">Get in Touch</h1>
+              <p className="text-lg text-gray-600">
+                Have questions about membership or need support? We're here to help.
+              </p>
+            </div>
 
-          {/* Contact Form */}
-          <Card className="mb-12">
+            {/* Contact Form */}
+            <Card className="mb-12">
             <CardHeader>
               <CardTitle>Send us a Message</CardTitle>
             </CardHeader>
@@ -177,7 +177,6 @@ export default function Contact() {
               </div>
             </div>
           </div>
-        </div>
         </div>
       </div>
     </div>

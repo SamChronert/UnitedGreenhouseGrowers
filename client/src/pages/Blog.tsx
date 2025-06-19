@@ -179,6 +179,7 @@ export default function Blog() {
             </Button>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
