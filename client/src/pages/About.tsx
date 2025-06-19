@@ -26,8 +26,8 @@ export default function About() {
   const foundingMembers = [
     {
       name: "Sam Chronert",
-      role: "Grower",
-      description: "Sam has been growing in greenhouses for over 15 years, focusing on sustainable production methods and innovative growing techniques. He co-founded UGGA to create a space where growers can share real-world solutions and learn from each other's experiences."
+      role: "Production Grower & Program Manager",
+      description: "Sam is a hydroponic grower with deep experience managing all aspects of plant growth in indoor farms. Over five years at Plenty, he led daily operations across multiple production sites, overseeing everything from crop care and environmental controls to system commissioning and yield optimization. With a Master's in Agriculture from Washington State University and a background in biology from Vanderbilt, Sam brings both scientific rigor and practical expertise to greenhouse operations. He helped start the Greenhouse Growers Association to give production growers a stronger voice. Sam knows firsthand how valuable it is to connect with peers who face the same challenges — and he's passionate about creating a space for shared learning, innovation, and grower-driven progress."
     },
     {
       name: "Dr. Melanie Yelton",

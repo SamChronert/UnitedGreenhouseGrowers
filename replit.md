@@ -135,7 +135,8 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 - June 19, 2025: Fixed About page layout alignment and founding members display
   - Applied consistent center alignment with max-w-3xl (48rem) container across all sections
   - Converted founding members from card grid to horizontal list format for better responsive behavior
-  - Removed logo image and improved paragraph centering throughout page
+  - Updated founding member profiles with comprehensive biographies for Sam Chronert and Dr. Melanie Yelton
+  - Added Dr. Melanie Yelton's LinkedIn photo with conditional rendering
   - Fixed mission section alignment to match other sections
 - June 19, 2025: Complete accessibility and performance enhancement pass
   - Achieved WCAG 2.1 AA compliance with proper contrast ratios, ARIA labels, focus states, and keyboard navigation
