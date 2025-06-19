@@ -49,7 +49,6 @@ export default function About() {
       <div style={{backgroundColor: '#e6f2e6'}} className="text-gray-800 py-2 text-center text-sm">
         🚧 UGGA is a nonprofit in its early stages. <Link href="/register" className="underline hover:no-underline font-medium">Join the pilot group</Link> and help shape the tools you need.
       </div>
-      
       {/* Header Section */}
       <div className="py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -60,13 +59,10 @@ export default function About() {
             <p className="text-xl text-gray-600 mb-6">
               United Greenhouse Growers Association is a nonprofit forming to connect greenhouse growers across the U.S., share vetted knowledge, and give growers a stronger voice in research and policy.
             </p>
-            <p className="text-lg text-gray-600">
-              Our founding members, Sam Chronert and Dr. Melanie Yelton, started UGGA because they saw the same gap from both sides: growers tackling problems alone, and researchers unsure how to help. We're here to close that gap — but we need your help to do it.
-            </p>
+            <p className="text-lg text-gray-600">Our founding members started UGGA because they saw the same gap from both sides: growers tackling problems alone, and researchers unsure how to help. We're here to close that gap — but we need your help to do it.</p>
           </div>
         </div>
       </div>
-
       {/* Mission Section - Full Width Banner */}
       <div className="w-full text-white text-center" style={{backgroundColor: 'var(--color-sage)', padding: '2rem 1rem'}}>
         <div className="max-w-3xl mx-auto">
@@ -76,7 +72,6 @@ export default function About() {
           </p>
         </div>
       </div>
-
       <div className="py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
 
