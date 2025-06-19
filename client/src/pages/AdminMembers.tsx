@@ -14,16 +14,16 @@ interface MemberWithProfile extends User {
 
 export default function AdminMembers() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedState, setSelectedState] = useState<string>("");
-  const [selectedFarmType, setSelectedFarmType] = useState<string>("");
+  const [selectedState, setSelectedState] = useState<string>("all");
+  const [selectedFarmType, setSelectedFarmType] = useState<string>("all");
 
   const { data: members, isLoading, error } = useQuery<MemberWithProfile[]>({
     queryKey: ["/api/admin/members", searchTerm, selectedState, selectedFarmType],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append("query", searchTerm);
-      if (selectedState) params.append("state", selectedState);
-      if (selectedFarmType) params.append("farmType", selectedFarmType);
+      if (selectedState && selectedState !== "all") params.append("state", selectedState);
+      if (selectedFarmType && selectedFarmType !== "all") params.append("farmType", selectedFarmType);
       
       const response = await fetch(`/api/admin/members?${params.toString()}`, {
         credentials: "include",
@@ -157,7 +157,7 @@ export default function AdminMembers() {
               <SelectValue placeholder="Filter by state" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All States</SelectItem>
+              <SelectItem value="all">All States</SelectItem>
               {allStates.map((state) => (
                 <SelectItem key={state} value={state}>
                   {state}
@@ -170,7 +170,7 @@ export default function AdminMembers() {
               <SelectValue placeholder="Filter by farm type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Farm Types</SelectItem>
+              <SelectItem value="all">All Farm Types</SelectItem>
               {allFarmTypes.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type}
@@ -188,7 +188,7 @@ export default function AdminMembers() {
           <CardContent>
             {!members || members.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                {searchTerm || selectedState || selectedFarmType 
+                {searchTerm || (selectedState && selectedState !== "all") || (selectedFarmType && selectedFarmType !== "all") 
                   ? "No members found matching your criteria." 
                   : "No members available."
                 }
@@ -212,24 +212,24 @@ export default function AdminMembers() {
                       <TableRow key={member.id}>
                         <TableCell className="font-medium">
                           <div>
-                            <div className="font-semibold">{member.profile.name}</div>
+                            <div className="font-semibold">{member.profile?.name || "No name provided"}</div>
                             <div className="text-sm text-gray-500">@{member.username}</div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="text-sm">
                             <div className="text-gray-900">{member.email}</div>
-                            <div className="text-gray-500">{member.profile.phone}</div>
+                            <div className="text-gray-500">{member.profile?.phone || "No phone"}</div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1 text-sm">
                             <MapPin className="h-3 w-3 text-gray-400" />
-                            {member.profile.state}
+                            {member.profile?.state || "Not specified"}
                           </div>
                         </TableCell>
                         <TableCell>
-                          {member.profile.farmType ? (
+                          {member.profile?.farmType ? (
                             <Badge variant="secondary">{member.profile.farmType}</Badge>
                           ) : (
                             <span className="text-gray-400 text-sm">Not specified</span>

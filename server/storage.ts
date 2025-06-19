@@ -29,7 +29,7 @@ import {
   Role
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, like, desc, gte, ilike, sql } from "drizzle-orm";
+import { eq, and, or, like, desc, gte, ilike, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
