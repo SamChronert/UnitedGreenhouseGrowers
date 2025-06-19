@@ -3,6 +3,7 @@ import { Users, Target, Award, User } from "lucide-react";
 import { Link } from "wouter";
 import melaniePhoto from "@assets/Melanie Linkedin_1750356920411.jpeg";
 import samPhoto from "@assets/Sam LinkedIn_1750357597629.jpg";
+import neilPhoto from "@assets/Neil Coppinger_1750357821872.jpeg";
 
 
 export default function About() {
@@ -154,6 +155,12 @@ export default function About() {
                         <img 
                           src={samPhoto} 
                           alt="Sam Chronert"
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                      ) : member.name === "Neil Coppinger" ? (
+                        <img 
+                          src={neilPhoto} 
+                          alt="Neil Coppinger"
                           className="w-16 h-16 rounded-full object-cover"
                         />
                       ) : (
