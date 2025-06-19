@@ -120,9 +120,7 @@ export default function About() {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
               We're Just Getting Started
             </h2>
-            <p className="text-lg text-gray-800 mb-4">
-              UGGA is a nonprofit in its pilot phase. We're actively inviting growers to join and help shape the tools and resources we build together.
-            </p>
+            <p className="text-lg text-gray-800 mb-4">UGGA is a nonprofit in its pilot phase. We're actively inviting growers, researchers, and industry professionals to join and help shape the tools and resources we build together.</p>
             <p className="text-gray-600">
               Your feedback will directly influence what gets prioritized and how we develop our member dashboard, resource library, and grower network.
             </p>
