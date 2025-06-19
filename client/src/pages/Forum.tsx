@@ -211,9 +211,8 @@ export default function Forum() {
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={post.user.profile?.profileImageUrl} />
                       <AvatarFallback>
-                        {post.user.profile?.firstName?.[0]}{post.user.profile?.lastName?.[0]}
+                        {post.user.profile?.name?.[0] || post.user.username?.[0] || "U"}
                       </AvatarFallback>
                     </Avatar>
                     
@@ -233,7 +232,7 @@ export default function Forum() {
                       </div>
                       
                       <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                        <span>{post.user.profile?.firstName} {post.user.profile?.lastName}</span>
+                        <span>{post.user.profile?.name || post.user.username}</span>
                         <span>•</span>
                         <Calendar className="h-3 w-3" />
                         <span>{format(new Date(post.createdAt), "MMM d, yyyy")}</span>
@@ -269,7 +268,7 @@ export default function Forum() {
                     <CardTitle className="text-xl">{selectedPost.title}</CardTitle>
                     <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
                       <User className="h-4 w-4" />
-                      <span>{selectedPost.user.profile?.firstName} {selectedPost.user.profile?.lastName}</span>
+                      <span>{selectedPost.user.profile?.name || selectedPost.user.username}</span>
                       <span>•</span>
                       <Calendar className="h-4 w-4" />
                       <span>{format(new Date(selectedPost.createdAt), "MMM d, yyyy 'at' h:mm a")}</span>
@@ -295,7 +294,7 @@ export default function Forum() {
                   <div className="flex gap-3 mb-6">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback>
-                        {user?.profile?.firstName?.[0]}{user?.profile?.lastName?.[0]}
+                        {user?.profile?.name?.[0] || user?.username?.[0] || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 flex gap-2">
@@ -320,15 +319,14 @@ export default function Forum() {
                     {selectedPost.comments?.map((comment) => (
                       <div key={comment.id} className="flex gap-3">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={comment.user.profile?.profileImageUrl} />
                           <AvatarFallback>
-                            {comment.user.profile?.firstName?.[0]}{comment.user.profile?.lastName?.[0]}
+                            {comment.user.profile?.name?.[0] || comment.user.username?.[0] || "U"}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-medium text-sm">
-                              {comment.user.profile?.firstName} {comment.user.profile?.lastName}
+                              {comment.user.profile?.name || comment.user.username}
                             </span>
                             <span className="text-xs text-gray-500">
                               {format(new Date(comment.createdAt), "MMM d, yyyy 'at' h:mm a")}
