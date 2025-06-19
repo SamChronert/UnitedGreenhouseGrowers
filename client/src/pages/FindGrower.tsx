@@ -115,7 +115,7 @@ export default function FindGrower() {
         {/* How It Works Section */}
         <div className="mt-8 bg-white rounded-xl shadow-sm border p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">How It Works</h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-12 h-12 bg-ugga-primary rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white font-bold">1</span>
@@ -134,6 +134,16 @@ export default function FindGrower() {
               <p className="text-gray-600 text-sm">
                 Our system searches through our member directory to find 
                 growers who match your specific criteria.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-ugga-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-ugga-primary font-bold">3</span>
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Connect & Collaborate</h3>
+              <p className="text-gray-600 text-sm">
+                Get personalized recommendations with contact information to start 
+                building valuable professional relationships.
               </p>
             </div>
           </div>
