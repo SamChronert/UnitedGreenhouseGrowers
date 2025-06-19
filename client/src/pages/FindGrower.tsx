@@ -108,37 +108,14 @@ export default function FindGrower() {
               </CardContent>
             </Card>
 
-            {/* Network Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Network Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-ugga-primary">5,000+</div>
-                    <div className="text-sm text-gray-600">Active Members</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div>
-                      <div className="text-lg font-semibold text-ugga-primary">50</div>
-                      <div className="text-xs text-gray-600">States</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-semibold text-ugga-primary">15+</div>
-                      <div className="text-xs text-gray-600">Farm Types</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            
           </div>
         </div>
 
         {/* How It Works Section */}
-        <div className="mt-12 bg-white rounded-xl shadow-sm border p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">How It Works</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+        <div className="mt-8 bg-white rounded-xl shadow-sm border p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">How It Works</h2>
+          <div className="grid md:grid-cols-2 gap-8">
             <div className="text-center">
               <div className="w-12 h-12 bg-ugga-primary rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white font-bold">1</span>
@@ -157,16 +134,6 @@ export default function FindGrower() {
               <p className="text-gray-600 text-sm">
                 Our system searches through our member directory to find 
                 growers who match your specific criteria.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-ugga-accent rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-ugga-primary font-bold">3</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Connect & Collaborate</h3>
-              <p className="text-gray-600 text-sm">
-                Get personalized recommendations with contact information to start 
-                building valuable professional relationships.
               </p>
             </div>
           </div>
