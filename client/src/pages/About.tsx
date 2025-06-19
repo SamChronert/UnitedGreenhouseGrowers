@@ -66,7 +66,7 @@ export default function About() {
 
       {/* Mission Section - Full Width Banner */}
       <div className="w-full text-white text-center" style={{backgroundColor: 'var(--color-sage)', padding: '2rem 1rem'}}>
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
           <p className="text-xl">
             We exist to help greenhouse growers connect, share knowledge, and have a stronger voice in research and innovation.
