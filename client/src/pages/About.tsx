@@ -82,8 +82,8 @@ export default function About() {
 
         {/* Problem Statement */}
         <div className="mb-16">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
               The Problem We're Solving
             </h2>
             <div className="bg-gray-50 rounded-lg p-8">
@@ -123,9 +123,9 @@ export default function About() {
 
         {/* Current Status */}
         <div className="mb-16">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto text-center">
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 We're Just Getting Started
               </h2>
               <p className="text-lg text-gray-800 mb-4">
@@ -167,32 +167,32 @@ export default function About() {
 
         {/* What We're Building */}
         <div className="mb-16">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
               What We're Building With You
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-white border rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3 text-left">Member Dashboard</h3>
-                <p className="text-gray-600 text-left">
+              <div className="bg-white border rounded-lg p-6 text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Member Dashboard</h3>
+                <p className="text-gray-600">
                   Co-designed tools for making decisions on greenhouse improvements, built based on real grower feedback and needs.
                 </p>
               </div>
-              <div className="bg-white border rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3 text-left">Curated Resource Library</h3>
-                <p className="text-gray-600 text-left">
+              <div className="bg-white border rounded-lg p-6 text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Curated Resource Library</h3>
+                <p className="text-gray-600">
                   Peer-reviewed guides, case studies, and extension bulletins that growers have actually tested and approved.
                 </p>
               </div>
-              <div className="bg-white border rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3 text-left">Grower Network</h3>
-                <p className="text-gray-600 text-left">
+              <div className="bg-white border rounded-lg p-6 text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Grower Network</h3>
+                <p className="text-gray-600">
                   A way to connect with fellow growers to share questions, answers, and real-world solutions to common challenges.
                 </p>
               </div>
-              <div className="bg-white border rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3 text-left">Stronger Voice</h3>
-                <p className="text-gray-600 text-left">
+              <div className="bg-white border rounded-lg p-6 text-center">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Stronger Voice</h3>
+                <p className="text-gray-600">
                   Amplify grower perspectives to researchers, universities, and lobbying groups who need to hear from you.
                 </p>
               </div>
