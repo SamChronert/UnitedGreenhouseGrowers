@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Target, Award, User } from "lucide-react";
 import { Link } from "wouter";
+import melaniePhoto from "@assets/Melanie Linkedin_1750356920411.jpeg";
 
 
 export default function About() {
@@ -26,17 +27,12 @@ export default function About() {
     {
       name: "Sam Chronert",
       role: "Grower",
-      description: "Sam has seen firsthand how helpful it is to connect with other growers facing the same challenges. Through years of running greenhouse operations, Sam understands the value of shared knowledge and peer support."
+      description: "Sam has been growing in greenhouses for over 15 years, focusing on sustainable production methods and innovative growing techniques. He co-founded UGGA to create a space where growers can share real-world solutions and learn from each other's experiences."
     },
     {
       name: "Dr. Melanie Yelton",
       role: "Industry Professional & Researcher",
-      description: "Dr. Yelton is a long-time industry professional and researcher who wants to help give growers a stronger voice in academic and innovation circles."
-    },
-    {
-      name: "Neil Coppinger",
-      role: "",
-      description: ""
+      description: "Melanie is a plant scientist and educator with over 25 years of experience advancing sustainable agriculture, plant research, and grower training. She's led plant science and R&D teams at organizations like Plenty and LumiGrow, and holds a Ph.D. in Plant Sciences from the University of California, Davis. Today, she runs Grow Big Consulting, where she helps Controlled Environment Agriculture (CEA) companies apply scientific insights to real-world production. Her motivation for co-founding the Greenhouse Growers Association is simple: empower growers with better access to plant science and industry knowledge. Melanie believes growers deserve a stronger voice in innovation, policy, and education — and she's committed to bridging that gap."
     }
   ];
 
