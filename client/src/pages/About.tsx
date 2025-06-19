@@ -218,9 +218,7 @@ export default function About() {
           <h2 className="text-2xl font-bold mb-4">
             Help Us Build Something Better
           </h2>
-          <p className="text-lg mb-6">
-            Join our pilot group and help shape a network that's truly built by growers, for growers.
-          </p>
+          <p className="text-lg mb-6">Join our pilot group and help shape a network that's truly built for growers. Whether you are a grower looking for support, a researcher looking for an easier way to communicate with growers, or an industry member looking to collaborate, we have a place for you.</p>
           <p className="opacity-90">
             Together, we can solve the fragmentation problem and give greenhouse growers the connected, supportive community they deserve.
           </p>
