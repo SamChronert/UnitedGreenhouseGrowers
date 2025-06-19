@@ -256,7 +256,7 @@ export class DatabaseStorage implements IStorage {
 
   // Member directory
   async searchMembers(query?: string, state?: string, farmType?: string): Promise<(User & { profile: Profile })[]> {
-    let conditions = [eq(users.role, Role.MEMBER)];
+    let conditions: any[] = [];
 
     if (state) {
       conditions.push(eq(profiles.state, state));
@@ -267,14 +267,21 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (query) {
-      conditions.push(like(profiles.name, `%${query}%`));
+      conditions.push(
+        or(
+          like(profiles.name, `%${query}%`),
+          like(users.email, `%${query}%`),
+          like(users.username, `%${query}%`)
+        )
+      );
     }
 
     const dbQuery = db
       .select()
       .from(users)
       .innerJoin(profiles, eq(users.id, profiles.userId))
-      .where(and(...conditions));
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(users.createdAt);
 
     const results = await dbQuery;
     return results.map((result: any) => ({
