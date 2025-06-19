@@ -111,6 +111,11 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 
 ## Changelog
 
+- June 19, 2025: Added password change functionality to user profile settings
+  - Created secure password change API endpoint with current password verification
+  - Added comprehensive frontend form with password visibility toggles
+  - Implemented proper validation (12 character minimum, confirmation matching)
+  - Enhanced profile settings page with dedicated password change section
 - June 16, 2025: Initial UGGA platform setup with authentication and database
 - June 16, 2025: Updated entire site messaging to reflect nonprofit, grower-first mission
   - Homepage redesigned with new tagline "Connecting growers, sharing knowledge, strengthening greenhouses"

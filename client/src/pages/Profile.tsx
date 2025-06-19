@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, User, Save } from "lucide-react";
-import { useEffect } from "react";
+import { Loader2, User, Save, Lock, Eye, EyeOff } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const profileSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -22,7 +23,17 @@ const profileSchema = z.object({
   farmType: z.string().optional(),
 });
 
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(12, "Password must be at least 12 characters long"),
+  confirmPassword: z.string().min(1, "Please confirm your new password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 type ProfileForm = z.infer<typeof profileSchema>;
+type PasswordForm = z.infer<typeof passwordSchema>;
 
 const US_STATES = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", 
@@ -43,6 +54,9 @@ export default function Profile() {
   const { user, refetch } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -53,6 +67,15 @@ export default function Profile() {
       employer: "",
       jobTitle: "",
       farmType: "",
+    },
+  });
+
+  const passwordForm = useForm<PasswordForm>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     },
   });
 
@@ -89,8 +112,33 @@ export default function Profile() {
     },
   });
 
+  const changePasswordMutation = useMutation({
+    mutationFn: (data: PasswordForm) => apiRequest("PUT", "/api/auth/change-password", {
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword,
+    }),
+    onSuccess: () => {
+      passwordForm.reset();
+      toast({
+        title: "Password changed!",
+        description: "Your password has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Password change failed",
+        description: error.message || "Failed to change password. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: ProfileForm) => {
     updateProfileMutation.mutate(data);
+  };
+
+  const onPasswordSubmit = (data: PasswordForm) => {
+    changePasswordMutation.mutate(data);
   };
 
   if (!user) {
@@ -256,6 +304,126 @@ export default function Profile() {
                     <>
                       <Save className="h-4 w-4 mr-2" />
                       Save Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Password Change Section */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5" />
+              Change Password
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="currentPassword">Current Password *</Label>
+                <div className="relative">
+                  <Input
+                    id="currentPassword"
+                    type={showCurrentPassword ? "text" : "password"}
+                    {...passwordForm.register("currentPassword")}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  >
+                    {showCurrentPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                {passwordForm.formState.errors.currentPassword && (
+                  <p className="text-sm text-red-600">{passwordForm.formState.errors.currentPassword.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New Password *</Label>
+                <div className="relative">
+                  <Input
+                    id="newPassword"
+                    type={showNewPassword ? "text" : "password"}
+                    {...passwordForm.register("newPassword")}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  >
+                    {showNewPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                {passwordForm.formState.errors.newPassword && (
+                  <p className="text-sm text-red-600">{passwordForm.formState.errors.newPassword.message}</p>
+                )}
+                <p className="text-sm text-gray-600">Password must be at least 12 characters long</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm New Password *</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    {...passwordForm.register("confirmPassword")}
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                {passwordForm.formState.errors.confirmPassword && (
+                  <p className="text-sm text-red-600">{passwordForm.formState.errors.confirmPassword.message}</p>
+                )}
+              </div>
+
+              <Separator />
+
+              <div className="flex justify-end">
+                <Button 
+                  type="submit" 
+                  disabled={changePasswordMutation.isPending}
+                  className="min-w-32"
+                >
+                  {changePasswordMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Changing...
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="h-4 w-4 mr-2" />
+                      Change Password
                     </>
                   )}
                 </Button>
