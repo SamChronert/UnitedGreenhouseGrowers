@@ -166,13 +166,17 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="py-16 bg-primary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto">
-            <img src={uggaLogo} alt="UGGA Logo" className="h-16 w-16 mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Help Shape a Network Built for Growers
-            </h2>
-            <p className="text-lg text-gray-100 mb-8">
+            <div className="flex items-center justify-center gap-6 mb-4">
+              <div className="flex-shrink-0 bg-white bg-opacity-20 rounded-lg p-3">
+                <img src={uggaLogo} alt="UGGA Logo" className="h-16 w-16" />
+              </div>
+              <h2 className="text-3xl font-bold text-white text-left">
+                Help Shape a Network Built for Growers
+              </h2>
+            </div>
+            <p className="text-lg text-gray-100 mb-8 text-center">
               Join our pilot group and help us build the tools and resources that will actually make a difference in your operation. Your input will directly shape what gets built first.
             </p>
             {!isAuthenticated && (
