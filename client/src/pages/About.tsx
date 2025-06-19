@@ -25,7 +25,7 @@ export default function About() {
   const foundingMembers = [
     {
       name: "Sam Chronert",
-      role: "Commercial Greenhouse Grower",
+      role: "Grower",
       description: "Sam has seen firsthand how helpful it is to connect with other growers facing the same challenges. Through years of running greenhouse operations, Sam understands the value of shared knowledge and peer support."
     },
     {
@@ -142,9 +142,17 @@ export default function About() {
                 <div key={index} className="bg-white border rounded-lg p-6">
                   <div className="flex items-start space-x-4">
                     <div className="flex-shrink-0">
-                      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                        <User className="h-8 w-8 text-gray-400" />
-                      </div>
+                      {member.name === "Dr. Melanie Yelton" ? (
+                        <img 
+                          src={melaniePhoto} 
+                          alt="Dr. Melanie Yelton"
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                          <User className="h-8 w-8 text-gray-400" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-semibold text-gray-900 mb-1">{member.name}</h3>
