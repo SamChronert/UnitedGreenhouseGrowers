@@ -489,6 +489,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
   app.get("/api/admin/challenges", authenticate, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const challenges = await storage.getAllGrowerChallenges();
+      console.log("Fetched challenges:", challenges.length);
       res.json(challenges);
     } catch (error) {
       console.error("Get challenges error:", error);
@@ -510,6 +511,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
   app.get("/api/admin/challenges/stats", authenticate, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const stats = await storage.getGrowerChallengeStats();
+      console.log("Fetched stats:", stats);
       res.json(stats);
     } catch (error) {
       console.error("Get challenge stats error:", error);

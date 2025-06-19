@@ -303,6 +303,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllGrowerChallenges(): Promise<(GrowerChallenge & { user: User & { profile: Profile } })[]> {
+    console.log("Fetching grower challenges from database...");
     const results = await db
       .select()
       .from(growerChallenges)
@@ -310,11 +311,13 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(profiles, eq(users.id, profiles.userId))
       .orderBy(desc(growerChallenges.createdAt));
 
+    console.log("Raw DB results:", results.length);
+    
     return results.map((result: any) => ({
       ...result.grower_challenges,
       user: {
         ...result.users,
-        profile: result.profiles
+        profile: result.profiles || null
       }
     }));
   }
@@ -329,9 +332,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getGrowerChallengeStats(): Promise<{ totalCount: number; categoryCounts: Record<string, number>; recentCount: number }> {
+    console.log("Fetching grower challenge stats...");
+    
     // Get total count
     const totalResults = await db.select().from(growerChallenges);
     const totalCount = totalResults.length;
+    console.log("Total challenges found:", totalCount);
 
     // Get category counts
     const categoryCounts: Record<string, number> = {};
@@ -340,6 +346,7 @@ export class DatabaseStorage implements IStorage {
         categoryCounts[challenge.category] = (categoryCounts[challenge.category] || 0) + 1;
       }
     });
+    console.log("Category counts:", categoryCounts);
 
     // Get recent count (last 30 days)
     const thirtyDaysAgo = new Date();
@@ -351,12 +358,16 @@ export class DatabaseStorage implements IStorage {
       .where(gte(growerChallenges.createdAt, thirtyDaysAgo));
     
     const recentCount = recentResults.length;
+    console.log("Recent challenges count:", recentCount);
 
-    return {
+    const stats = {
       totalCount,
       categoryCounts,
       recentCount
     };
+    
+    console.log("Final stats:", stats);
+    return stats;
   }
 
   // Forum operations
