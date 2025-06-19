@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Target, Award, User } from "lucide-react";
+import { Link } from "wouter";
 import uggaLogo from "@assets/2_1750100657577.png";
 
 export default function About() {
@@ -41,6 +42,11 @@ export default function About() {
 
   return (
     <div className="min-h-screen">
+      {/* Development Banner */}
+      <div style={{backgroundColor: '#e6f2e6'}} className="text-gray-800 py-2 text-center text-sm">
+        🚧 UGGA is a nonprofit in its early stages. <Link href="/register" className="underline hover:no-underline font-medium">Join the pilot group</Link> and help shape the tools you need.
+      </div>
+      
       {/* Header Section */}
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
