@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /blog
+Allow: /resources
+Allow: /register
+Allow: /login
+
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /api
+Disallow: /.env
+Disallow: /server
+
+Sitemap: https://ugga-platform.replit.app/sitemap.xml

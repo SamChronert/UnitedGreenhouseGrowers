@@ -76,7 +76,12 @@ export default function Home() {
                 </Link>
               ) : (
                 <Link href="/register">
-                  <Button size="lg" className="text-white hover:opacity-90 px-6 py-3 text-lg font-medium shadow-lg transition-all duration-300" style={{backgroundColor: 'var(--color-sage)'}}>
+                  <Button 
+                    size="lg" 
+                    className="text-white hover:opacity-90 px-6 py-3 text-lg font-medium shadow-lg transition-all duration-300" 
+                    style={{backgroundColor: 'var(--color-sage)'}}
+                    aria-label="Become a founding member of UGGA - Register for membership"
+                  >
                     Become a Founding Member
                   </Button>
                 </Link>
