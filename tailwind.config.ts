@@ -61,6 +61,10 @@ export default {
           border: "var(--sidebar-border)",
           ring: "var(--sidebar-ring)",
         },
+        // UGGA Brand Colors
+        sage: "var(--color-sage)",
+        clay: "var(--color-clay)",
+        parchment: "var(--color-parchment)",
       },
       keyframes: {
         "accordion-down": {

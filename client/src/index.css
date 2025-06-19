@@ -31,6 +31,47 @@
   --ugga-success: hsl(120, 65%, 30%);
   --ugga-warning: hsl(43, 100%, 45%);
   --ugga-error: hsl(0, 75%, 50%);
+  
+  /* New UGGA Brand Colors */
+  --color-sage: #5C8A3C;
+  --color-clay: #D8B08C;
+  --color-parchment: #F4F1E8;
+}
+
+/* Base Typography Styles */
+@layer base {
+  p {
+    font-size: 16px;
+    max-width: 65ch;
+    line-height: 1.6;
+  }
+}
+
+/* Focus Styles for Interactive Elements */
+@layer base {
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  a:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--color-sage);
+    outline-offset: 2px;
+  }
+}
+
+/* Reusable Card Component */
+@layer components {
+  .card {
+    border: 1px solid #CDD2D4;
+    border-radius: 6px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+  
+  .card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .dark {
