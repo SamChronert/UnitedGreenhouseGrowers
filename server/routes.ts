@@ -257,6 +257,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Change password route
+  app.put("/api/auth/change-password", authenticate, async (req: AuthRequest, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      // Validate input
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+      
+      // Validate new password strength
+      if (newPassword.length < 12) {
+        return res.status(400).json({ message: "New password must be at least 12 characters long" });
+      }
+      
+      // Get current user
+      const user = await storage.getUser(req.user!.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Verify current password
+      const isCurrentPasswordValid = await verifyPassword(currentPassword, user.passwordHash);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+      
+      // Hash new password
+      const newPasswordHash = await hashPassword(newPassword);
+      
+      // Update password
+      await storage.updateUser(req.user!.id, { passwordHash: newPasswordHash });
+      
+      res.json({ message: "Password changed successfully" });
+    } catch (error) {
+      console.error("Change password error:", error);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
   // AI routes with rate limiting
   app.post("/api/ai/find-grower", aiRateLimit, authenticate, requireMember, async (req: AuthRequest, res) => {
     try {
