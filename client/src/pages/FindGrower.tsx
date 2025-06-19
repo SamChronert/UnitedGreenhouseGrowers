@@ -19,11 +19,6 @@ export default function FindGrower() {
       icon: <Briefcase className="h-5 w-5" />,
       title: "Experience Level",
       description: "Find growers with specific experience levels or professional backgrounds"
-    },
-    {
-      icon: <Users className="h-5 w-5" />,
-      title: "Network Connections",
-      description: "Connect with growers who share similar challenges or interests"
     }
   ];
 
@@ -44,11 +39,11 @@ export default function FindGrower() {
             <div className="w-12 h-12 bg-ugga-primary rounded-full flex items-center justify-center">
               <Users className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Find-a-Grower AI</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Find a Grower</h1>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Use our AI-powered matching system to connect with experienced growers 
-            in your region and specialty area.
+            Connect with experienced growers in your region and specialty area 
+            through our member matching system.
           </p>
         </div>
 
@@ -57,7 +52,7 @@ export default function FindGrower() {
           <div className="lg:col-span-2">
             <div className="h-96 lg:h-[600px]">
               <ChatWidget
-                title="AI Grower Finder"
+                title="Grower Finder"
                 placeholder="e.g., Find tomato growers in Florida with hydroponic experience"
                 endpoint="/api/ai/find-grower"
                 icon={<Users className="h-5 w-5" />}
@@ -150,7 +145,7 @@ export default function FindGrower() {
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Describe Your Needs</h3>
               <p className="text-gray-600 text-sm">
-                Tell our AI what type of grower you're looking for, including location, 
+                Tell us what type of grower you're looking for, including location, 
                 expertise, or specific challenges you're facing.
               </p>
             </div>
@@ -158,9 +153,9 @@ export default function FindGrower() {
               <div className="w-12 h-12 bg-ugga-secondary rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white font-bold">2</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">AI Finds Matches</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Find Matches</h3>
               <p className="text-gray-600 text-sm">
-                Our intelligent system searches through our member directory to find 
+                Our system searches through our member directory to find 
                 growers who match your specific criteria.
               </p>
             </div>
