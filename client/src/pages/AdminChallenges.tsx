@@ -34,7 +34,7 @@ import type { GrowerChallenge, User, Profile } from "@shared/schema";
 type ChallengeWithUser = GrowerChallenge & { user: User & { profile: Profile } };
 
 const flagOptions = [
-  { value: "", label: "No flag", color: "bg-gray-100 text-gray-600" },
+  { value: "none", label: "No flag", color: "bg-gray-100 text-gray-600" },
   { value: "reviewed", label: "Reviewed", color: "bg-blue-100 text-blue-700" },
   { value: "important", label: "Important", color: "bg-red-100 text-red-700" },
   { value: "needs_follow_up", label: "Needs Follow-Up", color: "bg-yellow-100 text-yellow-700" }
@@ -129,7 +129,8 @@ export default function AdminChallenges() {
   };
 
   const getFlagDisplay = (flag: string | null) => {
-    const option = flagOptions.find(opt => opt.value === (flag || ""));
+    if (!flag) return flagOptions[0]; // Return "No flag" option
+    const option = flagOptions.find(opt => opt.value === flag);
     return option || flagOptions[0];
   };
 
@@ -354,11 +355,14 @@ export default function AdminChallenges() {
                           </Badge>
                           
                           <Select
-                            value={challenge.adminFlag || ""}
-                            onValueChange={(value) => updateFlag.mutate({ 
-                              id: challenge.id, 
-                              adminFlag: value 
-                            })}
+                            value={challenge.adminFlag || "none"}
+                            onValueChange={(value) => {
+                              const newFlag = value === "none" ? null : value;
+                              updateFlag.mutate({ 
+                                id: challenge.id, 
+                                adminFlag: newFlag || "" 
+                              });
+                            }}
                           >
                             <SelectTrigger className="w-32">
                               <SelectValue placeholder="Set flag" />
