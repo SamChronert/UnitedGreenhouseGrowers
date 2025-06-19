@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Users, Target, Award, User } from "lucide-react";
 import { Link } from "wouter";
 import melaniePhoto from "@assets/Melanie Linkedin_1750356920411.jpeg";
+import samPhoto from "@assets/Sam LinkedIn_1750357597629.jpg";
 
 
 export default function About() {
@@ -142,6 +143,12 @@ export default function About() {
                         <img 
                           src={melaniePhoto} 
                           alt="Dr. Melanie Yelton"
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                      ) : member.name === "Sam Chronert" ? (
+                        <img 
+                          src={samPhoto} 
+                          alt="Sam Chronert"
                           className="w-16 h-16 rounded-full object-cover"
                         />
                       ) : (
