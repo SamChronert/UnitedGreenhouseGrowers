@@ -172,7 +172,7 @@ export default function AdminMembers() {
             <SelectContent>
               <SelectItem value="all">All Farm Types</SelectItem>
               {allFarmTypes.map((type) => (
-                <SelectItem key={type} value={type}>
+                <SelectItem key={type} value={type || ""}>
                   {type}
                 </SelectItem>
               ))}
