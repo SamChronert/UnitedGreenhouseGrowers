@@ -130,7 +130,8 @@ export default function ChallengeSubmissionForm() {
           <Button 
             type="submit" 
             disabled={!description.trim() || submitChallenge.isPending}
-            className="w-full bg-ugga-secondary hover:bg-ugga-secondary/90 mt-4"
+            className="w-full text-white rounded-lg font-medium shadow-lg hover:opacity-90 transition-all duration-300 mt-4"
+            style={{backgroundColor: 'var(--color-clay)'}}
           >
             {submitChallenge.isPending ? "Submitting..." : "Share Challenge"}
           </Button>

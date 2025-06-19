@@ -367,7 +367,8 @@ export default function Dashboard() {
             <Button 
               onClick={handleFeedbackSubmit}
               disabled={submitFeedbackMutation.isPending}
-              className="bg-ugga-secondary hover:bg-ugga-secondary/90"
+              className="text-white rounded-lg font-medium shadow-lg hover:opacity-90 transition-all duration-300"
+              style={{backgroundColor: 'var(--color-clay)'}}
               aria-label="Submit feedback to UGGA development team"
             >
               {submitFeedbackMutation.isPending ? (
