@@ -41,6 +41,14 @@ export default function Dashboard() {
     message: "",
     type: "feedback"
   });
+  
+  // Track user-controlled onboarding steps
+  const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({
+    profile: false,
+    explore: false,
+    challenge: false,
+    resources: false
+  });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -81,27 +89,35 @@ export default function Dashboard() {
     submitFeedbackMutation.mutate(feedback);
   };
 
+  // Toggle step completion
+  const toggleStepCompletion = (stepId: string) => {
+    setCompletedSteps(prev => ({
+      ...prev,
+      [stepId]: !prev[stepId]
+    }));
+  };
+
   // Onboarding steps tracking
   const onboardingSteps = [
     {
       id: "profile",
       title: "Complete Profile",
-      completed: !!(user?.profile?.name && user?.profile?.state && user?.profile?.farmType)
+      completed: completedSteps.profile
     },
     {
       id: "explore",
       title: "Explore Dashboard",
-      completed: true // Auto-complete when they visit dashboard
+      completed: completedSteps.explore
     },
     {
       id: "challenge",
       title: "Share Challenge",
-      completed: false // This would be tracked via backend in real implementation
+      completed: completedSteps.challenge
     },
     {
       id: "resources",
       title: "Read Resources",
-      completed: false // This would be tracked via backend in real implementation
+      completed: completedSteps.resources
     }
   ];
 
@@ -171,23 +187,30 @@ export default function Dashboard() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               {onboardingSteps.map((step, index) => (
                 <div key={step.id} className="flex items-center gap-3 flex-1">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all ${
-                    step.completed 
-                      ? 'bg-green-500 border-green-500 text-white' 
-                      : 'border-gray-300 text-gray-400'
-                  }`}>
+                  <button
+                    onClick={() => toggleStepCompletion(step.id)}
+                    className={`flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${
+                      step.completed 
+                        ? 'bg-green-500 border-green-500 text-white hover:bg-green-600' 
+                        : 'border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-500'
+                    }`}
+                    aria-label={step.completed ? `Mark "${step.title}" as incomplete` : `Mark "${step.title}" as complete`}
+                  >
                     {step.completed ? (
                       <Check className="h-4 w-4" />
                     ) : (
                       <span className="text-sm font-medium">{index + 1}</span>
                     )}
-                  </div>
+                  </button>
                   <div className="flex-1">
-                    <p className={`text-sm font-medium ${
-                      step.completed ? 'text-green-700' : 'text-gray-700'
-                    }`}>
+                    <button
+                      onClick={() => toggleStepCompletion(step.id)}
+                      className={`text-sm font-medium text-left hover:underline focus:outline-none focus:underline ${
+                        step.completed ? 'text-green-700' : 'text-gray-700'
+                      }`}
+                    >
                       {step.title}
-                    </p>
+                    </button>
                   </div>
                   {index < onboardingSteps.length - 1 && (
                     <div className={`hidden sm:block w-8 h-0.5 ${
