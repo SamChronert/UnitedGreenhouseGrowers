@@ -137,21 +137,25 @@ export default function About() {
             <div className="mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Founding Members</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 max-w-5xl mx-auto">
+            <div className="space-y-6">
               {foundingMembers.map((member, index) => (
                 <div key={index} className="bg-white border rounded-lg p-6">
-                  <div className="mb-4">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                      <User className="h-8 w-8 text-gray-400" />
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                        <User className="h-8 w-8 text-gray-400" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">{member.name}</h3>
+                      {member.role && (
+                        <p className="text-sm font-medium text-gray-600 mb-2">{member.role}</p>
+                      )}
+                      {member.description && (
+                        <p className="text-sm text-gray-600 leading-relaxed">{member.description}</p>
+                      )}
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1 text-left">{member.name}</h3>
-                  {member.role && (
-                    <p className="text-sm font-medium text-gray-600 mb-2 text-left">{member.role}</p>
-                  )}
-                  {member.description && (
-                    <p className="text-sm text-gray-600 leading-relaxed text-left">{member.description}</p>
-                  )}
                 </div>
               ))}
             </div>

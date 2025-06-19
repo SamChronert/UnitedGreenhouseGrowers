@@ -132,10 +132,11 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
   - Removed statistics cards from dashboard to align with pilot program status
   - Simplified contact page to single horizontal layout with email and phone only
   - Removed AI references from dashboard in favor of "member tools" language
-- June 19, 2025: Fixed About page text alignment for consistent center alignment
-  - Applied consistent center alignment to both headers and paragraphs within sections
-  - Updated problem statement, current status, and building sections for uniform presentation
-  - Ensured consistent margins and alignment throughout the page
+- June 19, 2025: Fixed About page layout alignment and founding members display
+  - Applied consistent center alignment with max-w-3xl (48rem) container across all sections
+  - Converted founding members from card grid to horizontal list format for better responsive behavior
+  - Removed logo image and improved paragraph centering throughout page
+  - Fixed mission section alignment to match other sections
 - June 19, 2025: Complete accessibility and performance enhancement pass
   - Achieved WCAG 2.1 AA compliance with proper contrast ratios, ARIA labels, focus states, and keyboard navigation
   - Fixed all missing buttons, broken routes, and blank admin pages across Member and Admin Dashboards
