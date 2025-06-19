@@ -18,11 +18,10 @@ interface EmailParams {
 }
 
 export async function sendEmail(
-  apiKey: string,
   params: EmailParams
 ): Promise<boolean> {
   try {
-    if (!apiKey) {
+    if (!process.env.SENDGRID_API_KEY) {
       console.error("SendGrid API key not provided");
       return false;
     }

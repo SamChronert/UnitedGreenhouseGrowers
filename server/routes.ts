@@ -153,12 +153,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { name, email, subject, message } = req.body;
       
-      const fromEmail = process.env.FROM_EMAIL || "info@greenhousegrowers.org";
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      const fromEmail = process.env.FROM_EMAIL || "sam@growbig.ag";
+      const toEmail = "sam@growbig.ag";
       
-      await sendEmail(process.env.SENDGRID_API_KEY!, {
-        to: fromEmail,
+      const emailSent = await sendEmail({
+        to: toEmail,
         from: fromEmail,
-        subject: `Contact Form: ${subject}`,
+        subject: `UGGA Contact Form: ${subject}`,
         html: `
           <h2>New Contact Form Submission</h2>
           <p><strong>Name:</strong> ${name}</p>
@@ -166,8 +171,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           <p><strong>Subject:</strong> ${subject}</p>
           <p><strong>Message:</strong></p>
           <p>${message.replace(/\n/g, '<br>')}</p>
+          <hr>
+          <p><em>This message was sent through the UGGA contact form. Reply directly to respond to the sender.</em></p>
         `,
+        text: `
+New Contact Form Submission
+
+Name: ${name}
+Email: ${email}
+Subject: ${subject}
+
+Message:
+${message}
+
+This message was sent through the UGGA contact form. Reply directly to respond to the sender.
+        `
       });
+
+      if (!emailSent) {
+        return res.status(500).json({ message: "Failed to send email" });
+      }
 
       res.json({ message: "Message sent successfully" });
     } catch (error) {
@@ -185,7 +208,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const fromEmail = process.env.FROM_EMAIL || "info@greenhousegrowers.org";
       
-      await sendEmail(process.env.SENDGRID_API_KEY!, {
+      await sendEmail({
         to: "sam@growbig.ag",
         from: fromEmail,
         subject: `[UGGA ${type.toUpperCase()}] ${subject}`,
