@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Target, Award, User } from "lucide-react";
 import { Link } from "wouter";
-import uggaLogo from "@assets/2_1750100657577.png";
+
 
 export default function About() {
   const values = [
@@ -51,11 +51,10 @@ export default function About() {
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <img src={uggaLogo} alt="United Greenhouse Growers Association Logo" className="h-24 w-24 mx-auto mb-8" loading="lazy" />
             <h1 className="text-4xl font-bold text-gray-900 mb-6">
               About United Greenhouse Growers Association
             </h1>
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto text-center">
               <p className="text-xl text-gray-600 mb-6">
                 United Greenhouse Growers Association is a nonprofit forming to connect greenhouse growers across the U.S., share vetted knowledge, and give growers a stronger voice in research and policy.
               </p>
@@ -86,7 +85,7 @@ export default function About() {
             <h2 className="text-3xl font-bold text-gray-900 mb-6">
               The Problem We're Solving
             </h2>
-            <div className="bg-gray-50 rounded-lg p-8">
+            <div className="bg-gray-50 rounded-lg p-8 text-center">
               <p className="text-lg text-gray-800 mb-4">
                 Greenhouse growers are solving the same problems alone.
                 Research doesn't always reach the farm. Technology is advancing, but support is often missing. And too often, growers are left without a place to turn.
@@ -124,7 +123,7 @@ export default function About() {
         {/* Current Status */}
         <div className="mb-16">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 We're Just Getting Started
               </h2>
@@ -202,7 +201,7 @@ export default function About() {
 
         {/* Call to Action */}
         <div className="text-center">
-          <div className="max-w-4xl mx-auto rounded-lg p-8 text-white" style={{backgroundColor: 'var(--color-sage)'}}>
+          <div className="max-w-4xl mx-auto rounded-lg p-8 text-white text-center" style={{backgroundColor: 'var(--color-sage)'}}>
             <h2 className="text-2xl font-bold mb-4">
               Help Us Build Something Better
             </h2>
