@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { Users, Handshake, BookOpen, Wrench, Lightbulb, ClipboardCheck, Archive, Megaphone } from "lucide-react";
+import { Users, Handshake, BookOpen, Wrench, ClipboardCheck, Archive, Megaphone } from "lucide-react";
 import uggaLogo from "@assets/2_1750100657577.png";
 
 export default function Home() {
@@ -20,7 +20,7 @@ export default function Home() {
       description: "Help create decision-making tools designed by growers, for growers."
     },
     {
-      icon: <Lightbulb className="h-12 w-12" />,
+      icon: <BookOpen className="h-12 w-12" />,
       title: "Share Knowledge",
       description: "Access peer-reviewed resources tested and approved by your fellow growers."
     }
