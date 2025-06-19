@@ -203,18 +203,24 @@ This message was sent through the UGGA contact form. Reply directly to respond t
   app.post("/api/feedback", authenticate, requireMember, async (req: AuthRequest, res) => {
     try {
       const { subject, message, type } = req.body;
+      
+      if (!subject || !message || !type) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
       const user = await storage.getUser(req.user!.id);
       const profile = await storage.getProfile(req.user!.id);
       
-      const fromEmail = process.env.FROM_EMAIL || "info@greenhousegrowers.org";
+      const fromEmail = process.env.FROM_EMAIL || "sam@growbig.ag";
+      const toEmail = "sam@growbig.ag";
       
-      await sendEmail({
-        to: "sam@growbig.ag",
+      const emailSent = await sendEmail({
+        to: toEmail,
         from: fromEmail,
         subject: `[UGGA ${type.toUpperCase()}] ${subject}`,
         html: `
           <h2>New ${type} from UGGA Member</h2>
-          <p><strong>From:</strong> ${profile?.name} (${user?.email})</p>
+          <p><strong>From:</strong> ${profile?.name || user?.username} (${user?.email})</p>
           <p><strong>Member Since:</strong> ${user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}</p>
           <p><strong>Organization:</strong> ${profile?.employer || 'Not specified'}</p>
           <p><strong>State:</strong> ${profile?.state || 'Not specified'}</p>
@@ -225,7 +231,26 @@ This message was sent through the UGGA contact form. Reply directly to respond t
           <hr>
           <p><em>This message was sent through the UGGA member dashboard. Reply directly to respond to the member.</em></p>
         `,
+        text: `
+New ${type} from UGGA Member
+
+From: ${profile?.name || user?.username} (${user?.email})
+Member Since: ${user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
+Organization: ${profile?.employer || 'Not specified'}
+State: ${profile?.state || 'Not specified'}
+Type: ${type}
+Subject: ${subject}
+
+Message:
+${message}
+
+This message was sent through the UGGA member dashboard. Reply directly to respond to the member.
+        `
       });
+
+      if (!emailSent) {
+        return res.status(500).json({ message: "Failed to send email" });
+      }
 
       res.json({ message: "Feedback sent successfully" });
     } catch (error) {
