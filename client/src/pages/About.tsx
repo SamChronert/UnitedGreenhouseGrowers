@@ -82,16 +82,16 @@ export default function About() {
 
         {/* Problem Statement */}
         <div className="mb-16">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-left">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
               The Problem We're Solving
             </h2>
             <div className="bg-gray-50 rounded-lg p-8">
-              <p className="text-lg text-gray-800 mb-4 text-left">
+              <p className="text-lg text-gray-800 mb-4">
                 Greenhouse growers are solving the same problems alone.
                 Research doesn't always reach the farm. Technology is advancing, but support is often missing. And too often, growers are left without a place to turn.
               </p>
-              <p className="text-lg text-ugga-primary font-semibold text-left">
+              <p className="text-lg text-ugga-primary font-semibold">
                 UGGA exists to change that — by bringing us together.
               </p>
             </div>
@@ -100,9 +100,9 @@ export default function About() {
 
         {/* Values Section */}
         <div className="mb-16">
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 text-left">Our Values</h2>
-            <p className="text-lg text-gray-600 text-left">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Values</h2>
+            <p className="text-lg text-gray-600">
               Everything we do is guided by these core principles
             </p>
           </div>
@@ -123,24 +123,26 @@ export default function About() {
 
         {/* Current Status */}
         <div className="mb-16">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-left">
-              We're Just Getting Started
-            </h2>
-            <p className="text-lg text-gray-800 mb-4 text-left">
-              UGGA is a nonprofit in its pilot phase. We're actively inviting growers to join and help shape the tools and resources we build together.
-            </p>
-            <p className="text-gray-600 text-left">
-              Your feedback will directly influence what gets prioritized and how we develop our member dashboard, resource library, and grower network.
-            </p>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                We're Just Getting Started
+              </h2>
+              <p className="text-lg text-gray-800 mb-4">
+                UGGA is a nonprofit in its pilot phase. We're actively inviting growers to join and help shape the tools and resources we build together.
+              </p>
+              <p className="text-gray-600">
+                Your feedback will directly influence what gets prioritized and how we develop our member dashboard, resource library, and grower network.
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Founding Members */}
         <div className="mb-16">
           <div className="border-t border-gray-200 pt-16">
-            <div className="mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4 text-left">Founding Members</h2>
+            <div className="mb-12 text-center">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Founding Members</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {foundingMembers.map((member, index) => (
@@ -165,8 +167,8 @@ export default function About() {
 
         {/* What We're Building */}
         <div className="mb-16">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-left">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">
               What We're Building With You
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
@@ -200,14 +202,14 @@ export default function About() {
 
         {/* Call to Action */}
         <div className="text-center">
-          <div className="rounded-lg p-8 text-white" style={{backgroundColor: 'var(--color-sage)'}}>
-            <h2 className="text-2xl font-bold mb-4 text-white">
+          <div className="max-w-4xl mx-auto rounded-lg p-8 text-white" style={{backgroundColor: 'var(--color-sage)'}}>
+            <h2 className="text-2xl font-bold mb-4">
               Help Us Build Something Better
             </h2>
-            <p className="text-lg mb-6 text-white">
+            <p className="text-lg mb-6">
               Join our pilot group and help shape a network that's truly built by growers, for growers.
             </p>
-            <p className="text-white opacity-90">
+            <p className="opacity-90">
               Together, we can solve the fragmentation problem and give greenhouse growers the connected, supportive community they deserve.
             </p>
           </div>
