@@ -214,10 +214,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 ) : (
                   <>
                     <Link href="/login">
-                      <Button variant="ghost">Login</Button>
+                      <Button variant="ghost" aria-label="Login to your UGGA account">Login</Button>
                     </Link>
                     <Link href="/register">
-                      <Button className="text-white hover:opacity-90 px-4 py-2 text-sm font-medium shadow-sm transition-all duration-300" style={{backgroundColor: 'var(--color-sage)'}}>
+                      <Button 
+                        className="text-white hover:opacity-90 px-4 py-2 text-sm font-medium shadow-sm transition-all duration-300" 
+                        style={{backgroundColor: 'var(--color-sage)'}}
+                        aria-label="Join UGGA membership - Register for United Greenhouse Growers Association"
+                      >
                         Join UGGA
                       </Button>
                     </Link>

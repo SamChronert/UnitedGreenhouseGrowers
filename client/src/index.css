@@ -24,13 +24,13 @@
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
   
-  /* UGGA Custom Colors - Enhanced for better contrast */
-  --ugga-primary: hsl(142, 35%, 20%);
-  --ugga-secondary: hsl(67, 60%, 30%);
-  --ugga-accent: hsl(142, 35%, 45%);
-  --ugga-success: hsl(120, 65%, 30%);
-  --ugga-warning: hsl(43, 100%, 45%);
-  --ugga-error: hsl(0, 75%, 50%);
+  /* UGGA Custom Colors - Enhanced for WCAG AA contrast compliance */
+  --ugga-primary: hsl(142, 40%, 18%);
+  --ugga-secondary: hsl(67, 65%, 28%);
+  --ugga-accent: hsl(142, 40%, 40%);
+  --ugga-success: hsl(120, 70%, 25%);
+  --ugga-warning: hsl(43, 100%, 35%);
+  --ugga-error: hsl(0, 80%, 45%);
   
   /* New UGGA Brand Colors */
   --color-sage: #5C8A3C;
@@ -47,15 +47,26 @@
   }
 }
 
-/* Focus Styles for Interactive Elements */
+/* Enhanced Focus Styles for WCAG AA Compliance */
 @layer base {
   button:focus-visible,
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible,
   a:focus-visible,
-  [tabindex]:focus-visible {
-    outline: 2px solid var(--color-sage);
+  [tabindex]:focus-visible,
+  [role="button"]:focus-visible,
+  [role="link"]:focus-visible {
+    outline: 3px solid var(--color-sage);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Ensure high contrast focus for interactive elements */
+  .btn-primary:focus-visible,
+  .bg-ugga-primary:focus-visible,
+  .bg-ugga-secondary:focus-visible {
+    outline: 3px solid #FFD700;
     outline-offset: 2px;
   }
 }
@@ -113,7 +124,17 @@
   }
   
   .ugga-hero-bg {
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
-                url('https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080') center/cover;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                url('https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&h=1080&fm=webp&q=80') center/cover;
+  }
+  
+  /* Lazy loading image styles */
+  img[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  img[loading="lazy"].loaded {
+    opacity: 1;
   }
 }

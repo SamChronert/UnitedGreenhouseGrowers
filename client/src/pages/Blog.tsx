@@ -28,12 +28,12 @@ export default function Blog() {
            post.title.toLowerCase().includes(selectedTopic.toLowerCase());
   }) || [];
 
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  
   // Reset to first page when filter changes
   if (currentPage > totalPages && totalPages > 0) {
     setCurrentPage(1);
   }
-
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   const paginatedPosts = filteredPosts.slice(
     (currentPage - 1) * postsPerPage,
     currentPage * postsPerPage
