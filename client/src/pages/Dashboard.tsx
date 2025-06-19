@@ -19,7 +19,15 @@ import {
   Calendar,
   MessageSquare,
   Send,
-  Mail
+  Mail,
+  MapPin,
+  ClipboardList,
+  FolderOpen,
+  UserCircle,
+  LifeBuoy,
+  MessageCircle,
+  Check,
+  Badge
 } from "lucide-react";
 
 import ChatWidget from "@/components/ChatWidget";
@@ -73,34 +81,70 @@ export default function Dashboard() {
     submitFeedbackMutation.mutate(feedback);
   };
 
-  const quickActions = [
+  // Onboarding steps tracking
+  const onboardingSteps = [
     {
-      icon: <BookOpen className="h-6 w-6" />,
-      title: "Resources",
-      description: "Browse curated resources",
-      href: "/dashboard/resources",
-      color: "bg-ugga-primary"
+      id: "profile",
+      title: "Complete Profile",
+      completed: !!(user?.profile?.name && user?.profile?.state && user?.profile?.farmType)
     },
     {
-      icon: <User className="h-6 w-6" />,
-      title: "Edit Profile",
-      description: "Update your information",
+      id: "explore",
+      title: "Explore Dashboard",
+      completed: true // Auto-complete when they visit dashboard
+    },
+    {
+      id: "challenge",
+      title: "Share Challenge",
+      completed: false // This would be tracked via backend in real implementation
+    },
+    {
+      id: "resources",
+      title: "Read Resources",
+      completed: false // This would be tracked via backend in real implementation
+    }
+  ];
+
+  const memberTools = [
+    {
+      icon: <MapPin className="h-8 w-8" />,
+      title: "Find a Grower",
+      description: "Connect with growers by location and expertise",
+      href: "/dashboard/find-grower",
+      inDevelopment: true,
+      color: "bg-blue-500"
+    },
+    {
+      icon: <ClipboardList className="h-8 w-8" />,
+      title: "Farm Assessment",
+      description: "Get AI-powered analysis and recommendations",
+      href: "/dashboard/assessment",
+      inDevelopment: true,
+      color: "bg-green-500"
+    },
+    {
+      icon: <FolderOpen className="h-8 w-8" />,
+      title: "Resource Library",
+      description: "Browse curated grower resources",
+      href: "/resources",
+      inDevelopment: false,
+      color: "bg-orange-500"
+    },
+    {
+      icon: <UserCircle className="h-8 w-8" />,
+      title: "Member Profile",
+      description: "Update your information and preferences",
       href: "/dashboard/profile",
-      color: "bg-ugga-secondary"
+      inDevelopment: false,
+      color: "bg-purple-500"
     },
     {
-      icon: <Newspaper className="h-6 w-6" />,
-      title: "Blog",
-      description: "Read latest articles",
-      href: "/blog",
-      color: "bg-ugga-accent"
-    },
-    {
-      icon: <Headphones className="h-6 w-6" />,
+      icon: <MessageCircle className="h-8 w-8" />,
       title: "Support",
-      description: "Get help and assistance",
+      description: "Get help and contact the UGGA team",
       href: "/contact",
-      color: "bg-gray-600"
+      inDevelopment: false,
+      color: "bg-gray-500"
     }
   ];
 
@@ -117,85 +161,107 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Main Dashboard Grid */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-8">
-          {/* Profile Summary Card */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-semibold">Profile Summary</CardTitle>
-              <Link href="/dashboard/profile">
-                <Button variant="ghost" size="sm">
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Location:</span>
-                  <span className="font-medium">{user?.profile?.state || "Not specified"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Farm Type:</span>
-                  <span className="font-medium">{user?.profile?.farmType || "Not specified"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Member Since:</span>
-                  <span className="font-medium">
-                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "Unknown"}
-                  </span>
-                </div>
-                {user?.profile?.employer && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Employer:</span>
-                    <span className="font-medium">{user.profile.employer}</span>
+        {/* Onboarding Progress Bar */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-lg">Getting Started</CardTitle>
+            <p className="text-sm text-gray-600">Complete these steps to get the most out of UGGA</p>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              {onboardingSteps.map((step, index) => (
+                <div key={step.id} className="flex items-center gap-3 flex-1">
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all ${
+                    step.completed 
+                      ? 'bg-green-500 border-green-500 text-white' 
+                      : 'border-gray-300 text-gray-400'
+                  }`}>
+                    {step.completed ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <span className="text-sm font-medium">{index + 1}</span>
+                    )}
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Member Tools Section */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Find-a-Grower Widget */}
-            <div className="space-y-2">
-              <div className="h-80">
-                <ChatWidget
-                  title="Find-a-Grower"
-                  placeholder="e.g., Find tomato growers in Florida with hydroponic experience"
-                  endpoint="/api/ai/find-grower"
-                  icon={<Users className="h-5 w-5" />}
-                />
-              </div>
-              <p className="text-sm text-gray-500 italic">
-                This tool is still under development and being refined based on member feedback.
-              </p>
+                  <div className="flex-1">
+                    <p className={`text-sm font-medium ${
+                      step.completed ? 'text-green-700' : 'text-gray-700'
+                    }`}>
+                      {step.title}
+                    </p>
+                  </div>
+                  {index < onboardingSteps.length - 1 && (
+                    <div className={`hidden sm:block w-8 h-0.5 ${
+                      step.completed ? 'bg-green-500' : 'bg-gray-200'
+                    }`} />
+                  )}
+                </div>
+              ))}
             </div>
+          </CardContent>
+        </Card>
 
-            {/* Farm Assessment Tool */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-ugga-secondary" />
-                  Farm Assessment Tool
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">
-                  Get analysis and recommendations for your greenhouse operation
-                </p>
-                <Link href="/dashboard/assessment">
-                  <Button className="bg-ugga-secondary hover:bg-ugga-secondary/90">
-                    Start Assessment
-                  </Button>
-                </Link>
-                <p className="text-sm text-gray-500 italic mt-3">
-                  This tool is still under development and being refined based on member feedback.
-                </p>
-              </CardContent>
-            </Card>
+        {/* Member Tools Grid */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Member Tools</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {memberTools.map((tool, index) => (
+              <Link key={index} href={tool.href}>
+                <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer h-full relative group">
+                  {tool.inDevelopment && (
+                    <div className="absolute top-3 right-3 z-10">
+                      <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-full border border-orange-200">
+                        In Development
+                      </span>
+                    </div>
+                  )}
+                  <CardContent className="p-6 text-center">
+                    <div className={`inline-flex items-center justify-center w-16 h-16 ${tool.color} rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200`}>
+                      <span className="text-white">{tool.icon}</span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-2">{tool.title}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">{tool.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
           </div>
         </div>
+
+        {/* Profile Summary Card */}
+        <Card className="mb-8">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-lg font-semibold">Profile Summary</CardTitle>
+            <Link href="/dashboard/profile">
+              <Button variant="ghost" size="sm">
+                <Edit className="h-4 w-4" />
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-1">Location</p>
+                <p className="font-medium">{user?.profile?.state || "Not specified"}</p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-1">Farm Type</p>
+                <p className="font-medium">{user?.profile?.farmType || "Not specified"}</p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-1">Member Since</p>
+                <p className="font-medium">
+                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : "Unknown"}
+                </p>
+              </div>
+              {user?.profile?.employer && (
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-gray-600 mb-1">Employer</p>
+                  <p className="font-medium">{user.profile.employer}</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Challenge Submission Section */}
         <Card className="mb-8">
@@ -281,22 +347,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions Grid */}
-        <div className="grid md:grid-cols-4 gap-4">
-          {quickActions.map((action, index) => (
-            <Link key={index} href={action.href}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                <CardContent className="p-6 text-center">
-                  <div className={`inline-flex items-center justify-center w-12 h-12 ${action.color} rounded-full mb-4`}>
-                    <span className="text-white">{action.icon}</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-1">{action.title}</h3>
-                  <p className="text-sm text-gray-600">{action.description}</p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+
 
 
       </div>
