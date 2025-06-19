@@ -38,12 +38,38 @@
   --color-parchment: #F4F1E8;
 }
 
-/* Base Typography Styles */
+/* Base Typography Styles for Accessibility */
 @layer base {
   p {
     font-size: 16px;
     max-width: 65ch;
     line-height: 1.6;
+  }
+  
+  /* Ensure sufficient color contrast */
+  .text-gray-600 {
+    color: hsl(0, 0%, 40%); /* Improved contrast ratio */
+  }
+  
+  .text-gray-500 {
+    color: hsl(0, 0%, 35%); /* Improved contrast ratio */
+  }
+  
+  /* Skip link for keyboard navigation */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--color-sage);
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 1000;
+  }
+  
+  .skip-link:focus {
+    top: 6px;
   }
 }
 

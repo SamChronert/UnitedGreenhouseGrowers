@@ -88,7 +88,7 @@ export default function Register() {
     <div className="min-h-screen py-16 bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <img src={uggaLogo} alt="UGGA Logo" className="h-12 w-12 mx-auto mb-4" />
+          <img src={uggaLogo} alt="United Greenhouse Growers Association Logo" className="h-12 w-12 mx-auto mb-4" loading="lazy" />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Join UGGA</h1>
           <p className="text-gray-600">Connect with greenhouse growers across the country and access practical tools built with growers in mind.
 
@@ -108,9 +108,10 @@ export default function Register() {
                   <Input
                     id="name"
                     {...form.register("name")}
+                    aria-describedby={form.formState.errors.name ? "name-error" : undefined}
                   />
                   {form.formState.errors.name && (
-                    <p className="text-sm text-red-600">{form.formState.errors.name.message}</p>
+                    <p id="name-error" className="text-sm text-red-600" role="alert">{form.formState.errors.name.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">

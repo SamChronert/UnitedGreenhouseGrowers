@@ -82,6 +82,7 @@ export default function Login() {
                   type="text"
                   {...form.register("identifier")}
                   error={form.formState.errors.identifier?.message}
+                  aria-describedby={form.formState.errors.identifier ? "identifier-error" : undefined}
                 />
               </div>
 
