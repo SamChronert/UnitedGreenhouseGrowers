@@ -35,7 +35,7 @@ function AdminAssessmentTrainer() {
   const queryClient = useQueryClient();
 
   // Fetch training data
-  const { data: trainingData = [], isLoading } = useQuery({
+  const { data: trainingData = [], isLoading } = useQuery<AssessmentTrainingData[]>({
     queryKey: ["/api/admin/assessment-training"],
     queryFn: () => apiRequest("GET", "/api/admin/assessment-training"),
   });

@@ -237,13 +237,13 @@ export default function AdminMembers() {
                         </TableCell>
                         <TableCell>
                           <div className="text-sm">
-                            {member.profile.jobTitle && (
+                            {member.profile?.jobTitle && (
                               <div className="font-medium">{member.profile.jobTitle}</div>
                             )}
-                            {member.profile.employer && (
+                            {member.profile?.employer && (
                               <div className="text-gray-500">{member.profile.employer}</div>
                             )}
-                            {!member.profile.jobTitle && !member.profile.employer && (
+                            {!member.profile?.jobTitle && !member.profile?.employer && (
                               <span className="text-gray-400">Not specified</span>
                             )}
                           </div>
@@ -256,7 +256,7 @@ export default function AdminMembers() {
                         <TableCell>
                           <div className="flex items-center gap-1 text-sm text-gray-600">
                             <Calendar className="h-3 w-3" />
-                            {formatDate(member.createdAt.toString())}
+                            {formatDate(new Date(member.createdAt).toISOString())}
                           </div>
                         </TableCell>
                       </TableRow>
