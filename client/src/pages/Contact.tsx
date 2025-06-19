@@ -125,44 +125,47 @@ export default function Contact() {
                   />
                 </div>
                 
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={contactMutation.isPending}
-                >
-                  {contactMutation.isPending ? (
-                    "Sending..."
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4 mr-2" />
-                      Send Message
-                    </>
-                  )}
-                </Button>
+                <div className="flex justify-center">
+                  <Button 
+                    type="submit" 
+                    className="w-full md:w-auto md:px-8 text-white rounded-lg font-medium shadow-lg hover:opacity-90 transition-all duration-300" 
+                    style={{backgroundColor: 'var(--color-clay)'}}
+                    disabled={contactMutation.isPending}
+                  >
+                    {contactMutation.isPending ? (
+                      "Sending..."
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        Send Message
+                      </>
+                    )}
+                  </Button>
+                </div>
               </form>
             </CardContent>
           </Card>
 
           {/* Contact Info */}
-          <div className="rounded-lg p-6 bg-[#e6f2e6]">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Get in Touch</h3>
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-8 bg-[#2d543a]">
+          <div className="rounded-lg p-6" style={{backgroundColor: 'color-mix(in srgb, var(--color-sage) 20%, white 80%)'}}>
+            <h3 className="text-lg font-semibold text-gray-900 mb-6 text-center">Get in Touch</h3>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-8">
               <div className="flex items-center gap-3">
-                <div className="inline-flex items-center justify-center w-10 h-10 bg-ugga-primary rounded-full">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full" style={{backgroundColor: 'var(--color-sage)'}}>
                   <Mail className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-[#ffffff]">Email</p>
-                  <p className="font-medium text-[#f9fafb]">sam@growbig.ag</p>
+                  <p className="text-sm text-gray-600">Email</p>
+                  <p className="font-medium text-gray-900">sam@growbig.ag</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="inline-flex items-center justify-center w-10 h-10 bg-ugga-secondary rounded-full">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full" style={{backgroundColor: 'var(--color-sage)'}}>
                   <Phone className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-[#f9fafb]">Phone</p>
-                  <p className="font-medium text-[#f9fafb]">415-686-9620</p>
+                  <p className="text-sm text-gray-600">Phone</p>
+                  <p className="font-medium text-gray-900">415-686-9620</p>
                 </div>
               </div>
             </div>
