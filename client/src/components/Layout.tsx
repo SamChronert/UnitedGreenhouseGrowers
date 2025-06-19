@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Menu, X } from "lucide-react";
+import { Menu, X, UserPlus, Lightbulb, Leaf } from "lucide-react";
 import { useState } from "react";
 import uggaLogo from "@assets/2_1750100657577.png";
 
@@ -398,6 +398,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </ul>
             </div>
           </div>
+          
+          {/* CTA Explainer Strip */}
+          <div className="mt-8 p-6 rounded-lg" style={{backgroundColor: 'var(--color-parchment)'}}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              <div className="flex flex-col items-center gap-4">
+                <UserPlus className="h-8 w-8 text-gray-700" />
+                <span className="font-medium text-gray-800">Join</span>
+              </div>
+              <div className="flex flex-col items-center gap-4">
+                <Lightbulb className="h-8 w-8 text-gray-700" />
+                <span className="font-medium text-gray-800">Contribute</span>
+              </div>
+              <div className="flex flex-col items-center gap-4">
+                <Leaf className="h-8 w-8 text-gray-700" />
+                <span className="font-medium text-gray-800">Benefit</span>
+              </div>
+            </div>
+          </div>
+          
           <div className="border-t border-gray-400 mt-8 pt-8 text-center">
             <p className="text-gray-700">
               © 2024 United Greenhouse Growers Association. All rights reserved.
