@@ -256,7 +256,7 @@ export default function AdminMembers() {
                         <TableCell>
                           <div className="flex items-center gap-1 text-sm text-gray-600">
                             <Calendar className="h-3 w-3" />
-                            {formatDate(member.createdAt)}
+                            {formatDate(member.createdAt.toString())}
                           </div>
                         </TableCell>
                       </TableRow>

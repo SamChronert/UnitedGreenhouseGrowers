@@ -227,6 +227,40 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Forum Preview Section */}
+        <Card className="mb-8">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Member Forum
+            </CardTitle>
+            <Link href="/forum">
+              <Button variant="outline" size="sm">
+                View All Discussions
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600 mb-4">
+              Connect with fellow growers, ask questions, and share your expertise in our member-only forum.
+            </p>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">Recent Discussions</h4>
+                <p className="text-sm text-gray-600">Join ongoing conversations about greenhouse challenges and solutions</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">Ask Questions</h4>
+                <p className="text-sm text-gray-600">Get help from experienced growers in your region or specialty</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-gray-900 mb-2">Share Knowledge</h4>
+                <p className="text-sm text-gray-600">Help other growers by sharing your experiences and insights</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Profile Summary Card */}
         <Card className="mb-8">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

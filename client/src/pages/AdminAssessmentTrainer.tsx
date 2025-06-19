@@ -23,7 +23,7 @@ import {
 import { format } from "date-fns";
 import type { AssessmentTrainingData } from "@shared/schema";
 
-export default function AdminAssessmentTrainer() {
+function AdminAssessmentTrainer() {
   const [showCreate, setShowCreate] = useState(false);
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [newItem, setNewItem] = useState({ 
@@ -377,3 +377,5 @@ export default function AdminAssessmentTrainer() {
     </div>
   );
 }
+
+export default AdminAssessmentTrainer;

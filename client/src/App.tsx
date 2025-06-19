@@ -61,6 +61,11 @@ function Router() {
           <Assessment />
         </AuthGuard>
       </Route>
+      <Route path="/dashboard/resources">
+        <AuthGuard requireMember>
+          <Resources />
+        </AuthGuard>
+      </Route>
       <Route path="/forum">
         <AuthGuard requireMember>
           <Forum />
