@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Calendar, Users, Building, Briefcase, ChevronDown, ChevronRight } from "lucide-react";
+import { ExternalLink, Calendar, Users, Building, Briefcase, Wrench, ChevronDown, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 
@@ -11,6 +11,7 @@ export default function Resources() {
     organizations: true,
     government: false,
     industry: false,
+    tools: false,
     events: true
   });
 
@@ -68,7 +69,8 @@ export default function Resources() {
   const shouldShowSection = (sectionType: string) => {
     if (selectedFilter === "All") return true;
     return selectedFilter.toLowerCase() === sectionType.toLowerCase() || 
-           (selectedFilter === "Events" && sectionType === "events");
+           (selectedFilter === "Events" && sectionType === "events") ||
+           (selectedFilter === "Tools" && sectionType === "tools");
   };
 
   return (
@@ -150,8 +152,33 @@ export default function Resources() {
           </div>
         )}
 
-        {/* Government Section */}
+        {/* Tools Section */}
         {shouldShowSection("tools") && (
+          <div className="mb-8">
+            <button
+              onClick={() => toggleSection("tools")}
+              className="flex items-center mb-4 w-full text-left group"
+            >
+              <Wrench className="h-6 w-6 text-ugga-primary mr-2" />
+              <h2 className="text-2xl font-bold text-gray-900">Tools</h2>
+              {openSections.tools ? (
+                <ChevronDown className="h-5 w-5 ml-2 text-gray-500 group-hover:text-gray-700 transition-colors" />
+              ) : (
+                <ChevronRight className="h-5 w-5 ml-2 text-gray-500 group-hover:text-gray-700 transition-colors" />
+              )}
+            </button>
+            {openSections.tools && (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <p className="text-gray-500">Coming Soon</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* Government Section */}
+        {shouldShowSection("government") && (
           <div className="mb-8">
             <button
               onClick={() => toggleSection("government")}
@@ -176,7 +203,7 @@ export default function Resources() {
         )}
 
         {/* Industry Section */}
-        {shouldShowSection("tools") && (
+        {shouldShowSection("industry") && (
           <div className="mb-8">
             <button
               onClick={() => toggleSection("industry")}

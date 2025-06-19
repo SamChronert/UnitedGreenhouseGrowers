@@ -83,7 +83,7 @@ export default function About() {
           <div className="bg-gray-50 rounded-lg p-8">
             <p className="text-lg text-gray-800 mb-4">
               Greenhouse growers are solving the same problems alone.
-              Research doesn't always reach the farm. Technology is advancing, but support is often missing. And too often, growers are left without a place to turn.
+              Research doesn't always reach the farm. Technology is advancing, but support is often missing. And too often, growers are unable to find the right support.
             </p>
             <p className="text-lg text-ugga-primary font-semibold">
               UGGA exists to change that — by bringing us together.
