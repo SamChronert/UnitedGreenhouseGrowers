@@ -34,6 +34,11 @@ export default function About() {
       name: "Dr. Melanie Yelton",
       role: "Industry Professional & Researcher",
       description: "Melanie is a plant scientist and educator with over 25 years of experience advancing sustainable agriculture, plant research, and grower training. She's led plant science and R&D teams at organizations like Plenty and LumiGrow, and holds a Ph.D. in Plant Sciences from the University of California, Davis. Today, she runs Grow Big Consulting, where she helps Controlled Environment Agriculture (CEA) companies apply scientific insights to real-world production. Her motivation for co-founding the Greenhouse Growers Association is simple: empower growers with better access to plant science and industry knowledge. Melanie believes growers deserve a stronger voice in innovation, policy, and education — and she's committed to bridging that gap."
+    },
+    {
+      name: "Neil Coppinger",
+      role: "Greenhouse Technology Advocate",
+      description: "Neil began his career selling horticultural LED lighting systems, which gave him a front-row seat to the innovation — and the challenges — within commercial greenhouse operations. Over the past 14 years, he's worked with growers across North America through roles at companies like Signify, BIOS Lighting, and Heliospectra, helping them implement cutting-edge growing technology. He holds a degree in Business Administration from the University of Missouri–St. Louis and currently leads GrowBig Consultants. Through the Greenhouse Growers Association, Neil hopes to support the industry that first sparked his passion — one where technology, food security, and sustainability converge. He believes everyone should have access to fresh, greenhouse-grown produce year-round, no matter where they live, and is driven to help make that a reality."
     }
   ];
 
