@@ -39,7 +39,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative ugga-hero-bg">
         <div className="absolute inset-0 bg-black opacity-40"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
           <div className="text-center">
             <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
               Connecting growers, <span className="text-green-300">sharing knowledge</span>, strengthening greenhouses
@@ -50,19 +50,19 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {isAuthenticated ? (
                 <Link href="/dashboard">
-                  <Button size="lg" className="bg-white hover:bg-gray-100 text-ugga-primary px-10 py-5 text-xl font-bold shadow-xl border-2 border-white rounded-xl transform hover:scale-105 transition-all duration-300">
+                  <Button size="lg" className="text-white hover:opacity-90 px-6 py-3 text-lg font-medium shadow-lg transition-all duration-300" style={{backgroundColor: 'var(--color-sage)'}}>
                     Go to Dashboard
                   </Button>
                 </Link>
               ) : (
                 <Link href="/register">
-                  <Button size="lg" className="bg-white hover:bg-gray-100 text-ugga-primary px-10 py-5 text-xl font-bold shadow-xl border-2 border-white rounded-xl transform hover:scale-105 transition-all duration-300">
-                    Become a founding member
+                  <Button size="lg" className="text-white hover:opacity-90 px-6 py-3 text-lg font-medium shadow-lg transition-all duration-300" style={{backgroundColor: 'var(--color-sage)'}}>
+                    Become a Founding Member
                   </Button>
                 </Link>
               )}
               <Link href="#features">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-ugga-primary bg-transparent px-10 py-5 text-xl font-semibold shadow-lg border-2 rounded-xl transform hover:scale-105 transition-all duration-300">
+                <Button size="lg" variant="ghost" className="border-white text-white hover:bg-white hover:text-gray-900 bg-transparent px-6 py-3 text-lg font-medium shadow-lg border-2 transition-all duration-300">
                   Learn More
                 </Button>
               </Link>

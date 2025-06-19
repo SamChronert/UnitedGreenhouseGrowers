@@ -69,7 +69,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
+      <nav className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -169,48 +169,57 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="hidden md:block">
               <div className="flex items-center space-x-4">
                 {isAuthenticated ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>
-                            {user?.profile?.name?.charAt(0) || user?.username?.charAt(0) || "U"}
-                          </AvatarFallback>
-                        </Avatar>
+                  <>
+                    <Link href="/register">
+                      <Button className="text-white hover:opacity-90 px-4 py-2 text-sm font-medium shadow-sm transition-all duration-300" style={{backgroundColor: 'var(--color-sage)'}}>
+                        Join UGGA
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56" align="end" forceMount>
-                      <div className="flex flex-col space-y-1 p-2">
-                        <p className="text-sm font-medium leading-none">
-                          {user?.profile?.name || user?.username}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {user?.email}
-                        </p>
-                      </div>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <Link href="/dashboard/profile">Profile</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/dashboard">Dashboard</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => logoutMutation.mutate()}
-                        disabled={logoutMutation.isPending}
-                      >
-                        Log out
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    </Link>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback>
+                              {user?.profile?.name?.charAt(0) || user?.username?.charAt(0) || "U"}
+                            </AvatarFallback>
+                          </Avatar>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56" align="end" forceMount>
+                        <div className="flex flex-col space-y-1 p-2">
+                          <p className="text-sm font-medium leading-none">
+                            {user?.profile?.name || user?.username}
+                          </p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {user?.email}
+                          </p>
+                        </div>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/dashboard/profile">Profile</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/dashboard">Dashboard</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => logoutMutation.mutate()}
+                          disabled={logoutMutation.isPending}
+                        >
+                          Log out
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
                 ) : (
                   <>
                     <Link href="/login">
                       <Button variant="ghost">Login</Button>
                     </Link>
                     <Link href="/register">
-                      <Button>Join UGGA</Button>
+                      <Button className="text-white hover:opacity-90 px-4 py-2 text-sm font-medium shadow-sm transition-all duration-300" style={{backgroundColor: 'var(--color-sage)'}}>
+                        Join UGGA
+                      </Button>
                     </Link>
                   </>
                 )}
@@ -251,6 +260,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               
               {isAuthenticated ? (
                 <>
+                  <div className="border-t pt-2 space-y-1">
+                    <Link
+                      href="/register"
+                      className="block px-3 py-2 text-base font-medium text-white rounded-md mx-3 transition-all duration-300"
+                      style={{backgroundColor: 'var(--color-sage)'}}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Join UGGA
+                    </Link>
+                  </div>
                   <div className="border-t pt-2">
                     <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
                       Dashboard
@@ -324,7 +343,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </Link>
                   <Link
                     href="/register"
-                    className="block px-3 py-2 text-base font-medium bg-ugga-primary text-white rounded-md mx-3"
+                    className="block px-3 py-2 text-base font-medium text-white rounded-md mx-3 transition-all duration-300"
+                    style={{backgroundColor: 'var(--color-sage)'}}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Join UGGA
