@@ -1,0 +1,84 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan and wait for my “Approved – implement” before making any code changes.
+
+Goal
+=====
+Add a **Member Type** selector to /register so users choose:
+  • “Grower Member”  → sees full grower questionnaire  
+  • “General Member” → sees basic form only
+
+Conditional form logic
+----------------------
+* Member Type selection controls which inputs are rendered (React state is fine).  
+* Switching the type instantly updates the form without page reload.  
+* Grower-specific dropdowns include **“N/A”** as the last option.
+
+Fields for **General Member**
+-----------------------------
+• Full Name (required)  
+• Phone Number (required)  
+• Email Address (required)  
+• State (required)  
+• Employer/Company (optional)  
+• Job Title (optional)  
+• Username (required)  
+• Password (required, ≥12 chars)
+
+Fields for **Grower Member** *(all required unless noted, dropdowns include “N/A”)*
+----------------------------------------------------------------------------------
+• Full Name  
+• Phone Number  
+• Email Address  
+• State  
+• County (required)  
+• Employer/Company (optional)  
+• Job Title (optional)  
+• Username  
+• Password  
+• **Greenhouse Role** – radio:  
+    ○ I own / manage this greenhouse  
+    ○ I work at this greenhouse  
+• **Crop Types Grown** – multi-select (max 8)  
+    Tomatoes, Cucumbers, Leafy greens, Herbs, Strawberries, Peppers, Flowers/ornamentals, **Other**, **N/A**  
+    ▸ If “Other” selected, show free-text `otherCrop` field (required)  
+• **Greenhouse Size** – dropdown + N/A  
+    Under 500 ft²; 500–2,000 ft²; 2,001–10,000 ft²; 10,001–43,560 ft²;  
+    43,560–87,119 ft²; 87,120–217,799 ft²; Over 217,800 ft²; N/A  
+• **Production Method** – Soil-based; Hydroponics; **N/A**  
+• **Supplemental Lighting** – Yes; No; Planning to add; **N/A**  
+• **Climate-Control Type** –  
+    Passive High Tunnel; Naturally Ventilated; Mechanically Ventilated;  
+    Evaporative-Cooled (Fan-and-Pad); Fog/Misting-Cooled; Semi-Closed;  
+    Fully Closed / HVAC-Controlled; Other / Not Listed; **N/A**
+
+Back-end & database tasks
+=========================
+1. Add `memberType` ("grower" | "general") to each record.  
+2. Keep existing members as `"grower"` for backward compatibility.  
+3. Add/ensure nullable keys: `county`, `role`, `cropTypes` (array),
+   `otherCrop`, `ghSize`, `productionMethod`, `suppLighting`, `climateControl`.  
+4. Registration endpoint must:  
+   • Validate Grower vs General requirements.  
+   • Enforce “Other” crop text when selected.  
+   • Accept “N/A” as valid grower answers where provided.  
+5. Write a migration script (if needed) to set new keys to null for existing users.  
+6. No breaking changes to login or dashboards.
+
+Front-end tasks
+===============
+* Update form UI with Member Type selector at top.  
+* Conditionally render sections; preserve styling & responsiveness.  
+* Real-time validation & inline error messages.  
+* Preserve existing accessibility (labels, aria attributes).
+
+Deliverables
+============
+1. **Plan summary** (files to modify/add, edge cases, test strategy).  
+2. After approval, implement changes and create checkpoint **“member-type-conditional-registration”**.  
+3. Provide a manual test checklist covering:  
+   – New user (Grower), missing required field → error displayed  
+   – New user (Grower), selects “Other” crop → prompted for text  
+   – New user (General) sees only basic fields  
+   – Existing users can still log in  
+
+Await my reply **“Approved – implement”** before coding.
