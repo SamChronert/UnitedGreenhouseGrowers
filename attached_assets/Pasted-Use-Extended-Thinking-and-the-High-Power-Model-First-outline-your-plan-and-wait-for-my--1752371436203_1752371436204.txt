@@ -1,0 +1,84 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan and wait for my **“Approved – implement”** before changing code.
+
+================================================================
+COMBINED GOAL
+================================================================
+1️⃣ **Streamline & modernize the member dashboard UI**  
+2️⃣ **Lock down forum access and reroute to /dashboard/forum**
+
+----------------------------------------------------------------
+Part A – Dashboard UI Refresh
+----------------------------------------------------------------
+A-1. **Remove** these sections entirely  
+   • Getting Started  
+   • Profile Summary  
+
+A-2. **Member Tools** grid updates  
+   • Delete the “Support” widget.  
+   • Convert “Member Forum” into a clickable widget card:  
+       – Same size & style as other widgets  
+       – Icon: forum / message-bubble (match current icon set)  
+       – Link target: **/dashboard/forum** (auth-protected)  
+   • Final grid = five widgets (Find a Grower, Farm Assessment, Resource Library, Member Profile, Member Forum)  
+       → Layout: 3 on row 1, 2 on row 2; center-aligned & responsive.
+
+A-3. **Visual polish** (lightweight)  
+   • Widget cards: `bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow`  
+   • Icon circles: `bg-green-600/10` + `text-green-700` icon  
+   • Hover & keyboard focus: `ring-2 ring-green-500` (accessible)  
+   • Increase vertical spacing between dashboard sections: `space-y-10`  
+   • Section headings: `text-2xl font-semibold text-gray-900 dark:text-gray-100`  
+   • Dark-mode variants: `dark:bg-gray-800 dark:text-gray-100 dark:shadow-none`
+
+----------------------------------------------------------------
+Part B – Forum Route Guard & Redirect
+----------------------------------------------------------------
+B-1. **Create /dashboard/forum**  
+   • Use existing Forum component.  
+   • Protect with same auth middleware as other dashboard routes.  
+   • Unauthenticated users → `/login?next=/dashboard/forum`.
+
+B-2. **Redirect legacy /forum → /dashboard/forum**  
+   • Add a permanent (301) or temporary (302) redirect in Next.js / React-Router.  
+   • Keeps external links alive.
+
+B-3. Remove any public header/menu links to `/forum`; all internal links now point to `/dashboard/forum`.
+
+----------------------------------------------------------------
+Front-end files to touch
+----------------------------------------------------------------
+`client/src/pages/Dashboard.tsx` (or equivalent)  
+   – Remove `<GettingStarted/>` and `<ProfileSummary/>`  
+   – Remove `<SupportWidget/>`  
+   – Add `<MemberForumWidget/>` mirroring other widget cards  
+   – Update MemberToolsGrid data  
+   – Apply Tailwind polish classes
+
+`client/src/pages/Forum.tsx` (or create `/dashboard/forum` component)  
+   – Wrap Forum component with auth guard
+
+`client/src/routes.tsx` or Next.js `pages`/`app` routing config  
+   – Add redirect from `/forum` to `/dashboard/forum`
+
+----------------------------------------------------------------
+Back-end
+----------------------------------------------------------------
+None (routing & auth reuse existing middleware).
+
+----------------------------------------------------------------
+Deliverables
+----------------------------------------------------------------
+1. **Plan summary first** (files, steps, redirect method, Tailwind tweaks).  
+2. After approval, implement; commit checkpoint **“dashboard-ui-refresh-and-forum-guard”**.  
+3. Manual test checklist:  
+   ▸ Getting Started & Profile Summary removed  
+   ▸ Member Tools grid has 5 widgets; Forum widget links to /dashboard/forum  
+   ▸ /forum redirects correctly (logged-in → dashboard forum; logged-out → login)  
+   ▸ Hover/focus rings and dark-mode look correct  
+   ▸ Contact UGGA Team card unchanged  
+   ▸ Responsive layout works on mobile & desktop
+
+================================================================
+Await my **“Approved – implement”** before coding.
+================================================================
