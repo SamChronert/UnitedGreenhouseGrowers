@@ -123,6 +123,33 @@ export const assessmentTrainingData = pgTable("assessment_training_data", {
   createdAtIdx: index("assessment_training_created_at_idx").on(table.createdAt),
 }));
 
+export const buyersDistributors = pgTable("buyers_distributors", {
+  id: varchar("id").primaryKey().notNull(),
+  name: varchar("name").notNull(),
+  state: varchar("state").notNull(), // 2-letter code
+  county: varchar("county"),
+  categories: text("categories").array().notNull().default([]), // ["wholesale","CSA","retail"]
+  contactEmail: varchar("contact_email").notNull(),
+  phone: varchar("phone"),
+  websiteUrl: varchar("website_url"),
+}, (table) => ({
+  stateIdx: index("buyers_distributors_state_idx").on(table.state),
+  categoriesIdx: index("buyers_distributors_categories_idx").on(table.categories),
+}));
+
+export const products = pgTable("products", {
+  id: varchar("id").primaryKey().notNull(),
+  productName: varchar("product_name").notNull(),
+  category: varchar("category").notNull(),
+  vendorName: varchar("vendor_name").notNull(),
+  vendorEmail: varchar("vendor_email").notNull(),
+  description: text("description").notNull(),
+  testimonials: jsonb("testimonials").notNull().default([]), // Array of {growerName, growerEmail, quote}
+}, (table) => ({
+  categoryIdx: index("products_category_idx").on(table.category),
+  vendorIdx: index("products_vendor_idx").on(table.vendorName),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, {
@@ -227,6 +254,14 @@ export const insertAssessmentTrainingDataSchema = createInsertSchema(assessmentT
   updatedAt: true,
 });
 
+export const insertBuyersDistributorsSchema = createInsertSchema(buyersDistributors).omit({
+  id: true,
+});
+
+export const insertProductsSchema = createInsertSchema(products).omit({
+  id: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -246,3 +281,7 @@ export type ForumComment = typeof forumComments.$inferSelect;
 export type InsertForumComment = z.infer<typeof insertForumCommentSchema>;
 export type AssessmentTrainingData = typeof assessmentTrainingData.$inferSelect;
 export type InsertAssessmentTrainingData = z.infer<typeof insertAssessmentTrainingDataSchema>;
+export type BuyersDistributors = typeof buyersDistributors.$inferSelect;
+export type InsertBuyersDistributors = z.infer<typeof insertBuyersDistributorsSchema>;
+export type Products = typeof products.$inferSelect;
+export type InsertProducts = z.infer<typeof insertProductsSchema>;

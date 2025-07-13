@@ -26,6 +26,8 @@ import AdminMembers from "@/pages/AdminMembers";
 import AdminChallenges from "@/pages/AdminChallenges";
 import AdminAssessmentTrainer from "@/pages/AdminAssessmentTrainer";
 import Forum from "@/pages/Forum";
+import SalesHub from "@/pages/SalesHub";
+import ProductHub from "@/pages/ProductHub";
 
 function Router() {
   return (
@@ -69,6 +71,16 @@ function Router() {
       <Route path="/dashboard/forum">
         <AuthGuard requireMember>
           <Forum />
+        </AuthGuard>
+      </Route>
+      <Route path="/dashboard/saleshub">
+        <AuthGuard requireMember>
+          <SalesHub />
+        </AuthGuard>
+      </Route>
+      <Route path="/dashboard/producthub">
+        <AuthGuard requireMember>
+          <ProductHub />
         </AuthGuard>
       </Route>
       <Route path="/forum">

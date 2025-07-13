@@ -16,7 +16,9 @@ import {
   ClipboardList,
   FolderOpen,
   UserCircle,
-  MessageCircle
+  MessageCircle,
+  Store,
+  ShoppingBag
 } from "lucide-react";
 
 import ChatWidget from "@/components/ChatWidget";
@@ -66,6 +68,21 @@ export default function Dashboard() {
   };
 
   const memberTools = [
+    // Row 1: Resource Library, Member Forum, Find a Grower
+    {
+      icon: <FolderOpen className="h-8 w-8" />,
+      title: "Resource Library",
+      description: "Browse curated grower resources — find organizations near you, tax incentives and rebates, upcoming events, and more.",
+      href: "/dashboard/resources",
+      inDevelopment: true
+    },
+    {
+      icon: <MessageCircle className="h-8 w-8" />,
+      title: "Member Forum",
+      description: "Connect with fellow growers to share knowledge and organize bulk ordering.",
+      href: "/dashboard/forum",
+      inDevelopment: false
+    },
     {
       icon: <MapPin className="h-8 w-8" />,
       title: "Find a Grower",
@@ -73,32 +90,33 @@ export default function Dashboard() {
       href: "/dashboard/find-grower",
       inDevelopment: true
     },
+    // Row 2: Farm Assessment, Sales Hub, Product Hub, Member Profile
     {
       icon: <ClipboardList className="h-8 w-8" />,
       title: "Farm Assessment",
-      description: "Get AI-powered analysis and recommendations",
+      description: "Respond to the prompts to determine which areas of your farm to work on to improve yield and profitability for your operation.",
       href: "/dashboard/assessment",
       inDevelopment: true
     },
     {
-      icon: <FolderOpen className="h-8 w-8" />,
-      title: "Resource Library",
-      description: "Browse curated grower resources",
-      href: "/dashboard/resources",
-      inDevelopment: false
+      icon: <Store className="h-8 w-8" />,
+      title: "Sales Hub",
+      description: "Find buyers and distributors for your products",
+      href: "/dashboard/saleshub",
+      inDevelopment: true
+    },
+    {
+      icon: <ShoppingBag className="h-8 w-8" />,
+      title: "Product Hub",
+      description: "Browse vetted products and services",
+      href: "/dashboard/producthub",
+      inDevelopment: true
     },
     {
       icon: <UserCircle className="h-8 w-8" />,
       title: "Member Profile",
       description: "Update your information and preferences",
       href: "/dashboard/profile",
-      inDevelopment: false
-    },
-    {
-      icon: <MessageCircle className="h-8 w-8" />,
-      title: "Member Forum",
-      description: "Connect with fellow growers and share knowledge",
-      href: "/dashboard/forum",
       inDevelopment: false
     }
   ];
@@ -141,8 +159,8 @@ export default function Dashboard() {
               </Link>
             ))}
           </div>
-          <div className="grid md:grid-cols-2 gap-6 mt-6 justify-center max-w-2xl mx-auto">
-            {memberTools.slice(3, 5).map((tool, index) => (
+          <div className="grid md:grid-cols-4 gap-6 mt-6">
+            {memberTools.slice(3, 7).map((tool, index) => (
               <Link key={index + 3} href={tool.href}>
                 <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full relative group focus:outline-none focus:ring-2 focus:ring-green-500">
                   {tool.inDevelopment && (

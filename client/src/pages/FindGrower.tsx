@@ -2,6 +2,7 @@ import ChatWidget from "@/components/ChatWidget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, MapPin, Briefcase } from "lucide-react";
 import uggaLogo from "@assets/2_1750100657577.png";
+import InDevelopmentBanner from "@/components/InDevelopmentBanner";
 
 export default function FindGrower() {
   const tips = [
@@ -33,6 +34,10 @@ export default function FindGrower() {
   return (
     <div className="min-h-screen py-8 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <InDevelopmentBanner 
+          title="Find a Grower" 
+          description="This feature is currently in development. Basic functionality is available for testing."
+        />
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">

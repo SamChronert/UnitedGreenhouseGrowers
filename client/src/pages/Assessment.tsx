@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Send, TrendingUp, User, Bot, Loader2, FileText, Lightbulb } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import InDevelopmentBanner from "@/components/InDevelopmentBanner";
 
 interface AssessmentMessage {
   id: string;
@@ -117,6 +118,10 @@ export default function Assessment() {
   return (
     <div className="min-h-screen py-8 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <InDevelopmentBanner 
+          title="Farm Assessment" 
+          description="This feature is currently in development. Basic functionality is available for testing."
+        />
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">

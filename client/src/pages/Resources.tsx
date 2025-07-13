@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Calendar, Users, Building, Briefcase, Wrench, ChevronDown, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
+import InDevelopmentBanner from "@/components/InDevelopmentBanner";
 
 export default function Resources() {
   const [selectedFilter, setSelectedFilter] = useState<string>("All");
@@ -82,6 +83,10 @@ export default function Resources() {
       
       <div className="p-8">
         <div className="max-w-6xl mx-auto">
+        <InDevelopmentBanner 
+          title="Resource Library" 
+          description="This feature is currently in development. Basic resource browsing is available for testing."
+        />
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Resources</h1>
           <p className="text-gray-700">We're building a grower-reviewed resource library of guides, case studies, and extension bulletins — everything from irrigation best practices to supplier insights. Founding members will help decide what gets included, reviewed, and prioritized.</p>
