@@ -111,6 +111,15 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 
 ## Changelog
 
+- July 13, 2025: Forum and navigation enhancements
+  - Removed County filter from Forum page - simplified to State and Category filters only
+  - Updated Forum page subtitle to: "Connect with fellow growers, share knowledge, organize bulk ordering."
+  - Updated Member Forum widget description in Dashboard to match new messaging
+  - Reordered Dashboard dropdown navigation menu to show 8 items in priority order:
+    1. Overview, 2. Profile, 3. Resource Library, 4. Member Forum, 5. Find a Grower, 6. Farm Assessment, 7. Sales Hub, 8. Product Hub
+  - Fixed console JavaScript errors related to undefined county filter variables
+  - Cleaned up unused county-related code from ForumFilters component
+  - Enhanced navigation consistency across desktop and mobile views
 - July 13, 2025: Sales Hub and Product Hub implementation with dashboard modernization
   - Added Sales Hub with interactive US map using Leaflet and OpenStreetMap tiles
   - Implemented buyer/distributor filtering by state and category with sample data
