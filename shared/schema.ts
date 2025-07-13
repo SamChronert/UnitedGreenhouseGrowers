@@ -27,10 +27,21 @@ export const profiles = pgTable("profiles", {
   employer: varchar("employer"),
   jobTitle: varchar("job_title"),
   farmType: varchar("farm_type"),
+  // Member type and grower-specific fields
+  memberType: varchar("member_type").$type<"grower" | "general">().default("grower").notNull(),
+  county: varchar("county"),
+  greenhouseRole: varchar("greenhouse_role"),
+  cropTypes: text("crop_types").array().default([]),
+  otherCrop: varchar("other_crop"),
+  ghSize: varchar("gh_size"),
+  productionMethod: varchar("production_method"),
+  suppLighting: varchar("supp_lighting"),
+  climateControl: varchar("climate_control"),
 }, (table) => ({
   stateIdx: index("profiles_state_idx").on(table.state),
   farmTypeIdx: index("profiles_farm_type_idx").on(table.farmType),
   stateAndFarmTypeIdx: index("profiles_state_farm_type_idx").on(table.state, table.farmType),
+  memberTypeIdx: index("profiles_member_type_idx").on(table.memberType),
 }));
 
 export const blogPosts = pgTable("blog_posts", {

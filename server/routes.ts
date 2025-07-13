@@ -39,7 +39,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {
     try {
-      const { password, ...userData } = req.body;
+      const { password, memberType = "grower", ...userData } = req.body;
       
       // Validate password strength
       if (password.length < 12) {
@@ -54,16 +54,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(409).json({ message: "User already exists" });
       }
 
+      // Validate member type specific requirements
+      if (memberType === "grower") {
+        const { cropTypes, otherCrop, county } = req.body;
+        
+        if (!county) {
+          return res.status(400).json({ message: "County is required for grower members" });
+        }
+        
+        if (cropTypes && cropTypes.includes("Other") && !otherCrop) {
+          return res.status(400).json({ message: "Please specify other crop type" });
+        }
+      }
+
       // Create user
       const passwordHash = await hashPassword(password);
       const user = await storage.createUser({
-        ...userData,
+        username: userData.username,
+        email: userData.email,
         passwordHash,
         role: Role.MEMBER,
       });
 
-      // Create profile
-      const { name, phone, state, employer, jobTitle, farmType } = req.body;
+      // Create profile with member type specific fields
+      const { 
+        name, phone, state, employer, jobTitle, farmType,
+        county, greenhouseRole, cropTypes, otherCrop, 
+        ghSize, productionMethod, suppLighting, climateControl 
+      } = req.body;
+      
       await storage.createProfile(user.id, {
         name,
         phone,
@@ -71,6 +90,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         employer,
         jobTitle,
         farmType,
+        memberType,
+        // Grower-specific fields (will be null for general members)
+        county: memberType === "grower" ? county : null,
+        greenhouseRole: memberType === "grower" ? greenhouseRole : null,
+        cropTypes: memberType === "grower" ? (cropTypes || []) : [],
+        otherCrop: memberType === "grower" ? otherCrop : null,
+        ghSize: memberType === "grower" ? ghSize : null,
+        productionMethod: memberType === "grower" ? productionMethod : null,
+        suppLighting: memberType === "grower" ? suppLighting : null,
+        climateControl: memberType === "grower" ? climateControl : null,
       });
 
       // Send verification email (simplified for MVP)
