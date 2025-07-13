@@ -111,6 +111,11 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 
 ## Changelog
 
+- July 13, 2025: Updated Sam Chronert's founding member biography
+  - Replaced Sam's bio text on About page with new comprehensive content
+  - Updated narrative to emphasize hands-on experience, collaborative learning, and practical expertise
+  - New bio highlights progression from entry-level to production grower through direct farm experience
+  - Maintains existing styling and layout structure for consistency with other founder bios
 - July 13, 2025: Forum and navigation enhancements
   - Removed County filter from Forum page - simplified to State and Category filters only
   - Updated Forum page subtitle to: "Connect with fellow growers, share knowledge, organize bulk ordering."
