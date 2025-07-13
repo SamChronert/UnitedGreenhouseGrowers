@@ -1,0 +1,50 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan; wait for my “Approved – implement” before editing code.
+
+Goal
+=====
+Add concise, italic explanations next to each **Climate Control Type** checkbox option.  
+Remove the “N/A” option (Other / Not Listed already handles that).
+
+Content
+-------
+• Passive High Tunnel — *Unheated hoop house, roll-up sides*  
+• Naturally Ventilated — *Roof/side vents, no fans*  
+• Mechanically Ventilated — *Fans + shutters for airflow*  
+• Evaporative-Cooled (Fan-and-Pad) — *Wet pad cooling system*  
+• Fog / Misting-Cooled — *Fine mist cools air*  
+• Semi-Closed — *Filtered intake, partial recirculation*  
+• Fully Closed / HVAC-Controlled — *Sealed, AC + dehumidification*  
+• Other / Not Listed — *Select if none match*
+
+Display
+-------
+* Render blurbs **inline**, immediately following each label, in italic `text-sm text-gray-500`.  
+* Example: `[ ] Passive High Tunnel  *Unheated hoop house, roll-up sides*`  
+* Ensure accessibility: wrap blurb in `<span aria-hidden="true">` so screen readers announce label first, then description via `aria-describedby` if appropriate.
+
+Front-end changes
+-----------------
+File: `client/src/pages/Register.tsx`  
+1. Update `ClimateControlOptions` array to include `{ value, label, blurb }`.  
+2. Map options to render checkbox + label + `<span>` blurb inline.  
+3. Remove “N/A” option from options array and any related exclusivity logic.  
+4. Validation: user must still select **at least one** climate-control option.
+
+Back-end
+--------
+No schema or API changes required (value list simply excludes “N/A”).
+
+Testing
+-------
+• Verify blurbs render correctly (desktop & mobile).  
+• Confirm at least-one validation still functions.  
+• Ensure screen-reader flow remains accessible.
+
+Deliverables
+============
+1. **Plan summary** (files, steps) — await my approval.  
+2. After approval, implement; commit checkpoint **“climate-control-blurbs”**.  
+3. Provide a brief manual test checklist.
+
+Await my reply **“Approved – implement”** before coding.
