@@ -1,0 +1,52 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan; wait for my **“Approved – implement”** before coding.
+
+================================================================
+GOAL – Forum & Navigation Tweaks
+================================================================
+1️⃣ **Forum Page**  
+   • Remove the **County** filter entirely (keep State & Category).  
+   • Update dashboard-widget subtitle on Member Tools **and** Forum page header:  
+     “Connect with fellow growers, share knowledge, organize bulk ordering.”
+
+2️⃣ **Dashboard dropdown → add hubs**  
+   • In the top-nav **Dashboard** dropdown, list items in this exact order:  
+     1. Overview  
+     2. Profile  
+     3. Resource Library  
+     4. Member Forum  
+     5. Find a Grower  
+     6. Farm Assessment  
+     7. Sales Hub  
+     8. Product Hub  
+
+Front-end tasks
+----------------
+`client/src/pages/Forum.tsx`  
+  – Remove County dropdown + logic.  
+  – Adjust State filter to no longer cascade to County.  
+  – Update header subtitle text.
+
+`client/src/pages/Dashboard.tsx` (Member Tools widget array)  
+  – Change Member Forum description to new text.
+
+`client/src/components/NavDashboardDropdown.tsx` (or equivalent layout/nav file)  
+  – Re-order dropdown items and add **Sales Hub** & **Product Hub** links pointing to `/dashboard/saleshub` and `/dashboard/producthub`.
+
+Back-end
+--------
+None (filters handled client-side; API already supports state/category).
+
+Deliverables
+------------
+1. **Plan summary** (files, steps) — await approval.  
+2. After approval, implement; commit checkpoint **“forum-nav-tweaks”**.  
+3. Manual test checklist:  
+   ▸ Forum page shows State + Category filters only.  
+   ▸ Selecting State filters posts correctly.  
+   ▸ Member Forum widget & page subtitle updated.  
+   ▸ Dashboard dropdown shows eight items in specified order, links work.
+
+================================================================
+Await my **“Approved – implement”** before coding.
+================================================================
