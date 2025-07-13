@@ -1,0 +1,40 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan and wait for my **“Approved – implement”** before changing code.
+
+================================================================
+GOAL – Update Sam Chronert’s Founding Member Bio
+================================================================
+
+Update the biography text for **Sam Chronert** on the **/about** page (https://www.greenhousegrowers.org/about), in the **Founding Members** section.
+
+New bio copy:
+> Sam began his work in indoor farming in a hands-on, entry-level role and steadily built his expertise through direct farm experience, close collaboration with peers, and learning from a lot of mistakes. Over time, he took on broader responsibilities across crop care, climate control, system commissioning, and yield improvement as a production Grower while simultaneously earning a Master’s in Agriculture from Washington State University along the way. Most of his practical know-how came from swapping ideas with growers, R&D scientists, university researchers, and vendors while troubleshooting real crop management problems in a large scale production farm. That habit of open collaboration led him to want to help create the United Greenhouse Growers Association — a straightforward space for production growers, academics, and industry partners to share data, compare methods, and solve problems together. His focus remains the same: keep learning, keep exchanging knowledge, and make day-to-day greenhouse work a little easier for everyone.
+
+----------------------------------------------------------------
+Front-end changes
+----------------------------------------------------------------
+`client/src/pages/About.tsx` (or equivalent team/founders component)  
+• Locate the Founding Members section and the current bio block for Sam Chronert.  
+• Replace the existing paragraph with the new copy above.  
+• Maintain existing styling, layout, and card/avatar formatting.  
+• Confirm line breaks, smart quotes, and em dash render correctly.
+
+----------------------------------------------------------------
+Back-end
+----------------------------------------------------------------
+None.
+
+----------------------------------------------------------------
+Deliverables
+----------------------------------------------------------------
+1. **Plan summary** (file and section to change) — await approval.  
+2. After approval, implement; commit checkpoint **“bio-update-sam-chronert”**.  
+3. Manual test checklist:  
+   ▸ New bio text displays on /about page under Founding Members  
+   ▸ No styling regressions to avatar, text wrapping, or layout  
+   ▸ Content visible and readable on mobile and desktop  
+   ▸ Typography is consistent with other founder bios
+
+================================================================
+Await my **“Approved – implement”** before coding.
+================================================================
