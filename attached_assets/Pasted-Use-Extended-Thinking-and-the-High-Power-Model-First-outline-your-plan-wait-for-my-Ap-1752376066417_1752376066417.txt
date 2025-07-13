@@ -1,0 +1,91 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan; wait for my **“Approved – implement”** before changing code.
+
+================================================================
+GOAL – Forum Feature Upgrades
+================================================================
+1️⃣ **Post/Comment editing & deletion**  
+2️⃣ **Filters:** by poster’s **State** & **County** (from profile)  
+3️⃣ **Categories:** Bulk Ordering, Plant Health Management, Greenhouse Systems Management, Operations, Other  
+4️⃣ **Media uploads:** images & videos (≤ 10 MB) as files or inline embeds  
+
+----------------------------------------------------------------
+A. Editing & Deletion
+----------------------------------------------------------------
+• Allow members to **edit** their own posts/comments  
+  – On save, show a small ✎ “edited” tooltip with timestamp (`Edited · 2025-07-12 14:05`).  
+• Allow members to **delete** their own posts/comments  
+  – Replace content with “_message deleted_” placeholder (keeps thread structure).  
+• Permissions enforced server-side.
+
+----------------------------------------------------------------
+B. Filters
+----------------------------------------------------------------
+Top-bar filter UI (above post list):  
+  • **State** dropdown (50 states + “All”)  
+  • **County** dropdown (populated after state pick; “All”)  
+  • **Category** dropdown (see list)  
+Filters combine (AND). Default = All.
+
+----------------------------------------------------------------
+C. Categories
+----------------------------------------------------------------
+• Add fixed category list:  
+  Bulk Ordering · Plant Health Management · Greenhouse Systems Management · Operations · Other  
+• Post-creation form: require category select.  
+• Posts display category badge.  
+• Category filter uses same list.
+
+----------------------------------------------------------------
+D. Media Uploads
+----------------------------------------------------------------
+• Allow image/video upload (max 10 MB) via file picker **or** paste URL to embed.  
+• Store uploads in Repl filesystem (`/public/uploads/…`) – simplest for now.  
+• Accept `.jpg .png .gif .mp4 .mov .webm`.  
+• Render images inline, videos via HTML5 `<video controls>`.
+
+----------------------------------------------------------------
+Front-end tasks
+----------------------------------------------------------------
+`client/src/pages/Forum.tsx`
+  – Add filter bar & state/county logic (fetch from profile).  
+  – Update post list query to honor filters.  
+  – Show “edited” icon & tooltip.  
+  – Replace deleted text with italic placeholder.
+
+`client/src/components/PostEditor.tsx`
+  – Add category select + media upload UI (dropzone).  
+  – Support edit mode (prefill textarea).  
+
+`client/src/components/Comment.tsx`
+  – Add edit/delete buttons when `authorId === currentUser.id`.  
+
+`client/src/components/Filters.tsx`
+  – State ▸ County cascading dropdowns + category select.
+
+----------------------------------------------------------------
+Back-end tasks
+----------------------------------------------------------------
+• Update posts table: add `category` (string), `editedAt` (timestamp nullable).  
+• Update API:  
+  – `PUT /posts/:id` to edit (updates `editedAt`).  
+  – `DELETE /posts/:id` soft-delete (flag).  
+• Add query params for state, county, category filters.  
+• Serve `/uploads/*` static.  
+• Validate file size & type on upload.
+
+----------------------------------------------------------------
+Deliverables
+----------------------------------------------------------------
+1. **Plan summary** (files, schema changes, routes) — await approval.  
+2. After approval, implement; commit checkpoint **“forum-upgrades-v1”**.  
+3. Manual test checklist:  
+   ▸ Create/edit/delete post & comment; “edited” tag + “message deleted” placeholder render.  
+   ▸ Filters correctly narrow list by state + county + category.  
+   ▸ Category badge appears on posts.  
+   ▸ Image & video upload embeds display; ≤ 10 MB cap enforced.  
+   ▸ No permission leaks (user can edit/delete only their own content).
+
+================================================================
+Await my **“Approved – implement”** before coding.
+================================================================
