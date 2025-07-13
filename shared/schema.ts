@@ -36,7 +36,8 @@ export const profiles = pgTable("profiles", {
   ghSize: varchar("gh_size"),
   productionMethod: varchar("production_method"),
   suppLighting: varchar("supp_lighting"),
-  climateControl: varchar("climate_control"),
+  climateControl: text("climate_control").array().default([]),
+  otherFarmType: varchar("other_farm_type"),
 }, (table) => ({
   stateIdx: index("profiles_state_idx").on(table.state),
   farmTypeIdx: index("profiles_farm_type_idx").on(table.farmType),

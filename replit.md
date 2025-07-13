@@ -111,6 +111,15 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 
 ## Changelog
 
+- July 13, 2025: Enhanced registration form with member type selection and conditional fields
+  - Added "Grower Member" and "General Member" registration types with conditional form rendering
+  - Implemented proper field ordering per member type specification
+  - Added multi-select climate control with N/A exclusivity logic
+  - Enhanced greenhouse size options with acreage indicators
+  - Added "Other" farm type with conditional text field requirement
+  - Updated database schema with new fields: otherFarmType, climateControl array
+  - Improved validation for grower-specific requirements and multi-select fields
+  - Maintained backward compatibility with existing member data
 - June 19, 2025: Added password change functionality to user profile settings
   - Created secure password change API endpoint with current password verification
   - Added comprehensive frontend form with password visibility toggles

@@ -37,7 +37,8 @@ const registerSchema = z.object({
   ghSize: z.string().optional(),
   productionMethod: z.string().optional(),
   suppLighting: z.string().optional(),
-  climateControl: z.string().optional(),
+  climateControl: z.array(z.string()).optional(),
+  otherFarmType: z.string().optional(),
 }).refine((data) => {
   // Conditional validation for grower members
   if (data.memberType === "grower") {
@@ -56,6 +57,33 @@ const registerSchema = z.object({
 }, {
   message: "Please specify other crop type",
   path: ["otherCrop"],
+}).refine((data) => {
+  // Validate climate control multi-select
+  if (data.memberType === "grower" && data.climateControl) {
+    return data.climateControl.length > 0;
+  }
+  return true;
+}, {
+  message: "Please select at least one climate control type",
+  path: ["climateControl"],
+}).refine((data) => {
+  // Validate "N/A" exclusivity in climate control
+  if (data.memberType === "grower" && data.climateControl?.includes("N/A")) {
+    return data.climateControl.length === 1;
+  }
+  return true;
+}, {
+  message: "N/A cannot be selected with other climate control options",
+  path: ["climateControl"],
+}).refine((data) => {
+  // Validate "Other" farm type requirement
+  if (data.memberType === "grower" && data.farmType === "Other") {
+    return data.otherFarmType && data.otherFarmType.length > 0;
+  }
+  return true;
+}, {
+  message: "Please specify other farm type",
+  path: ["otherFarmType"],
 });
 
 type RegisterForm = z.infer<typeof registerSchema>;
@@ -81,8 +109,8 @@ const CROP_TYPES = [
 ];
 
 const GREENHOUSE_SIZES = [
-  "Under 500 ft²", "500–2,000 ft²", "2,001–10,000 ft²", "10,001–43,560 ft²",
-  "43,560–87,119 ft²", "87,120–217,799 ft²", "Over 217,800 ft²", "N/A"
+  "Under 500 ft²", "500 – 2 000 ft²", "2 001 – 10 000 ft²", "10 001 – 43 560 ft² (≈ 1 acre)",
+  "43 560 – 87 119 ft² (1 – 2 acres)", "87 120 – 217 799 ft² (2 – 5 acres)", "Over 217 800 ft² (> 5 acres)", "N/A"
 ];
 
 const PRODUCTION_METHODS = ["Soil-based", "Hydroponics", "N/A"];
@@ -100,6 +128,7 @@ export default function Register() {
   const { toast } = useToast();
   const [memberType, setMemberType] = useState<"grower" | "general">("grower");
   const [selectedCrops, setSelectedCrops] = useState<string[]>([]);
+  const [selectedClimateControl, setSelectedClimateControl] = useState<string[]>([]);
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -121,7 +150,8 @@ export default function Register() {
       ghSize: "",
       productionMethod: "",
       suppLighting: "",
-      climateControl: "",
+      climateControl: [],
+      otherFarmType: "",
     },
   });
 
@@ -139,8 +169,11 @@ export default function Register() {
       form.setValue("ghSize", "");
       form.setValue("productionMethod", "");
       form.setValue("suppLighting", "");
-      form.setValue("climateControl", "");
+      form.setValue("climateControl", []);
+      form.setValue("farmType", "");
+      form.setValue("otherFarmType", "");
       setSelectedCrops([]);
+      setSelectedClimateControl([]);
     }
   };
 
@@ -160,6 +193,28 @@ export default function Register() {
         form.setValue("otherCrop", "");
       }
     }
+  };
+
+  // Handle climate control selection
+  const handleClimateControlToggle = (option: string) => {
+    let newSelection: string[];
+    
+    if (option === "N/A") {
+      // N/A is exclusive - if selected, clear all others
+      newSelection = selectedClimateControl.includes("N/A") ? [] : ["N/A"];
+    } else {
+      // If N/A is currently selected, clear it first
+      const currentWithoutNA = selectedClimateControl.filter(item => item !== "N/A");
+      
+      if (currentWithoutNA.includes(option)) {
+        newSelection = currentWithoutNA.filter(item => item !== option);
+      } else {
+        newSelection = [...currentWithoutNA, option];
+      }
+    }
+    
+    setSelectedClimateControl(newSelection);
+    form.setValue("climateControl", newSelection);
   };
 
   const registerMutation = useMutation({
@@ -210,42 +265,55 @@ export default function Register() {
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="grower" id="grower" />
                     <Label htmlFor="grower" className="cursor-pointer">
-                      Grower Member - Complete greenhouse questionnaire
+                      Grower Member
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="general" id="general" />
                     <Label htmlFor="general" className="cursor-pointer">
-                      General Member - Basic information only
+                      General Member
                     </Label>
                   </div>
                 </RadioGroup>
               </div>
 
-              {/* Basic Information */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
-                  <Input
-                    id="name"
-                    {...form.register("name")}
-                    aria-describedby={form.formState.errors.name ? "name-error" : undefined}
-                  />
-                  {form.formState.errors.name && (
-                    <p id="name-error" className="text-sm text-red-600" role="alert">{form.formState.errors.name.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    {...form.register("phone")}
-                  />
-                  {form.formState.errors.phone && (
-                    <p className="text-sm text-red-600">{form.formState.errors.phone.message}</p>
-                  )}
-                </div>
+              {/* Basic Information - Full Name */}
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  {...form.register("name")}
+                  aria-describedby={form.formState.errors.name ? "name-error" : undefined}
+                />
+                {form.formState.errors.name && (
+                  <p id="name-error" className="text-sm text-red-600" role="alert">{form.formState.errors.name.message}</p>
+                )}
+              </div>
+
+              {/* Email Address */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...form.register("email")}
+                />
+                {form.formState.errors.email && (
+                  <p className="text-sm text-red-600">{form.formState.errors.email.message}</p>
+                )}
+              </div>
+
+              {/* Phone Number */}
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number *</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  {...form.register("phone")}
+                />
+                {form.formState.errors.phone && (
+                  <p className="text-sm text-red-600">{form.formState.errors.phone.message}</p>
+                )}
               </div>
 
               {/* Location Information */}
@@ -295,13 +363,15 @@ export default function Register() {
                     {...form.register("employer")}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="jobTitle">Job Title</Label>
-                  <Input
-                    id="jobTitle"
-                    {...form.register("jobTitle")}
-                  />
-                </div>
+                {memberType === "general" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="jobTitle">Job Title</Label>
+                    <Input
+                      id="jobTitle"
+                      {...form.register("jobTitle")}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Grower-Specific Fields */}
@@ -328,6 +398,59 @@ export default function Register() {
                         </Label>
                       </div>
                     </RadioGroup>
+                  </div>
+
+                  {/* Greenhouse Size */}
+                  <div className="space-y-2">
+                    <Label htmlFor="ghSize">Greenhouse Size</Label>
+                    <Select 
+                      value={form.watch("ghSize")} 
+                      onValueChange={(value) => form.setValue("ghSize", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select greenhouse size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {GREENHOUSE_SIZES.map((size) => (
+                          <SelectItem key={size} value={size}>
+                            {size}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Farm Type */}
+                  <div className="space-y-2">
+                    <Label htmlFor="farmType">Farm Type</Label>
+                    <Select 
+                      value={form.watch("farmType")} 
+                      onValueChange={(value) => form.setValue("farmType", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select farm type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {FARM_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {form.watch("farmType") === "Other" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="otherFarmType">Specify Other Farm Type *</Label>
+                        <Input
+                          id="otherFarmType"
+                          {...form.register("otherFarmType")}
+                          placeholder="Enter other farm type"
+                        />
+                        {form.formState.errors.otherFarmType && (
+                          <p className="text-sm text-red-600">{form.formState.errors.otherFarmType.message}</p>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Crop Types */}
@@ -363,122 +486,73 @@ export default function Register() {
                     )}
                   </div>
 
-                  {/* Greenhouse Details */}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="ghSize">Greenhouse Size</Label>
-                      <Select 
-                        value={form.watch("ghSize")} 
-                        onValueChange={(value) => form.setValue("ghSize", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select greenhouse size" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {GREENHOUSE_SIZES.map((size) => (
-                            <SelectItem key={size} value={size}>
-                              {size}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="productionMethod">Production Method</Label>
-                      <Select 
-                        value={form.watch("productionMethod")} 
-                        onValueChange={(value) => form.setValue("productionMethod", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select production method" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PRODUCTION_METHODS.map((method) => (
-                            <SelectItem key={method} value={method}>
-                              {method}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  {/* Production Method */}
+                  <div className="space-y-2">
+                    <Label htmlFor="productionMethod">Production Method</Label>
+                    <Select 
+                      value={form.watch("productionMethod")} 
+                      onValueChange={(value) => form.setValue("productionMethod", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select production method" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PRODUCTION_METHODS.map((method) => (
+                          <SelectItem key={method} value={method}>
+                            {method}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="suppLighting">Supplemental Lighting</Label>
-                      <Select 
-                        value={form.watch("suppLighting")} 
-                        onValueChange={(value) => form.setValue("suppLighting", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select lighting option" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {LIGHTING_OPTIONS.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                  {/* Climate Control Type - Multi-select */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-medium">Climate Control Type (select at least one) *</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {CLIMATE_CONTROL_TYPES.map((type) => (
+                        <div key={type} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={type}
+                            checked={selectedClimateControl.includes(type)}
+                            onCheckedChange={() => handleClimateControlToggle(type)}
+                            disabled={type !== "N/A" && selectedClimateControl.includes("N/A")}
+                          />
+                          <Label htmlFor={type} className="cursor-pointer text-sm">
+                            {type}
+                          </Label>
+                        </div>
+                      ))}
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="climateControl">Climate Control Type</Label>
-                      <Select 
-                        value={form.watch("climateControl")} 
-                        onValueChange={(value) => form.setValue("climateControl", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select climate control" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CLIMATE_CONTROL_TYPES.map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {type}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    {form.formState.errors.climateControl && (
+                      <p className="text-sm text-red-600">{form.formState.errors.climateControl.message}</p>
+                    )}
+                  </div>
+
+                  {/* Supplemental Lighting */}
+                  <div className="space-y-2">
+                    <Label htmlFor="suppLighting">Supplemental Lighting</Label>
+                    <Select 
+                      value={form.watch("suppLighting")} 
+                      onValueChange={(value) => form.setValue("suppLighting", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select lighting option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LIGHTING_OPTIONS.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </>
               )}
 
-              {/* Farm Type - for backward compatibility */}
-              {memberType === "grower" && (
-                <div className="space-y-2">
-                  <Label htmlFor="farmType">Farm Type</Label>
-                  <Select 
-                    value={form.watch("farmType")} 
-                    onValueChange={(value) => form.setValue("farmType", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select farm type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {FARM_TYPES.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
               {/* Account Credentials */}
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    {...form.register("email")}
-                  />
-                  {form.formState.errors.email && (
-                    <p className="text-sm text-red-600">{form.formState.errors.email.message}</p>
-                  )}
-                </div>
                 <div className="space-y-2">
                   <Label htmlFor="username">Username *</Label>
                   <Input

@@ -56,7 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate member type specific requirements
       if (memberType === "grower") {
-        const { cropTypes, otherCrop, county } = req.body;
+        const { cropTypes, otherCrop, county, climateControl, farmType, otherFarmType } = req.body;
         
         if (!county) {
           return res.status(400).json({ message: "County is required for grower members" });
@@ -64,6 +64,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (cropTypes && cropTypes.includes("Other") && !otherCrop) {
           return res.status(400).json({ message: "Please specify other crop type" });
+        }
+        
+        if (climateControl && climateControl.length === 0) {
+          return res.status(400).json({ message: "Please select at least one climate control type" });
+        }
+        
+        if (climateControl && climateControl.includes("N/A") && climateControl.length > 1) {
+          return res.status(400).json({ message: "N/A cannot be selected with other climate control options" });
+        }
+        
+        if (farmType === "Other" && !otherFarmType) {
+          return res.status(400).json({ message: "Please specify other farm type" });
         }
       }
 
@@ -80,7 +92,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { 
         name, phone, state, employer, jobTitle, farmType,
         county, greenhouseRole, cropTypes, otherCrop, 
-        ghSize, productionMethod, suppLighting, climateControl 
+        ghSize, productionMethod, suppLighting, climateControl,
+        otherFarmType
       } = req.body;
       
       await storage.createProfile(user.id, {
@@ -99,7 +112,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ghSize: memberType === "grower" ? ghSize : null,
         productionMethod: memberType === "grower" ? productionMethod : null,
         suppLighting: memberType === "grower" ? suppLighting : null,
-        climateControl: memberType === "grower" ? climateControl : null,
+        climateControl: memberType === "grower" ? (climateControl || []) : [],
+        otherFarmType: memberType === "grower" ? otherFarmType : null,
       });
 
       // Send verification email (simplified for MVP)
