@@ -1,7 +1,11 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { 
   authenticate, 
@@ -33,8 +37,32 @@ const aiRateLimit = rateLimit({
   message: "Too many AI requests, please try again later",
 });
 
+// Configure multer for file uploads
+const uploadDir = path.join(process.cwd(), "public", "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const upload = multer({
+  dest: uploadDir,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime', 'video/webm'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only JPEG, PNG, GIF, MP4, MOV, and WEBM files are allowed.'));
+    }
+  }
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
   app.use(cookieParser());
+  
+  // Serve uploaded files statically
+  app.use("/uploads", express.static(uploadDir));
 
   // Auth routes
   app.post("/api/auth/register", async (req, res) => {
@@ -563,8 +591,13 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
   // Forum routes
   app.get("/api/forum/posts", authenticate, requireMember, async (req: AuthRequest, res) => {
     try {
-      const { search } = req.query;
-      const posts = await storage.getAllForumPosts(search as string);
+      const { search, state, county, category } = req.query;
+      const posts = await storage.getAllForumPosts({
+        searchQuery: search as string,
+        state: state as string,
+        county: county as string,
+        category: category as string,
+      });
       res.json(posts);
     } catch (error) {
       console.error("Get forum posts error:", error);
@@ -586,18 +619,123 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
+  // Edit forum post
+  app.put("/api/forum/posts/:id", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const postId = req.params.id;
+      const updates = req.body;
+      
+      // Check if user owns the post
+      const post = await storage.getForumPost(postId);
+      if (!post || post.userId !== req.user!.id) {
+        return res.status(403).json({ message: "You can only edit your own posts" });
+      }
+      
+      const updatedPost = await storage.updateForumPost(postId, updates);
+      res.json(updatedPost);
+    } catch (error) {
+      console.error("Edit forum post error:", error);
+      res.status(500).json({ message: "Failed to edit post" });
+    }
+  });
+
+  // Delete forum post
+  app.delete("/api/forum/posts/:id", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const postId = req.params.id;
+      
+      // Check if user owns the post
+      const post = await storage.getForumPost(postId);
+      if (!post || post.userId !== req.user!.id) {
+        return res.status(403).json({ message: "You can only delete your own posts" });
+      }
+      
+      const deletedPost = await storage.softDeleteForumPost(postId);
+      res.json(deletedPost);
+    } catch (error) {
+      console.error("Delete forum post error:", error);
+      res.status(500).json({ message: "Failed to delete post" });
+    }
+  });
+
   app.post("/api/forum/posts/:postId/comments", authenticate, requireMember, async (req: AuthRequest, res) => {
     try {
       const commentData = {
         postId: req.params.postId,
         userId: req.user!.id,
         content: req.body.content,
+        attachments: req.body.attachments || [],
       };
       const comment = await storage.createForumComment(commentData);
       res.status(201).json(comment);
     } catch (error) {
       console.error("Create forum comment error:", error);
       res.status(500).json({ message: "Failed to create comment" });
+    }
+  });
+
+  // Edit forum comment
+  app.put("/api/forum/posts/:postId/comments/:id", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const commentId = req.params.id;
+      const updates = req.body;
+      
+      // Find the comment to check ownership
+      const post = await storage.getForumPost(req.params.postId);
+      const comment = post?.comments.find(c => c.id === commentId);
+      
+      if (!comment || comment.userId !== req.user!.id) {
+        return res.status(403).json({ message: "You can only edit your own comments" });
+      }
+      
+      const updatedComment = await storage.updateForumComment(commentId, updates);
+      res.json(updatedComment);
+    } catch (error) {
+      console.error("Edit forum comment error:", error);
+      res.status(500).json({ message: "Failed to edit comment" });
+    }
+  });
+
+  // Delete forum comment
+  app.delete("/api/forum/posts/:postId/comments/:id", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const commentId = req.params.id;
+      
+      // Find the comment to check ownership
+      const post = await storage.getForumPost(req.params.postId);
+      const comment = post?.comments.find(c => c.id === commentId);
+      
+      if (!comment || comment.userId !== req.user!.id) {
+        return res.status(403).json({ message: "You can only delete your own comments" });
+      }
+      
+      const deletedComment = await storage.softDeleteForumComment(commentId);
+      res.json(deletedComment);
+    } catch (error) {
+      console.error("Delete forum comment error:", error);
+      res.status(500).json({ message: "Failed to delete comment" });
+    }
+  });
+
+  // File upload endpoint
+  app.post("/api/forum/upload", authenticate, requireMember, upload.single('file'), async (req: AuthRequest, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const fileExtension = path.extname(req.file.originalname);
+      const newFileName = `${randomUUID()}${fileExtension}`;
+      const newFilePath = path.join(uploadDir, newFileName);
+      
+      // Rename file to have unique name
+      fs.renameSync(req.file.path, newFilePath);
+      
+      const fileUrl = `/uploads/${newFileName}`;
+      res.json({ url: fileUrl });
+    } catch (error) {
+      console.error("File upload error:", error);
+      res.status(500).json({ message: "Failed to upload file" });
     }
   });
 

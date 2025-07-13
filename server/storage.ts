@@ -73,13 +73,19 @@ export interface IStorage {
   getGrowerChallengeStats(): Promise<{ totalCount: number; categoryCounts: Record<string, number>; recentCount: number }>;
   
   // Forum operations
-  getAllForumPosts(searchQuery?: string): Promise<(ForumPost & { user: User & { profile: Profile }; comments: (ForumComment & { user: User & { profile: Profile } })[]; commentCount: number })[]>;
+  getAllForumPosts(filters?: {
+    searchQuery?: string;
+    state?: string;
+    county?: string;
+    category?: string;
+  }): Promise<(ForumPost & { user: User & { profile: Profile }; comments: (ForumComment & { user: User & { profile: Profile } })[]; commentCount: number })[]>;
   getForumPost(id: string): Promise<(ForumPost & { user: User & { profile: Profile }; comments: (ForumComment & { user: User & { profile: Profile } })[] }) | undefined>;
   createForumPost(post: InsertForumPost): Promise<ForumPost>;
   updateForumPost(id: string, updates: Partial<ForumPost>): Promise<ForumPost>;
-  deleteForumPost(id: string): Promise<void>;
+  softDeleteForumPost(id: string): Promise<ForumPost>;
   createForumComment(comment: InsertForumComment): Promise<ForumComment>;
-  deleteForumComment(id: string): Promise<void>;
+  updateForumComment(id: string, updates: Partial<ForumComment>): Promise<ForumComment>;
+  softDeleteForumComment(id: string): Promise<ForumComment>;
   
   // Assessment training data operations
   getAllAssessmentTrainingData(): Promise<AssessmentTrainingData[]>;
@@ -371,13 +377,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Forum operations
-  async getAllForumPosts(searchQuery?: string): Promise<(ForumPost & { user: User & { profile: Profile }; comments: (ForumComment & { user: User & { profile: Profile } })[]; commentCount: number })[]> {
-    const posts = await db
+  async getAllForumPosts(filters?: {
+    searchQuery?: string;
+    state?: string;
+    county?: string;
+    category?: string;
+  }): Promise<(ForumPost & { user: User & { profile: Profile }; comments: (ForumComment & { user: User & { profile: Profile } })[]; commentCount: number })[]> {
+    let query = db
       .select()
       .from(forumPosts)
       .leftJoin(users, eq(forumPosts.userId, users.id))
       .leftJoin(profiles, eq(users.id, profiles.userId))
-      .orderBy(desc(forumPosts.createdAt));
+      .where(eq(forumPosts.isDeleted, false));
+
+    // Apply filters
+    if (filters?.state) {
+      query = query.where(and(
+        eq(forumPosts.isDeleted, false),
+        eq(profiles.state, filters.state)
+      ));
+    }
+    
+    if (filters?.county) {
+      query = query.where(and(
+        eq(forumPosts.isDeleted, false),
+        eq(profiles.county, filters.county)
+      ));
+    }
+    
+    if (filters?.category) {
+      query = query.where(and(
+        eq(forumPosts.isDeleted, false),
+        eq(forumPosts.category, filters.category)
+      ));
+    }
+
+    const posts = await query.orderBy(desc(forumPosts.createdAt));
 
     const postsWithDetails = await Promise.all(
       posts.map(async (post) => {
@@ -386,7 +421,10 @@ export class DatabaseStorage implements IStorage {
           .from(forumComments)
           .leftJoin(users, eq(forumComments.userId, users.id))
           .leftJoin(profiles, eq(users.id, profiles.userId))
-          .where(eq(forumComments.postId, post.forum_posts.id))
+          .where(and(
+            eq(forumComments.postId, post.forum_posts.id),
+            eq(forumComments.isDeleted, false)
+          ))
           .orderBy(forumComments.createdAt);
 
         return {
@@ -401,11 +439,11 @@ export class DatabaseStorage implements IStorage {
       })
     );
 
-    if (searchQuery) {
+    if (filters?.searchQuery) {
       return postsWithDetails.filter(post => 
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+        post.title.toLowerCase().includes(filters.searchQuery!.toLowerCase()) ||
+        post.content.toLowerCase().includes(filters.searchQuery!.toLowerCase()) ||
+        (post.tags && post.tags.some(tag => tag.toLowerCase().includes(filters.searchQuery!.toLowerCase())))
       );
     }
 
@@ -454,14 +492,23 @@ export class DatabaseStorage implements IStorage {
   async updateForumPost(id: string, updates: Partial<ForumPost>): Promise<ForumPost> {
     const [post] = await db
       .update(forumPosts)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...updates, updatedAt: new Date(), editedAt: new Date() })
       .where(eq(forumPosts.id, id))
       .returning();
     return post;
   }
 
-  async deleteForumPost(id: string): Promise<void> {
-    await db.delete(forumPosts).where(eq(forumPosts.id, id));
+  async softDeleteForumPost(id: string): Promise<ForumPost> {
+    const [post] = await db
+      .update(forumPosts)
+      .set({ 
+        isDeleted: true, 
+        content: "_message deleted_",
+        updatedAt: new Date()
+      })
+      .where(eq(forumPosts.id, id))
+      .returning();
+    return post;
   }
 
   async createForumComment(commentData: InsertForumComment): Promise<ForumComment> {
@@ -475,8 +522,26 @@ export class DatabaseStorage implements IStorage {
     return comment;
   }
 
-  async deleteForumComment(id: string): Promise<void> {
-    await db.delete(forumComments).where(eq(forumComments.id, id));
+  async updateForumComment(id: string, updates: Partial<ForumComment>): Promise<ForumComment> {
+    const [comment] = await db
+      .update(forumComments)
+      .set({ ...updates, updatedAt: new Date(), editedAt: new Date() })
+      .where(eq(forumComments.id, id))
+      .returning();
+    return comment;
+  }
+
+  async softDeleteForumComment(id: string): Promise<ForumComment> {
+    const [comment] = await db
+      .update(forumComments)
+      .set({ 
+        isDeleted: true, 
+        content: "_message deleted_",
+        updatedAt: new Date()
+      })
+      .where(eq(forumComments.id, id))
+      .returning();
+    return comment;
   }
 
   // Assessment training data operations

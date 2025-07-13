@@ -9,6 +9,14 @@ export enum Role {
   ADMIN = "ADMIN"
 }
 
+export enum ForumCategory {
+  BULK_ORDERING = "Bulk Ordering",
+  PLANT_HEALTH_MANAGEMENT = "Plant Health Management", 
+  GREENHOUSE_SYSTEMS_MANAGEMENT = "Greenhouse Systems Management",
+  OPERATIONS = "Operations",
+  OTHER = "Other"
+}
+
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   username: varchar("username").unique().notNull(),
@@ -87,13 +95,17 @@ export const forumPosts = pgTable("forum_posts", {
   userId: varchar("user_id").notNull(),
   title: varchar("title").notNull(),
   content: text("content").notNull(),
+  category: varchar("category").notNull(), // Bulk Ordering, Plant Health Management, etc.
   tags: text("tags").array().default([]), // AI-generated topic tags
   attachments: text("attachments").array().default([]), // file URLs for images/documents
+  editedAt: timestamp("edited_at"), // Track when post was edited
+  isDeleted: boolean("is_deleted").default(false).notNull(), // Soft deletion
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
   userIdx: index("forum_posts_user_idx").on(table.userId),
   createdAtIdx: index("forum_posts_created_at_idx").on(table.createdAt),
+  categoryIdx: index("forum_posts_category_idx").on(table.category),
 }));
 
 export const forumComments = pgTable("forum_comments", {
@@ -101,6 +113,9 @@ export const forumComments = pgTable("forum_comments", {
   postId: varchar("post_id").notNull(),
   userId: varchar("user_id").notNull(),
   content: text("content").notNull(),
+  attachments: text("attachments").array().default([]), // file URLs for images/documents
+  editedAt: timestamp("edited_at"), // Track when comment was edited
+  isDeleted: boolean("is_deleted").default(false).notNull(), // Soft deletion
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
@@ -240,12 +255,16 @@ export const insertForumPostSchema = createInsertSchema(forumPosts).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  editedAt: true,
+  isDeleted: true,
 });
 
 export const insertForumCommentSchema = createInsertSchema(forumComments).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  editedAt: true,
+  isDeleted: true,
 });
 
 export const insertAssessmentTrainingDataSchema = createInsertSchema(assessmentTrainingData).omit({

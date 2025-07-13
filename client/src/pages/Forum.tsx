@@ -16,11 +16,17 @@ import {
   Calendar,
   User,
   Tag,
-  Send
+  Send,
+  Edit,
+  Trash2
 } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import type { ForumPost, ForumComment, User as UserType, Profile } from "@shared/schema";
+import ForumFilters from "@/components/ForumFilters";
+import PostEditor from "@/components/PostEditor";
+import Comment from "@/components/Comment";
+import { ForumCategory } from "@shared/schema";
 
 type PostWithDetails = ForumPost & { 
   user: UserType & { profile: Profile };
@@ -32,28 +38,37 @@ export default function Forum() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [selectedPost, setSelectedPost] = useState<PostWithDetails | null>(null);
-  const [newPost, setNewPost] = useState({ title: "", content: "" });
+  const [editingPost, setEditingPost] = useState<PostWithDetails | null>(null);
   const [newComment, setNewComment] = useState("");
+  const [filters, setFilters] = useState({
+    state: "",
+    county: "",
+    category: "",
+  });
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch forum posts with search
+  // Fetch forum posts with filters
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["/api/forum/posts", searchQuery],
+    queryKey: ["/api/forum/posts", searchQuery, filters],
     queryFn: async () => {
-      const searchParam = searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : '';
-      return apiRequest("GET", `/api/forum/posts${searchParam}`);
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('search', searchQuery);
+      if (filters.state) params.append('state', filters.state);
+      if (filters.county) params.append('county', filters.county);
+      if (filters.category) params.append('category', filters.category);
+      const queryString = params.toString();
+      return apiRequest("GET", `/api/forum/posts${queryString ? `?${queryString}` : ''}`);
     },
   });
 
   // Create new post mutation
   const createPostMutation = useMutation({
-    mutationFn: (postData: { title: string; content: string }) =>
+    mutationFn: (postData: { title: string; content: string; category: string; attachments: string[] }) =>
       apiRequest("POST", "/api/forum/posts", postData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/forum/posts"] });
-      setNewPost({ title: "", content: "" });
       setShowCreatePost(false);
       toast({
         title: "Success",
@@ -69,10 +84,51 @@ export default function Forum() {
     },
   });
 
+  // Edit post mutation
+  const editPostMutation = useMutation({
+    mutationFn: ({ id, ...postData }: { id: string; title: string; content: string; category: string; attachments: string[] }) =>
+      apiRequest("PUT", `/api/forum/posts/${id}`, postData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/forum/posts"] });
+      setEditingPost(null);
+      toast({
+        title: "Success",
+        description: "Your post has been updated successfully!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete post mutation
+  const deletePostMutation = useMutation({
+    mutationFn: (postId: string) =>
+      apiRequest("DELETE", `/api/forum/posts/${postId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/forum/posts"] });
+      toast({
+        title: "Success",
+        description: "Your post has been deleted successfully!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Create comment mutation
   const createCommentMutation = useMutation({
-    mutationFn: ({ postId, content }: { postId: string; content: string }) =>
-      apiRequest("POST", `/api/forum/posts/${postId}/comments`, { content }),
+    mutationFn: ({ postId, content, attachments }: { postId: string; content: string; attachments?: string[] }) =>
+      apiRequest("POST", `/api/forum/posts/${postId}/comments`, { content, attachments }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/forum/posts"] });
       setNewComment("");
@@ -90,21 +146,31 @@ export default function Forum() {
     },
   });
 
-  const handleCreatePost = () => {
-    if (!newPost.title.trim() || !newPost.content.trim()) {
+  const handleCreatePost = (postData: { title: string; content: string; category: string; attachments: string[] }) => {
+    createPostMutation.mutate(postData);
+  };
+
+  const handleEditPost = (postData: { title: string; content: string; category: string; attachments: string[] }) => {
+    if (!editingPost) return;
+    editPostMutation.mutate({ id: editingPost.id, ...postData });
+  };
+
+  const handleDeletePost = (postId: string) => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      deletePostMutation.mutate(postId);
+    }
+  };
+
+  const handleAddComment = (postId: string) => {
+    if (!newComment.trim()) {
       toast({
         title: "Error",
-        description: "Please fill in both title and content.",
+        description: "Please enter a comment.",
         variant: "destructive",
       });
       return;
     }
-    createPostMutation.mutate(newPost);
-  };
-
-  const handleCreateComment = (postId: string) => {
-    if (!newComment.trim()) return;
-    createCommentMutation.mutate({ postId, content: newComment });
+    createCommentMutation.mutate({ postId, content: newComment, attachments: [] });
   };
 
   if (isLoading) {
@@ -145,49 +211,40 @@ export default function Forum() {
             </Button>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search posts by topic, keywords, or questions..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+          {/* Search and Filters */}
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search posts by topic, keywords, or questions..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <ForumFilters 
+              filters={filters}
+              setFilters={setFilters}
             />
           </div>
         </div>
 
-        {/* Create Post Modal */}
+        {/* Create/Edit Post Modal */}
         {showCreatePost && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Create New Post</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Input
-                placeholder="Post title..."
-                value={newPost.title}
-                onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-              />
-              <Textarea
-                placeholder="Share your question, experience, or knowledge..."
-                value={newPost.content}
-                onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                rows={6}
-              />
-              <div className="flex justify-between">
-                <Button variant="outline" onClick={() => setShowCreatePost(false)}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleCreatePost}
-                  disabled={createPostMutation.isPending}
-                >
-                  {createPostMutation.isPending ? "Creating..." : "Create Post"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <PostEditor
+            onSave={handleCreatePost}
+            onCancel={() => setShowCreatePost(false)}
+            isLoading={createPostMutation.isPending}
+          />
+        )}
+        
+        {editingPost && (
+          <PostEditor
+            post={editingPost}
+            onSave={handleEditPost}
+            onCancel={() => setEditingPost(null)}
+            isLoading={editPostMutation.isPending}
+          />
         )}
 
         {/* Forum Posts */}
@@ -211,22 +268,38 @@ export default function Forum() {
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-3">
                     <Avatar className="h-10 w-10">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${post.user.profile?.name || post.user.username}`} />
                       <AvatarFallback>
                         {post.user.profile?.name?.[0] || post.user.username?.[0] || "U"}
                       </AvatarFallback>
                     </Avatar>
                     
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-lg">{post.title}</h3>
-                        {post.tags && post.tags.length > 0 && (
-                          <div className="flex gap-1">
-                            {post.tags.slice(0, 3).map((tag, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs">
-                                <Tag className="h-3 w-3 mr-1" />
-                                {tag}
-                              </Badge>
-                            ))}
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-lg">{post.title}</h3>
+                          {post.category && (
+                            <Badge variant="secondary" className="text-xs">
+                              {post.category}
+                            </Badge>
+                          )}
+                        </div>
+                        {user?.id === post.userId && (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingPost(post)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDeletePost(post.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         )}
                       </div>
@@ -234,8 +307,23 @@ export default function Forum() {
                       <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
                         <span>{post.user.profile?.name || post.user.username}</span>
                         <span>•</span>
+                        <span>{post.user.profile?.state}</span>
+                        {post.user.profile?.county && (
+                          <>
+                            <span>•</span>
+                            <span>{post.user.profile.county}</span>
+                          </>
+                        )}
+                        <span>•</span>
                         <Calendar className="h-3 w-3" />
                         <span>{format(new Date(post.createdAt), "MMM d, yyyy")}</span>
+                        {post.editedAt && (
+                          <>
+                            <span>•</span>
+                            <Edit className="h-3 w-3" />
+                            <span>Edited</span>
+                          </>
+                        )}
                         <span>•</span>
                         <MessageSquare className="h-3 w-3" />
                         <span>{post.commentCount || 0} comments</span>
@@ -266,12 +354,29 @@ export default function Forum() {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-xl">{selectedPost.title}</CardTitle>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
-                      <User className="h-4 w-4" />
-                      <span>{selectedPost.user.profile?.name || selectedPost.user.username}</span>
-                      <span>•</span>
-                      <Calendar className="h-4 w-4" />
-                      <span>{format(new Date(selectedPost.createdAt), "MMM d, yyyy 'at' h:mm a")}</span>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${selectedPost.user.profile?.name || selectedPost.user.username}`} />
+                        <AvatarFallback>
+                          {selectedPost.user.profile?.name?.[0] || selectedPost.user.username?.[0] || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-gray-600">
+                        {selectedPost.user.profile?.name || selectedPost.user.username}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        • {selectedPost.user.profile?.state}
+                        {selectedPost.user.profile?.county && `, ${selectedPost.user.profile.county}`}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        • {format(new Date(selectedPost.createdAt), "MMM d, yyyy 'at' h:mm a")}
+                      </span>
+                      {selectedPost.editedAt && (
+                        <span className="text-sm text-gray-500 italic flex items-center gap-1">
+                          <Edit className="h-3 w-3" />
+                          Edited · {format(new Date(selectedPost.editedAt), "MMM d, yyyy 'at' h:mm a")}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <Button variant="ghost" onClick={() => setSelectedPost(null)}>
@@ -293,20 +398,20 @@ export default function Forum() {
                   {/* Add Comment */}
                   <div className="flex gap-3 mb-6">
                     <Avatar className="h-8 w-8">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.profile?.name || user?.username}`} />
                       <AvatarFallback>
                         {user?.profile?.name?.[0] || user?.username?.[0] || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 flex gap-2">
-                      <Input
+                      <Textarea
                         placeholder="Add a comment..."
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleCreateComment(selectedPost.id)}
+                        rows={2}
                       />
                       <Button 
-                        size="sm"
-                        onClick={() => handleCreateComment(selectedPost.id)}
+                        onClick={() => handleAddComment(selectedPost.id)}
                         disabled={createCommentMutation.isPending || !newComment.trim()}
                       >
                         <Send className="h-4 w-4" />
@@ -315,26 +420,13 @@ export default function Forum() {
                   </div>
 
                   {/* Comments List */}
-                  <div className="space-y-4">
+                  <div className="space-y-0">
                     {selectedPost.comments?.map((comment) => (
-                      <div key={comment.id} className="flex gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>
-                            {comment.user.profile?.name?.[0] || comment.user.username?.[0] || "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-sm">
-                              {comment.user.profile?.name || comment.user.username}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {format(new Date(comment.createdAt), "MMM d, yyyy 'at' h:mm a")}
-                            </span>
-                          </div>
-                          <p className="text-gray-700 text-sm">{comment.content}</p>
-                        </div>
-                      </div>
+                      <Comment 
+                        key={comment.id} 
+                        comment={comment} 
+                        postId={selectedPost.id}
+                      />
                     ))}
                     
                     {(!selectedPost.comments || selectedPost.comments.length === 0) && (
