@@ -1,0 +1,140 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan; wait for my **“Approved – implement”** before changing code.
+
+================================================================
+GOAL
+================================================================
+1️⃣ Update existing widget copy  
+2️⃣ Add **Sales Hub** & **Product Hub** (members-only)  
+3️⃣ Re-order the Member Tools grid  
+4️⃣ Add **“In Development”** badge + banner to specified widgets/pages  
+
+----------------------------------------------------------------
+A. Widget text changes
+----------------------------------------------------------------
+• **Farm Assessment** →  
+  “Respond to the prompts to determine which areas of your farm to work on to improve yield and profitability for your operation.”
+
+• **Resource Library** →  
+  “Browse curated grower resources — find organizations near you, tax incentives and rebates, upcoming events, and more.”
+
+• **Member Forum** →  
+  “Connect with fellow growers to share knowledge and organize bulk ordering.”
+
+----------------------------------------------------------------
+B. New widgets, pages, and starter databases
+----------------------------------------------------------------
+### 1. Sales Hub
+* **Widget**  
+  – Icon: map-pin / store  
+  – Badge: orange **In Development** label on card  
+  – Grid link → `/dashboard/saleshub`
+
+* **Page `/dashboard/saleshub`**  
+  – Auth-protected (same guard as other dashboard pages)  
+  – Banner at top: **“Sales Hub – In Development”**  
+  – Placeholder UI: interactive US map (Leaflet + OpenStreetMap tiles)  
+  – Filter UI: dropdowns for **State** and **Category**
+
+* **Starter DB table** `buyers_distributors`
+  ```yaml
+  id:           uuid  # PK
+  name:         string
+  state:        string  # 2-letter
+  county:       string  # optional
+  categories:   string[]  # e.g. ["wholesale","CSA","retail"]
+  contactEmail: string
+  phone:        string   # optional
+  websiteUrl:   string   # optional
+2. Product Hub
+Widget
+– Icon: shopping-bag / package
+– Badge: In Development
+– Grid link → /dashboard/producthub
+
+Page /dashboard/producthub
+– Auth-protected
+– Banner: “Product Hub – In Development”
+– Intro copy:
+
+“Let us know if you want your product listed here!
+Vendors must provide testimonials from two growers (with contact info) that can be seen by grower members.”
+– Search bar + category filter (placeholder)
+
+Starter DB table products
+
+yaml
+Copy
+Edit
+id:            uuid  # PK
+productName:   string
+category:      string
+vendorName:    string
+vendorEmail:   string
+description:   string
+testimonials:  # array of references
+  - growerName:  string
+    growerEmail: string
+    quote:       string
+C. Member Tools grid order
+Row 1 → Resource Library • Member Forum • Find a Grower
+Row 2 → Farm Assessment • Sales Hub • Product Hub • Member Profile
+
+All widget cards share the existing style (white card, icon circle, hover ring, etc.).
+
+D. “In Development” badge logic
+• Widgets to show badge: Find a Grower, Farm Assessment, Resource Library, Sales Hub, Product Hub
+• Each linked page (/dashboard/...) should render a dismissible top-banner with the same label.
+
+Front-end tasks
+client/src/pages/Dashboard.tsx
+– Update text on existing widgets
+– Add SalesHubWidget & ProductHubWidget
+– Re-order grid per spec
+– Add reusable InDevelopmentBadge component
+
+client/src/pages/SalesHubPage.tsx
+client/src/pages/ProductHubPage.tsx
+– Scaffold pages with banner, placeholder UI, auth guard
+
+Global styles / components
+– Icons, badge component, Leaflet map wrapper
+
+Back-end / DB
+• Create / migrate buyers_distributors and products tables (Replit DB or Drizzle).
+• Seed with 1-2 dummy rows for demo if helpful.
+
+Deliverables
+Plan summary (file list, DB schema, routing) — await approval.
+
+After approval, implement; commit checkpoint “sales-product-hub-widgets”.
+
+Manual test checklist:
+▸ Widget texts updated
+▸ Grid order matches spec
+▸ All five specified widgets show badge + banner
+▸ /dashboard/saleshub & /dashboard/producthub behind auth and render placeholder UIs
+▸ Map loads with sample pin(s); search bar visible on Product Hub
+▸ DB tables created
+
+================================================================
+Await my “Approved – implement” before coding.
+Copy
+Edit
+
+
+
+
+
+
+
+
+Ask ChatGPT
+
+
+
+Tools
+
+
+
+ChatGPT can make mistakes. Check important info.
