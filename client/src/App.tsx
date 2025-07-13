@@ -78,6 +78,13 @@ function Router() {
           return null;
         }}
       </Route>
+      <Route path="/resources">
+        {() => {
+          // Redirect to dashboard resources
+          window.location.href = '/dashboard/resources';
+          return null;
+        }}
+      </Route>
 
       {/* Admin routes */}
       <Route path="/admin/resources">

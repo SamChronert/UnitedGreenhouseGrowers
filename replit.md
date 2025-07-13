@@ -111,6 +111,24 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 
 ## Changelog
 
+- July 13, 2025: Resources section secured for members-only access
+  - Removed Resources from public navigation menu for logged-out users
+  - Updated Resource Library widget in dashboard to link to protected /dashboard/resources route
+  - Added redirect from legacy /resources path to /dashboard/resources for backward compatibility
+  - Maintained existing protected /dashboard/resources route with AuthGuard requireMember
+  - Resources content and functionality remain unchanged, only access control enhanced
+- July 13, 2025: Dashboard UI refresh and forum access security implementation
+  - Streamlined dashboard by removing Getting Started and Profile Summary sections
+  - Updated Member Tools to 5-widget grid (3+2 layout): Find a Grower, Farm Assessment, Resource Library, Member Profile, Member Forum
+  - Replaced Support widget with Member Forum widget linking to protected /dashboard/forum route
+  - Applied modern styling: white cards with rounded-xl corners, subtle shadows, and smooth hover transitions
+  - Implemented green accent theme: bg-green-600/10 backgrounds with text-green-700 icons for consistency
+  - Added comprehensive dark mode support with proper contrast ratios
+  - Enhanced accessibility with focus rings (ring-2 ring-green-500) and proper keyboard navigation
+  - Created auth-protected /dashboard/forum route replacing public /forum access
+  - Added automatic redirect from legacy /forum to /dashboard/forum for backward compatibility
+  - Improved section spacing (space-y-10) and typography for better visual hierarchy
+  - Cleaned up unused imports and code for better maintainability
 - July 13, 2025: Enhanced password UX and comprehensive profile editor
   - Added password character counter (X/12 format) with green highlight when requirement met
   - Implemented show/hide password toggle with Eye/EyeOff icons for all password fields

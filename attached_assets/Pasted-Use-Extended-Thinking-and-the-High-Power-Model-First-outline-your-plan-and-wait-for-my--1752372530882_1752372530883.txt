@@ -1,0 +1,45 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan and wait for my **“Approved – implement”** before making code changes.
+
+Goal
+=====
+Secure the Resources section for members-only access and update navigation links.
+
+A. Protected Resources route  
+   • Create (or move) the Resources page to **/dashboard/resources**.  
+   • Wrap it with the existing auth middleware so unauthenticated users are redirected to **/login?next=/dashboard/resources**.  
+   • Resources page content/layout stays exactly the same.
+
+B. Redirect legacy public path  
+   • Add a 302 (or 301) redirect from **/resources** → **/dashboard/resources** to keep external links working.
+
+C. Update internal links  
+   1. **Member Tools** grid → change the Resource Library widget link to **/dashboard/resources**.  
+   2. **Nav bar logic**:  
+      • When **logged-in**, show “Resources” in the top nav, pointing to `/dashboard/resources`.  
+      • When **logged-out**, hide the Resources item from the nav bar.
+
+Front-end changes
+-----------------
+• `client/src/pages/Dashboard.tsx` – update Resource widget link.  
+• Global layout / nav component – conditionally render “Resources” link based on `isAuthenticated`.  
+• Routing config (Next.js pages, React-Router, Remix, etc.)  
+  – Add protected `/dashboard/resources` route.  
+  – Add redirect from `/resources` to `/dashboard/resources`.
+
+Back-end
+--------
+No API or schema changes (re-uses existing auth middleware).
+
+Deliverables
+------------
+1. **Plan summary** (files, steps, redirect method) — await approval.  
+2. After approval, implement; commit checkpoint **“resources-route-guard”**.  
+3. Manual test checklist:  
+   ▸ Resource widget opens /dashboard/resources.  
+   ▸ Logged-in nav shows Resources; logged-out nav hides it.  
+   ▸ Visiting /resources while logged-in → /dashboard/resources.  
+   ▸ Visiting /resources while logged-out → /login.  
+   ▸ Resources page content unchanged.
+
+Await my **“Approved – implement”** before coding.

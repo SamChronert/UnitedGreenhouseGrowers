@@ -84,7 +84,7 @@ export default function Dashboard() {
       icon: <FolderOpen className="h-8 w-8" />,
       title: "Resource Library",
       description: "Browse curated grower resources",
-      href: "/resources",
+      href: "/dashboard/resources",
       inDevelopment: false
     },
     {

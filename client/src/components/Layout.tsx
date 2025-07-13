@@ -44,7 +44,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const publicRoutes = [
     { path: "/", label: "Home" },
     { path: "/about", label: "About" },
-    { path: "/resources", label: "Resources" },
     { path: "/blog", label: "Blog" },
     { path: "/contact", label: "Contact" },
   ];
