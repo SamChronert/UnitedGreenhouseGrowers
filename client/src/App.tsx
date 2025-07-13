@@ -66,10 +66,17 @@ function Router() {
           <Resources />
         </AuthGuard>
       </Route>
-      <Route path="/forum">
+      <Route path="/dashboard/forum">
         <AuthGuard requireMember>
           <Forum />
         </AuthGuard>
+      </Route>
+      <Route path="/forum">
+        {() => {
+          // Redirect to dashboard forum
+          window.location.href = '/dashboard/forum';
+          return null;
+        }}
       </Route>
 
       {/* Admin routes */}
