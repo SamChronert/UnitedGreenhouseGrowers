@@ -1,0 +1,70 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan; wait for my “Approved – implement” before editing code.
+
+Goals
+=====
+A. Improve password UX on the **/register** and **/dashboard/profile** pages  
+   1. Add a simple live **character counter** for each password input (e.g., “8 / 12”).  
+   2. On /register, add a **show / hide password** toggle (eye icon) identical to the dashboard form.  
+   3. On /dashboard/profile → Change Password: after successful submit, show a dismissible Tailwind/HeadlessUI modal:  
+      *“Password successfully updated”* with a single “Close” button.
+
+B. Expand **Profile Information** editor (dashboard/profile) to include **all fields** introduced in the new registration flow, with full editability.
+
+Details
+-------
+
+### A. Password UX
+
+*Character counter*  
+• Display right-aligned inside the input (e.g., small gray text) or immediately under the field—use whichever integrates cleanly with current styles.  
+• Update in real time as the user types.  
+• Turns green (or standard success color) once count ≥ 12.
+
+*Show / hide toggle on /register*  
+• Reuse the existing eye icon component from dashboard.  
+• Maintain a11y (aria-label “Show password” / “Hide password”).
+
+*Success modal on change-password submit*  
+• Tailwind/HeadlessUI modal, center-screen, backdrop blur.  
+• Message: **“Password successfully updated.”**  
+• One primary button: **“Close”** (X button optional).  
+• No auto-close; user dismisses manually.  
+• Ensure focus trapping & ESC-to-close for accessibility.
+
+### B. Profile Information Editor
+
+Fields to expose (all editable):
+• Member Type (Grower / General) — changing this should instantly toggle which fields are shown, mirroring the registration form logic.  
+• Full Name, Email, Phone Number, State, County*  
+• Employer/Company, Job Title  
+• Grower-specific: Greenhouse Role, Greenhouse Size, Farm Type (+ *Other* text), Crop Types (multi-select + *Other* text), Production Method, Climate-Control Type (multi-select), Supplemental Lighting  
+• All dropdowns include “N/A” where specified in registration.  
+• Conditional “Other” text inputs appear as in registration.  
+• When Member Type switches from Grower → General, non-applicable fields should clear or hide; backend stores nulls.
+
+Backend / validation
+--------------------
+• No schema changes (all fields already present).  
+• Password rules unchanged—front-end counter only.  
+• Update profile-update endpoint to accept **all** new fields; validation mirrors registration rules (incl. “Other” required when selected, at least one crop/climate-control, N/A exclusivity, etc.).
+
+Front-end files likely touched
+------------------------------
+`client/src/pages/Register.tsx`  
+`client/src/pages/Profile.tsx` (or equivalent dashboard component)  
+Password input component / hooks  
+Modal component (reuse existing Tailwind/HeadlessUI modal pattern)
+
+Deliverables
+============
+1. **Plan summary** (files, steps, edge cases) — await approval.  
+2. After approval, implement; create checkpoint **“password-ux-and-profile-editor”**.  
+3. Provide a manual test checklist covering:  
+   • Character counter updates + turns green at 12.  
+   • Show/hide toggle on register works & preserves value.  
+   • Password-change success modal appears & is dismissible.  
+   • All profile fields editable; Member Type switch logic correct.  
+   • Validation errors still surface correctly.
+
+Await my reply **“Approved – implement”** before coding.

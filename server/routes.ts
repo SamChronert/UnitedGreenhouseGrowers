@@ -70,9 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Please select at least one climate control type" });
         }
         
-        if (climateControl && climateControl.includes("N/A") && climateControl.length > 1) {
-          return res.status(400).json({ message: "N/A cannot be selected with other climate control options" });
-        }
+
         
         if (farmType === "Other" && !otherFarmType) {
           return res.status(400).json({ message: "Please specify other farm type" });

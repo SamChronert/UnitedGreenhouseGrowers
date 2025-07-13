@@ -13,7 +13,7 @@ import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import uggaLogo from "@assets/2_1750100657577.png";
 
 const registerSchema = z.object({
@@ -67,15 +67,6 @@ const registerSchema = z.object({
   message: "Please select at least one climate control type",
   path: ["climateControl"],
 }).refine((data) => {
-  // Validate "N/A" exclusivity in climate control
-  if (data.memberType === "grower" && data.climateControl?.includes("N/A")) {
-    return data.climateControl.length === 1;
-  }
-  return true;
-}, {
-  message: "N/A cannot be selected with other climate control options",
-  path: ["climateControl"],
-}).refine((data) => {
   // Validate "Other" farm type requirement
   if (data.memberType === "grower" && data.farmType === "Other") {
     return data.otherFarmType && data.otherFarmType.length > 0;
@@ -117,10 +108,15 @@ const PRODUCTION_METHODS = ["Soil-based", "Hydroponics", "N/A"];
 
 const LIGHTING_OPTIONS = ["Yes", "No", "Planning to add", "N/A"];
 
-const CLIMATE_CONTROL_TYPES = [
-  "Passive High Tunnel", "Naturally Ventilated", "Mechanically Ventilated",
-  "Evaporative-Cooled (Fan-and-Pad)", "Fog/Misting-Cooled", "Semi-Closed",
-  "Fully Closed / HVAC-Controlled", "Other / Not Listed", "N/A"
+const CLIMATE_CONTROL_OPTIONS = [
+  { value: "Passive High Tunnel", label: "Passive High Tunnel", blurb: "Unheated hoop house, roll-up sides" },
+  { value: "Naturally Ventilated", label: "Naturally Ventilated", blurb: "Roof/side vents, no fans" },
+  { value: "Mechanically Ventilated", label: "Mechanically Ventilated", blurb: "Fans + shutters for airflow" },
+  { value: "Evaporative-Cooled (Fan-and-Pad)", label: "Evaporative-Cooled (Fan-and-Pad)", blurb: "Wet pad cooling system" },
+  { value: "Fog / Misting-Cooled", label: "Fog / Misting-Cooled", blurb: "Fine mist cools air" },
+  { value: "Semi-Closed", label: "Semi-Closed", blurb: "Filtered intake, partial recirculation" },
+  { value: "Fully Closed / HVAC-Controlled", label: "Fully Closed / HVAC-Controlled", blurb: "Sealed, AC + dehumidification" },
+  { value: "Other / Not Listed", label: "Other / Not Listed", blurb: "Select if none match" }
 ];
 
 export default function Register() {
@@ -129,6 +125,8 @@ export default function Register() {
   const [memberType, setMemberType] = useState<"grower" | "general">("grower");
   const [selectedCrops, setSelectedCrops] = useState<string[]>([]);
   const [selectedClimateControl, setSelectedClimateControl] = useState<string[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordLength, setPasswordLength] = useState(0);
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -197,21 +195,9 @@ export default function Register() {
 
   // Handle climate control selection
   const handleClimateControlToggle = (option: string) => {
-    let newSelection: string[];
-    
-    if (option === "N/A") {
-      // N/A is exclusive - if selected, clear all others
-      newSelection = selectedClimateControl.includes("N/A") ? [] : ["N/A"];
-    } else {
-      // If N/A is currently selected, clear it first
-      const currentWithoutNA = selectedClimateControl.filter(item => item !== "N/A");
-      
-      if (currentWithoutNA.includes(option)) {
-        newSelection = currentWithoutNA.filter(item => item !== option);
-      } else {
-        newSelection = [...currentWithoutNA, option];
-      }
-    }
+    const newSelection = selectedClimateControl.includes(option)
+      ? selectedClimateControl.filter(item => item !== option)
+      : [...selectedClimateControl, option];
     
     setSelectedClimateControl(newSelection);
     form.setValue("climateControl", newSelection);
@@ -509,17 +495,17 @@ export default function Register() {
                   {/* Climate Control Type - Multi-select */}
                   <div className="space-y-3">
                     <Label className="text-base font-medium">Climate Control Type (select at least one) *</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {CLIMATE_CONTROL_TYPES.map((type) => (
-                        <div key={type} className="flex items-center space-x-2">
+                    <div className="grid grid-cols-1 gap-3">
+                      {CLIMATE_CONTROL_OPTIONS.map((option) => (
+                        <div key={option.value} className="flex items-start space-x-2">
                           <Checkbox
-                            id={type}
-                            checked={selectedClimateControl.includes(type)}
-                            onCheckedChange={() => handleClimateControlToggle(type)}
-                            disabled={type !== "N/A" && selectedClimateControl.includes("N/A")}
+                            id={option.value}
+                            checked={selectedClimateControl.includes(option.value)}
+                            onCheckedChange={() => handleClimateControlToggle(option.value)}
+                            className="mt-1"
                           />
-                          <Label htmlFor={type} className="cursor-pointer text-sm">
-                            {type}
+                          <Label htmlFor={option.value} className="cursor-pointer text-sm flex-1">
+                            {option.label} <span aria-hidden="true" className="text-sm text-gray-500 italic">{option.blurb}</span>
                           </Label>
                         </div>
                       ))}
@@ -565,11 +551,35 @@ export default function Register() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password *</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    {...form.register("password")}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      {...form.register("password", {
+                        onChange: (e) => setPasswordLength(e.target.value.length)
+                      })}
+                      className="pr-20"
+                    />
+                    <div className="absolute right-0 top-0 h-full flex items-center">
+                      <span className={`text-sm px-2 ${passwordLength >= 12 ? 'text-green-600' : 'text-gray-500'}`}>
+                        {passwordLength} / 12
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                   {form.formState.errors.password && (
                     <p className="text-sm text-red-600">{form.formState.errors.password.message}</p>
                   )}
