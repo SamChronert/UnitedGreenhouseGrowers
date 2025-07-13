@@ -120,7 +120,7 @@ export default function Assessment() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <InDevelopmentBanner 
           title="Farm Assessment" 
-          description="This feature is currently in development. Basic functionality is available for testing."
+          description="This feature is currently in development and needs some more work before it is fully functional."
         />
         {/* Header */}
         <div className="text-center mb-8">

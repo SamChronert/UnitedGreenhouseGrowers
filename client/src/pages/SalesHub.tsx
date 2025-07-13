@@ -90,8 +90,8 @@ export default function SalesHub() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   const filteredBuyers = sampleBuyers.filter(buyer => {
-    const stateMatch = !selectedState || buyer.state === selectedState;
-    const categoryMatch = !selectedCategory || buyer.categories.includes(selectedCategory);
+    const stateMatch = !selectedState || selectedState === "all" || buyer.state === selectedState;
+    const categoryMatch = !selectedCategory || selectedCategory === "all" || buyer.categories.includes(selectedCategory);
     return stateMatch && categoryMatch;
   });
 
@@ -102,7 +102,7 @@ export default function SalesHub() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <InDevelopmentBanner 
           title="Sales Hub" 
-          description="This feature is currently in development. Sample data is shown for demonstration purposes."
+          description="This feature is currently in development and needs some more work before it is fully functional."
         />
         
         <div className="mb-8">
@@ -128,7 +128,7 @@ export default function SalesHub() {
                     <SelectValue placeholder="All states" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All States</SelectItem>
+                    <SelectItem value="all">All States</SelectItem>
                     {US_STATES.map(state => (
                       <SelectItem key={state} value={state}>
                         {state}
@@ -147,7 +147,7 @@ export default function SalesHub() {
                     <SelectValue placeholder="All categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     {BUYER_CATEGORIES.map(category => (
                       <SelectItem key={category.value} value={category.value}>
                         {category.label}

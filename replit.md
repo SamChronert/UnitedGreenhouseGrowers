@@ -111,6 +111,17 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 
 ## Changelog
 
+- July 13, 2025: Sales Hub and Product Hub implementation with dashboard modernization
+  - Added Sales Hub with interactive US map using Leaflet and OpenStreetMap tiles
+  - Implemented buyer/distributor filtering by state and category with sample data
+  - Created Product Hub with search functionality and vendor testimonial system
+  - Updated Member Tools grid to 3+4 layout (7 widgets total) with reordered priority
+  - Enhanced all widget descriptions per specification requirements
+  - Added InDevelopmentBanner component with dismissible functionality
+  - Applied development banners to Find a Grower, Farm Assessment, Resource Library, Sales Hub, and Product Hub
+  - Created database schemas for buyers_distributors and products tables
+  - Implemented protected routes for /dashboard/saleshub and /dashboard/producthub
+  - Fixed SelectItem value validation errors for proper form functionality
 - July 13, 2025: Resources section secured for members-only access
   - Removed Resources from public navigation menu for logged-out users
   - Updated Resource Library widget in dashboard to link to protected /dashboard/resources route

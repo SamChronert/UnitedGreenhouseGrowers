@@ -85,7 +85,7 @@ export default function Resources() {
         <div className="max-w-6xl mx-auto">
         <InDevelopmentBanner 
           title="Resource Library" 
-          description="This feature is currently in development. Basic resource browsing is available for testing."
+          description="This feature is currently in development and needs some more work before it is fully functional."
         />
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Resources</h1>

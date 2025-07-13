@@ -109,7 +109,7 @@ export default function ProductHub() {
       product.vendorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const categoryMatch = !selectedCategory || product.category === selectedCategory;
+    const categoryMatch = !selectedCategory || selectedCategory === "all" || product.category === selectedCategory;
     
     return searchMatch && categoryMatch;
   });
@@ -119,7 +119,7 @@ export default function ProductHub() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <InDevelopmentBanner 
           title="Product Hub" 
-          description="This feature is currently in development. Sample products are shown for demonstration purposes."
+          description="This feature is currently in development and needs some more work before it is fully functional."
         />
         
         <div className="mb-8">
@@ -160,7 +160,7 @@ export default function ProductHub() {
                     <SelectValue placeholder="All categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     {PRODUCT_CATEGORIES.map(category => (
                       <SelectItem key={category.value} value={category.value}>
                         {category.label}
