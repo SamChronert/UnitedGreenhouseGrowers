@@ -51,10 +51,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const memberDashboardRoutes = [
     { path: "/dashboard", label: "Overview" },
     { path: "/dashboard/profile", label: "Profile" },
-    { path: "/dashboard/find-grower", label: "Find Grower" },
-    { path: "/dashboard/assessment", label: "Assessment" },
-    { path: "/dashboard/resources", label: "Resources" },
-    { path: "/forum", label: "Forum" },
+    { path: "/dashboard/resources", label: "Resource Library" },
+    { path: "/dashboard/forum", label: "Member Forum" },
+    { path: "/dashboard/find-grower", label: "Find a Grower" },
+    { path: "/dashboard/assessment", label: "Farm Assessment" },
+    { path: "/dashboard/saleshub", label: "Sales Hub" },
+    { path: "/dashboard/producthub", label: "Product Hub" },
   ];
 
   const adminDashboardRoutes = [

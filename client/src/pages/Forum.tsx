@@ -42,7 +42,6 @@ export default function Forum() {
   const [newComment, setNewComment] = useState("");
   const [filters, setFilters] = useState({
     state: "",
-    county: "",
     category: "",
   });
   const { user } = useAuth();
@@ -56,7 +55,6 @@ export default function Forum() {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
       if (filters.state) params.append('state', filters.state);
-      if (filters.county) params.append('county', filters.county);
       if (filters.category) params.append('category', filters.category);
       const queryString = params.toString();
       return apiRequest("GET", `/api/forum/posts${queryString ? `?${queryString}` : ''}`);
@@ -202,7 +200,7 @@ export default function Forum() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Member Forum</h1>
-                <p className="text-gray-600">Connect with fellow growers and share knowledge</p>
+                <p className="text-gray-600">Connect with fellow growers, share knowledge, organize bulk ordering.</p>
               </div>
             </div>
             <Button onClick={() => setShowCreatePost(true)}>

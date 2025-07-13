@@ -79,7 +79,7 @@ export default function Dashboard() {
     {
       icon: <MessageCircle className="h-8 w-8" />,
       title: "Member Forum",
-      description: "Connect with fellow growers to share knowledge and organize bulk ordering.",
+      description: "Connect with fellow growers, share knowledge, organize bulk ordering.",
       href: "/dashboard/forum",
       inDevelopment: false
     },
