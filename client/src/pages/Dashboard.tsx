@@ -134,6 +134,22 @@ export default function Dashboard() {
           </p>
         </div>
 
+        {/* Challenge Submission Section */}
+        <Card className="mb-10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-ugga-secondary" />
+              Share Your Challenge
+            </CardTitle>
+            <p className="text-gray-600">
+              Tell us about operational challenges, knowledge gaps, or areas where the industry needs better support
+            </p>
+          </CardHeader>
+          <CardContent>
+            <ChallengeSubmissionForm />
+          </CardContent>
+        </Card>
+
         {/* Member Tools Grid */}
         <div className="mb-10">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Member Tools</h2>
@@ -183,21 +199,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Challenge Submission Section */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-ugga-secondary" />
-              Share Your Challenge
-            </CardTitle>
-            <p className="text-gray-600">
-              Tell us about operational challenges, knowledge gaps, or areas where the industry needs better support
-            </p>
-          </CardHeader>
-          <CardContent>
-            <ChallengeSubmissionForm />
-          </CardContent>
-        </Card>
+
 
         {/* Contact UGGA Team Section */}
         <Card className="mb-10">
