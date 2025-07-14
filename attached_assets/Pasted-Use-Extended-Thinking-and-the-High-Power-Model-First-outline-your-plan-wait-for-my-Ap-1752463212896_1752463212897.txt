@@ -1,0 +1,54 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan; wait for my **“Approved – implement”** before making code changes.
+
+================================================================
+GOAL – Remove “In Development” Badges on Demo Page Only
+================================================================
+Update the Demo Dashboard (`/demo`) so that **“In Development”** badges are hidden on all widget cards —  
+but leave those badges visible on the **member dashboard** and their linked pages.  
+Ensure that the Demo Dashboard still mirrors updates to the core widget layout and content.
+
+----------------------------------------------------------------
+Requirements
+----------------------------------------------------------------
+• Do **not** remove `inDevelopment: true` from the memberTools config or shared array  
+• Instead, pass a `showDevBadges={false}` prop or use local override logic in the Demo Dashboard only  
+• All other syncing behavior between `/dashboard` and `/demo` should remain unchanged
+
+----------------------------------------------------------------
+Front-end changes
+----------------------------------------------------------------
+`client/src/pages/DemoDashboard.tsx`  
+  – Import the same `memberTools` array used in `/dashboard`  
+  – When rendering the grid, hide the “In Development” badge (e.g. filter it out or conditionally render badge only if `showDevBadges === true`)  
+  – Ensure all other props and layout remain synced
+
+`client/src/components/WidgetCard.tsx` (or wherever the badge is rendered)  
+  – Wrap the badge in a conditional:  
+    ```tsx
+    {showDevBadges && inDevelopment && (
+      <Badge>In Development</Badge>
+    )}
+    ```
+
+Optional: Add `showDevBadges` prop to grid or wrapper component if centralized control is preferred.
+
+----------------------------------------------------------------
+Back-end
+----------------------------------------------------------------
+None.
+
+----------------------------------------------------------------
+Deliverables
+----------------------------------------------------------------
+1. **Plan summary** (files, logic override) — await approval  
+2. After approval, implement; commit checkpoint **“demo-badge-removal”**  
+3. Manual test checklist:  
+   ▸ `/demo` loads without any “In Development” badges  
+   ▸ `/dashboard` still shows all applicable badges  
+   ▸ Widget layout and content remain synced between both pages  
+   ▸ Logic override applies **only** to the Demo Dashboard
+
+================================================================
+Await my **“Approved – implement”** before coding.
+================================================================
