@@ -68,12 +68,12 @@ export default function Dashboard() {
   };
 
   const memberTools = [
-    // Row 1: Resource Library, Member Forum, Find a Grower
+    // Row 1: Find a Grower, Member Forum, Resource Library
     {
-      icon: <FolderOpen className="h-8 w-8" />,
-      title: "Resource Library",
-      description: "Browse curated grower resources — find relevant research, organizations near you, tax incentives and rebates, upcoming events, and more.",
-      href: "/dashboard/resources",
+      icon: <MapPin className="h-8 w-8" />,
+      title: "Find a Grower",
+      description: "Connect with growers by location and expertise",
+      href: "/dashboard/find-grower",
       inDevelopment: true
     },
     {
@@ -84,10 +84,10 @@ export default function Dashboard() {
       inDevelopment: false
     },
     {
-      icon: <MapPin className="h-8 w-8" />,
-      title: "Find a Grower",
-      description: "Connect with growers by location and expertise",
-      href: "/dashboard/find-grower",
+      icon: <FolderOpen className="h-8 w-8" />,
+      title: "Resource Library",
+      description: "Browse curated grower resources — find relevant research, organizations near you, tax incentives and rebates, upcoming events, and more.",
+      href: "/dashboard/resources",
       inDevelopment: true
     },
     // Row 2: Farm Assessment, Sales Hub, Product Hub, Member Profile
