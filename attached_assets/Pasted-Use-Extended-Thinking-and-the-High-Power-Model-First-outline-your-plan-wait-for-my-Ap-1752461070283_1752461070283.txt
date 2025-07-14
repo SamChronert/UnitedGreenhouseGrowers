@@ -1,0 +1,70 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan; wait for my **“Approved – implement”** before writing code.
+
+================================================================
+GOAL – Create a Publicly Accessible Demo Dashboard
+================================================================
+Make a non-member–accessible **Demo Dashboard** page to preview UGGA’s tools and layout.  
+This demo should mirror the live dashboard but without requiring login, and update automatically as the member dashboard evolves.
+
+----------------------------------------------------------------
+A. Page Setup
+----------------------------------------------------------------
+• New route: **`/demo`**  
+• Publicly accessible (no auth guard)  
+• Use the same layout, component structure, and styling as `/dashboard`  
+• Disable or mask interactive/secure features:
+  – No real data  
+  – No profile-specific content  
+  – All widgets should still display, including descriptions, In Development badges, and layout order
+
+----------------------------------------------------------------
+B. Auto-Sync with Member Dashboard
+----------------------------------------------------------------
+• Import and render **shared layout and widget components** (e.g., `MemberToolsGrid`, `DashboardSections`, etc.)  
+• Where member-only props/data are needed, provide dummy placeholder data via props or context  
+• Ensure that as the real `/dashboard` layout evolves (widgets added, grid order changes, banners change), `/demo` reflects those updates without separate maintenance
+
+----------------------------------------------------------------
+C. Navigation Access
+----------------------------------------------------------------
+• Add a new link in the top navigation labeled **“Demo”**  
+• Link target: `/demo`  
+• Should be visible to **both** logged-out and logged-in users  
+• Position in nav: immediately before or after “About”
+
+----------------------------------------------------------------
+Front-end Tasks
+----------------------------------------------------------------
+`client/src/pages/DemoDashboard.tsx`
+– Scaffold new route  
+– Reuse layout and components from `/dashboard`  
+– Supply mock data if needed for profile-based components  
+– Disable form submissions, interactive buttons, or redirects that require auth
+
+`client/src/components/Layout.tsx`
+– Add new nav item:  
+  ```tsx
+  <NavLink to="/demo">Demo</NavLink>
+Routing file (App.tsx or routes config)
+– Add route for /demo
+
+Back-end
+None — all content is front-end mock.
+
+Deliverables
+Plan summary (files reused, nav edits) — await approval
+
+After approval, implement; checkpoint “public-demo-dashboard”
+
+Manual test checklist:
+▸ /demo renders for all users, including logged-out
+▸ Grid order and widget layout match /dashboard
+▸ “Demo” link visible in nav and clickable
+▸ Interactive features safely disabled
+▸ Updates to member dashboard auto-sync with demo
+
+================================================================
+Await my “Approved – implement” before coding.
+Copy
+Edit
