@@ -111,6 +111,11 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 
 ## Changelog
 
+- July 13, 2025: Removed "In Development" badges from Demo Dashboard only
+  - Updated Demo Dashboard to hide development badges while preserving member dashboard badges
+  - Used conditional override logic (false && tool.inDevelopment) to suppress badge rendering
+  - Maintained full widget layout and content synchronization between dashboards
+  - Preserved auto-sync behavior for future dashboard updates
 - July 13, 2025: Reframed "What We're Building With You" section for collaborative messaging
   - Replaced feature-card grid with narrative-driven "How We're Building UGGA Together" section
   - Updated both Home and About pages with new collaborative process messaging

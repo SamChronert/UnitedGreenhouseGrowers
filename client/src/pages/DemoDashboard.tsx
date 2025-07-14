@@ -172,7 +172,7 @@ export default function DemoDashboard() {
             {memberTools.slice(0, 3).map((tool, index) => (
               <div key={index} onClick={handleDemoAction} className="cursor-pointer">
                 <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow h-full relative group focus:outline-none focus:ring-2 focus:ring-green-500">
-                  {tool.inDevelopment && (
+                  {false && tool.inDevelopment && (
                     <div className="absolute top-3 right-3 z-10">
                       <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-full border border-orange-200">
                         In Development
@@ -194,7 +194,7 @@ export default function DemoDashboard() {
             {memberTools.slice(3, 7).map((tool, index) => (
               <div key={index + 3} onClick={handleDemoAction} className="cursor-pointer">
                 <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow h-full relative group focus:outline-none focus:ring-2 focus:ring-green-500">
-                  {tool.inDevelopment && (
+                  {false && tool.inDevelopment && (
                     <div className="absolute top-3 right-3 z-10">
                       <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-full border border-orange-200">
                         In Development
