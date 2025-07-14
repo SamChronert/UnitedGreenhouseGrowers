@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { Users, Handshake, BookOpen, Wrench, ClipboardCheck, Archive, Megaphone } from "lucide-react";
+import { Handshake, BookOpen, Wrench } from "lucide-react";
 import uggaLogo from "@assets/2_1750100657577.png";
 
 export default function Home() {
@@ -26,28 +26,7 @@ export default function Home() {
     }
   ];
 
-  const buildingBlocks = [
-    {
-      icon: <Users className="h-8 w-8" />,
-      title: "Grower Database",
-      description: "Connect with greenhouse growers nationwide based on location, crops, and expertise."
-    },
-    {
-      icon: <ClipboardCheck className="h-8 w-8" />,
-      title: "Farm Assessment",
-      description: "Co-designed tools for making informed decisions on greenhouse improvements and operations."
-    },
-    {
-      icon: <Archive className="h-8 w-8" />,
-      title: "Resource Library",
-      description: "Curated guides and case studies that have been tested and approved by real growers."
-    },
-    {
-      icon: <Megaphone className="h-8 w-8" />,
-      title: "Advocacy Tools",
-      description: "Amplify grower perspectives to researchers, universities, and policy makers who need to hear from you."
-    }
-  ];
+
 
   return (
     <div className="min-h-screen">
@@ -138,28 +117,62 @@ export default function Home() {
         </div>
       </section>
 
-      {/* What We're Building Section */}
+      {/* How We're Building UGGA Together Section */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-              What We're Building With You
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+              How We're Building UGGA Together
             </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {buildingBlocks.map((block, index) => (
-                <div key={index} className="p-6 rounded-lg shadow-sm" style={{backgroundColor: 'var(--color-parchment)'}}>
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0" style={{color: 'var(--color-sage)'}}>
-                      {block.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{block.title}</h3>
-                      <p className="text-gray-600 leading-relaxed">{block.description}</p>
-                    </div>
-                  </div>
+            <p className="text-lg text-gray-600 mb-8">
+              UGGA is a grower-driven platform — built with input from the people who use it. Here's how you shape what we build next:
+            </p>
+            
+            <div className="space-y-6 text-left max-w-2xl mx-auto">
+              <div className="flex items-start space-x-4">
+                <span className="text-2xl">🧠</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Share Challenges</h3>
+                  <p className="text-gray-600">Your input helps us identify pain points across the industry</p>
                 </div>
-              ))}
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <span className="text-2xl">🛠</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Co-Design Tools</h3>
+                  <p className="text-gray-600">Features are tested and refined with direct grower feedback</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <span className="text-2xl">👥</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Connect with Peers</h3>
+                  <p className="text-gray-600">Ideas and solutions often come from fellow members</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <span className="text-2xl">📢</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Raise Your Voice</h3>
+                  <p className="text-gray-600">We bring your insights to researchers and policymakers</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <span className="text-2xl">🚧</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Preview What's Coming</h3>
+                  <p className="text-gray-600">Explore what's in development through the <Link href="/demo" className="text-ugga-primary hover:underline font-medium">Demo Dashboard</Link></p>
+                </div>
+              </div>
             </div>
+            
+            <p className="text-gray-600 mt-8 text-center">
+              🔄 This space evolves as you help us identify needs — the roadmap is shaped by your priorities.
+            </p>
           </div>
         </div>
       </section>

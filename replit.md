@@ -111,6 +111,13 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 
 ## Changelog
 
+- July 13, 2025: Reframed "What We're Building With You" section for collaborative messaging
+  - Replaced feature-card grid with narrative-driven "How We're Building UGGA Together" section
+  - Updated both Home and About pages with new collaborative process messaging
+  - Added 5-point list emphasizing member input: Share Challenges, Co-Design Tools, Connect with Peers, Raise Your Voice, Preview What's Coming
+  - Included direct link to Demo Dashboard for feature previews
+  - Shifted focus from specific tools to collaborative building process
+  - Maintained responsive design and consistent styling patterns
 - July 13, 2025: Created publicly accessible Demo Dashboard
   - Added new `/demo` route accessible to all users without authentication
   - Created DemoDashboard component mirroring member dashboard layout and structure

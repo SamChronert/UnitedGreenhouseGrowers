@@ -178,36 +178,61 @@ export default function About() {
           </div>
         </div>
 
-        {/* What We're Building */}
+        {/* How We're Building UGGA Together */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            What We're Building With You
+            How We're Building UGGA Together
           </h2>
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <div className="bg-white border rounded-lg p-6 text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Member Dashboard</h3>
-              <p className="text-gray-600">
-                Co-designed tools for making decisions on greenhouse improvements, built based on real grower feedback and needs.
-              </p>
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+            <p className="text-lg text-gray-600 mb-8">
+              UGGA is a grower-driven platform — built with input from the people who use it. Here's how you shape what we build next:
+            </p>
+            
+            <div className="space-y-6 text-left max-w-2xl mx-auto">
+              <div className="flex items-start space-x-4">
+                <span className="text-2xl">🧠</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Share Challenges</h3>
+                  <p className="text-gray-600">Your input helps us identify pain points across the industry</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <span className="text-2xl">🛠</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Co-Design Tools</h3>
+                  <p className="text-gray-600">Features are tested and refined with direct grower feedback</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <span className="text-2xl">👥</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Connect with Peers</h3>
+                  <p className="text-gray-600">Ideas and solutions often come from fellow members</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <span className="text-2xl">📢</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Raise Your Voice</h3>
+                  <p className="text-gray-600">We bring your insights to researchers and policymakers</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start space-x-4">
+                <span className="text-2xl">🚧</span>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Preview What's Coming</h3>
+                  <p className="text-gray-600">Explore what's in development through the <Link href="/demo" className="text-ugga-primary hover:underline font-medium">Demo Dashboard</Link></p>
+                </div>
+              </div>
             </div>
-            <div className="bg-white border rounded-lg p-6 text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Curated Resource Library</h3>
-              <p className="text-gray-600">
-                Peer-reviewed guides, case studies, and extension bulletins that growers have actually tested and approved.
-              </p>
-            </div>
-            <div className="bg-white border rounded-lg p-6 text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Grower Network</h3>
-              <p className="text-gray-600">
-                A way to connect with fellow growers to share questions, answers, and real-world solutions to common challenges.
-              </p>
-            </div>
-            <div className="bg-white border rounded-lg p-6 text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Stronger Voice</h3>
-              <p className="text-gray-600">
-                Amplify grower perspectives to researchers, universities, and lobbying groups who need to hear from you.
-              </p>
-            </div>
+            
+            <p className="text-gray-600 mt-8 text-center">
+              🔄 This space evolves as you help us identify needs — the roadmap is shaped by your priorities.
+            </p>
           </div>
         </div>
 
