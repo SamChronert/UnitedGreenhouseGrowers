@@ -30,7 +30,7 @@ export default function DemoDashboard() {
     {
       icon: <FolderOpen className="h-8 w-8" />,
       title: "Resource Library",
-      description: "Browse curated grower resources — find organizations near you, tax incentives and rebates, upcoming events, and more.",
+      description: "Browse curated grower resources — find relevant research findings, organizations near you, tax incentives and rebates, upcoming events, and more.",
       href: "/dashboard/resources",
       inDevelopment: true
     },
