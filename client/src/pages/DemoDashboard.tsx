@@ -115,7 +115,7 @@ export default function DemoDashboard() {
               Share Your Challenge
             </CardTitle>
             <p className="text-gray-600">
-              Tell us about operational challenges, knowledge gaps, or areas where the industry needs better support
+              Tell us about operational challenges, knowledge gaps, or areas where the industry needs better support. This will help us build tools for you, and eventually can inform policy, research, and technology development.
             </p>
           </CardHeader>
           <CardContent>
