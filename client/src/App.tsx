@@ -28,6 +28,7 @@ import AdminAssessmentTrainer from "@/pages/AdminAssessmentTrainer";
 import Forum from "@/pages/Forum";
 import SalesHub from "@/pages/SalesHub";
 import ProductHub from "@/pages/ProductHub";
+import DemoDashboard from "@/pages/DemoDashboard";
 
 function Router() {
   return (
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/resources" component={Resources} />
+      <Route path="/demo" component={DemoDashboard} />
       <Route path="/register" component={Register} />
       <Route path="/login" component={Login} />
 
