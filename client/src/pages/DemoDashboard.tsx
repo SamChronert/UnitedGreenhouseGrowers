@@ -114,9 +114,7 @@ export default function DemoDashboard() {
               <MessageSquare className="h-5 w-5 text-ugga-secondary" />
               Share Your Challenge
             </CardTitle>
-            <p className="text-gray-600">
-              Tell us about operational challenges, knowledge gaps, or areas where the industry needs better support. This will help us build tools for you, and eventually can inform policy, research, and technology development.
-            </p>
+            <p className="text-gray-600">Tell us about operational challenges, knowledge gaps, or areas where the industry needs better support. This will help us build tools for you, and eventually will be used to inform policy, research, and technology development.</p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
