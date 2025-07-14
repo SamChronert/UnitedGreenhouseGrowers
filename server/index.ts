@@ -6,6 +6,19 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Log startup environment
+console.log(`Starting UGGA Platform in ${process.env.NODE_ENV || 'development'} mode`);
+console.log(`Environment check:`);
+console.log(`- DATABASE_URL: ${process.env.DATABASE_URL ? 'configured' : 'missing'}`);
+console.log(`- OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? 'configured' : 'missing'}`);
+console.log(`- SENDGRID_API_KEY: ${process.env.SENDGRID_API_KEY ? 'configured' : 'missing'}`);
+console.log(`- JWT_SECRET: ${process.env.JWT_SECRET ? 'configured' : 'using default'}`);
+
+// Set environment defaults for production
+if (process.env.NODE_ENV === 'production') {
+  process.env.JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+}
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -41,10 +54,17 @@ app.use((req, res, next) => {
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    const message = process.env.NODE_ENV === 'production' 
+      ? "Internal Server Error" 
+      : err.message || "Internal Server Error";
 
+    console.error('Server error:', err);
     res.status(status).json({ message });
-    throw err;
+    
+    // Don't throw in production
+    if (process.env.NODE_ENV !== 'production') {
+      throw err;
+    }
   });
 
   // importantly only setup vite in development and after
@@ -66,5 +86,24 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    console.log(`UGGA Platform is running on port ${port}`);
+    console.log(`Health check available at: http://localhost:${port}/health`);
+  });
+
+  // Handle graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('SIGINT received, shutting down gracefully');
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
   });
 })();

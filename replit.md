@@ -111,6 +111,18 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 
 ## Changelog
 
+- July 14, 2025: Applied comprehensive deployment fixes for production readiness
+  - Added graceful error handling for missing OpenAI API key in AI functions
+  - Implemented proper database connection error handling and logging
+  - Enhanced production error handling with generic messages for security
+  - Added comprehensive health check endpoint at /health for deployment monitoring
+  - Improved startup logging with environment variable status checks
+  - Added graceful shutdown handling for SIGTERM/SIGINT signals
+  - Created deployment guide and environment variable examples
+  - Enhanced AI endpoint error handling with user-friendly messages
+  - Improved static file serving with proper caching headers
+  - Added production environment defaults for JWT_SECRET
+  - Created deployment check script for pre-deployment validation
 - July 13, 2025: Removed "In Development" badges from Demo Dashboard only
   - Updated Demo Dashboard to hide development badges while preserving member dashboard badges
   - Used conditional override logic (false && tool.inDevelopment) to suppress badge rendering

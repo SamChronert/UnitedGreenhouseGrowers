@@ -6,7 +6,14 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "default_key"
 });
 
+// Check if OpenAI API key is available
+const isOpenAIAvailable = !!(process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR);
+
 export async function findGrowerAI(question: string, members: (User & { profile: Profile })[]): Promise<string> {
+  if (!isOpenAIAvailable) {
+    return "The AI-powered Find a Grower feature is currently unavailable. Please check back later or contact support for assistance in finding relevant growers.";
+  }
+
   try {
     // Create a sanitized member directory for the AI prompt
     const memberData = members.map(member => ({
@@ -43,11 +50,15 @@ ${JSON.stringify(memberData, null, 2)}`;
     return response.choices[0].message.content || "I apologize, but I couldn't process your request. Please try rephrasing your question.";
   } catch (error) {
     console.error("OpenAI Find Grower error:", error);
-    throw new Error("AI service is currently unavailable. Please try again later.");
+    return "The AI service is currently unavailable. Please try again later or contact support for assistance.";
   }
 }
 
 export async function assessmentAI(input: string, sessionId?: string): Promise<string> {
+  if (!isOpenAIAvailable) {
+    return "The AI-powered Farm Assessment feature is currently unavailable. Please check back later or contact support for personalized greenhouse operation guidance.";
+  }
+
   try {
     const systemPrompt = `You are an expert agricultural consultant specializing in greenhouse operations. You provide comprehensive farm assessments and recommendations for greenhouse growers.
 
@@ -75,6 +86,6 @@ ${sessionId ? `This is a continuing conversation (Session: ${sessionId}). Refere
     return response.choices[0].message.content || "I apologize, but I couldn't process your assessment request. Please provide more details about your greenhouse operation.";
   } catch (error) {
     console.error("OpenAI Assessment error:", error);
-    throw new Error("AI assessment service is currently unavailable. Please try again later.");
+    return "The AI assessment service is currently unavailable. Please try again later or contact support for assistance.";
   }
 }

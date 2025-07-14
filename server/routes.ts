@@ -61,6 +61,16 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   app.use(cookieParser());
   
+  // Health check endpoint for deployment monitoring
+  app.get("/health", (_req, res) => {
+    res.status(200).json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development",
+      version: "1.0.0"
+    });
+  });
+  
   // Serve uploaded files statically
   app.use("/uploads", express.static(uploadDir));
 
@@ -419,6 +429,10 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     try {
       const { question } = req.body;
       
+      if (!question) {
+        return res.status(400).json({ message: "Question is required" });
+      }
+      
       // Get member directory for context
       const members = await storage.searchMembers();
       
@@ -435,13 +449,17 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       res.json({ response });
     } catch (error) {
       console.error("Find grower AI error:", error);
-      res.status(500).json({ message: "AI service unavailable" });
+      res.status(500).json({ message: "Find grower service is currently unavailable. Please try again later." });
     }
   });
 
   app.post("/api/ai/assessment", aiRateLimit, authenticate, requireMember, async (req: AuthRequest, res) => {
     try {
       const { input, sessionId } = req.body;
+      
+      if (!input) {
+        return res.status(400).json({ message: "Input is required" });
+      }
       
       // Set up Server-Sent Events
       res.writeHead(200, {
@@ -465,7 +483,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       res.end();
     } catch (error) {
       console.error("Assessment AI error:", error);
-      res.status(500).json({ message: "AI service unavailable" });
+      res.status(500).json({ message: "Assessment service is currently unavailable. Please try again later." });
     }
   });
 
