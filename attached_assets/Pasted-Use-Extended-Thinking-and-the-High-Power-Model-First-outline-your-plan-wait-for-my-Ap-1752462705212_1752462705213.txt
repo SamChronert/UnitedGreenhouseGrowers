@@ -1,0 +1,73 @@
+Use **Extended Thinking** and the **High-Power Model**.  
+First outline your plan; wait for my **“Approved – implement”** before changing code.
+
+================================================================
+GOAL – Reframe “What We’re Building With You” Section
+================================================================
+Replace the existing feature-card grid on the **Home** and **About** pages with a more concise, narrative-driven section that communicates how UGGA is built collaboratively with its members — and refers users to the Demo Dashboard for feature previews.
+
+----------------------------------------------------------------
+A. Replace existing feature grid
+----------------------------------------------------------------
+• Target section: “What We’re Building With You”  
+• Remove the current 4-item feature-card layout (Grower Database, Farm Assessment, etc.)  
+• Replace with a **text-centered, informational section** titled:
+
+> **How We’re Building UGGA Together**
+
+----------------------------------------------------------------
+B. New content (copy)
+----------------------------------------------------------------
+Intro paragraph:
+> UGGA is a grower-driven platform — built with input from the people who use it.  
+> Here’s how you shape what we build next:
+
+Bulleted list (can include icon bullets if desired):
+- 🧠 **Share Challenges** — Your input helps us identify pain points across the industry  
+- 🛠 **Co-Design Tools** — Features are tested and refined with direct grower feedback  
+- 👥 **Connect with Peers** — Ideas and solutions often come from fellow members  
+- 📢 **Raise Your Voice** — We bring your insights to researchers and policymakers  
+- 🚧 **Preview What’s Coming** — Explore what’s in development through the [Demo Dashboard](/demo)
+
+Final sentence (optional):  
+> 🔄 This space evolves as you help us identify needs — the roadmap is shaped by your priorities.
+
+----------------------------------------------------------------
+C. Layout / style
+----------------------------------------------------------------
+• Use Tailwind or existing shadcn/ui styles:  
+  – `max-w-3xl mx-auto text-center space-y-6`  
+  – Title: `text-2xl font-semibold`  
+  – Icons can be native emoji or inline Lucide icons  
+  – Ensure responsive on mobile and dark-mode safe  
+• Optional: Add a **“Share Your Challenge”** button linking to `/dashboard#share-your-challenge`
+
+----------------------------------------------------------------
+Front-end files to modify
+----------------------------------------------------------------
+`client/src/pages/Home.tsx`  
+  – Remove the current card-based grid under “What We’re Building With You”  
+  – Insert the new content block using static JSX or reusable `<TextFeatureSection>` if available
+
+`client/src/pages/About.tsx`  
+  – Make the same change if the section is repeated there
+
+----------------------------------------------------------------
+Back-end
+----------------------------------------------------------------
+None.
+
+----------------------------------------------------------------
+Deliverables
+----------------------------------------------------------------
+1. **Plan summary** (files, layout structure) — await approval  
+2. After approval, implement; commit checkpoint **“reframe-building-section”**  
+3. Manual test checklist:  
+   ▸ New text block displays on Home and About  
+   ▸ Mobile responsiveness and spacing are consistent  
+   ▸ Link to Demo Dashboard works  
+   ▸ Section clearly complements, not duplicates, what’s on `/demo`
+
+================================================================
+Await my **“Approved – implement”** before coding.
+================================================================
