@@ -14,6 +14,8 @@ import Contact from "@/pages/Contact";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
 import Resources from "@/pages/Resources";
+import ResourceDetail from "@/pages/ResourceDetail";
+import SavedResources from "@/pages/SavedResources";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
@@ -68,6 +70,16 @@ function Router() {
       <Route path="/dashboard/resources">
         <AuthGuard requireMember>
           <Resources />
+        </AuthGuard>
+      </Route>
+      <Route path="/dashboard/resources/saved">
+        <AuthGuard requireMember>
+          <SavedResources />
+        </AuthGuard>
+      </Route>
+      <Route path="/dashboard/resources/:id">
+        <AuthGuard requireMember>
+          <ResourceDetail />
         </AuthGuard>
       </Route>
       <Route path="/dashboard/forum">

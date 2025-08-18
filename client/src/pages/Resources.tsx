@@ -1,13 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Calendar, Users, Building, Briefcase, Wrench, ChevronDown, ChevronRight } from "lucide-react";
+import { ExternalLink, Calendar, Users, Building, Briefcase, Wrench, ChevronDown, ChevronRight, Grid, List, Heart, Search, Plus } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import InDevelopmentBanner from "@/components/InDevelopmentBanner";
 
 export default function Resources() {
   const [selectedFilter, setSelectedFilter] = useState<string>("All");
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     organizations: true,
     government: false,
@@ -87,34 +88,90 @@ export default function Resources() {
           title="Resource Library" 
           description="This feature is currently in development and needs some more work before it is fully functional."
         />
+        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Resources</h1>
-          <p className="text-gray-700">We're building a grower-reviewed resource library of guides, case studies, and extension bulletins — everything from irrigation best practices to supplier insights. Founding members will help decide what gets included, reviewed, and prioritized.</p>
-        </div>
-
-        {/* Filter Bar */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-2">
-            {filters.map((filter) => (
-              <Button
-                key={filter}
-                variant={selectedFilter === filter ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedFilter(filter)}
-                className={selectedFilter === filter 
-                  ? "text-white shadow-sm" 
-                  : "border-2 hover:border-gray-300"
-                }
-                style={selectedFilter === filter 
-                  ? {backgroundColor: 'var(--color-clay)'} 
-                  : {}
-                }
-              >
-                {filter}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Resource Library</h1>
+              <p className="text-gray-700">We're building a grower-reviewed resource library of guides, case studies, and extension bulletins — everything from irrigation best practices to supplier insights. Founding members will help decide what gets included, reviewed, and prioritized.</p>
+            </div>
+            
+            {/* Header Actions */}
+            <div className="flex items-center gap-3">
+              <Link href="/dashboard/resources/saved">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Heart className="h-4 w-4" />
+                  Saved
+                </Button>
+              </Link>
+              
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Suggest Resource
               </Button>
-            ))}
+            </div>
           </div>
         </div>
+
+        {/* Filter Bar and Controls */}
+        <div className="mb-8 space-y-4">
+          {/* Facet Filters Container */}
+          <Card className="shadow-sm bg-white">
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                {/* Filter Buttons */}
+                <div className="flex flex-wrap gap-2">
+                  {filters.map((filter) => (
+                    <Button
+                      key={filter}
+                      variant={selectedFilter === filter ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedFilter(filter)}
+                      className={selectedFilter === filter 
+                        ? "text-white shadow-sm" 
+                        : "border-2 hover:border-gray-300"
+                      }
+                      style={selectedFilter === filter 
+                        ? {backgroundColor: 'var(--color-clay)'} 
+                        : {}
+                      }
+                    >
+                      {filter}
+                    </Button>
+                  ))}
+                </div>
+
+                {/* View Toggle */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600 mr-2">View:</span>
+                  <div className="flex border rounded-md overflow-hidden">
+                    <Button
+                      variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('grid')}
+                      className={`rounded-none border-0 ${viewMode === 'grid' ? 'text-white' : ''}`}
+                      style={viewMode === 'grid' ? {backgroundColor: 'var(--color-clay)'} : {}}
+                    >
+                      <Grid className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === 'list' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('list')}
+                      className={`rounded-none border-0 ${viewMode === 'list' ? 'text-white' : ''}`}
+                      style={viewMode === 'list' ? {backgroundColor: 'var(--color-clay)'} : {}}
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Results Area */}
+        <div className="mb-8">{/* Placeholder for future results */}</div>
 
         {/* Organizations Section */}
         {shouldShowSection("organizations") && (
@@ -287,6 +344,15 @@ export default function Resources() {
             )}
           </div>
         )}
+
+        {/* Pagination Footer Placeholder */}
+        <div className="mt-12 flex justify-center">
+          <div className="p-4 bg-gray-100 border border-gray-200 rounded-lg">
+            <p className="text-sm text-gray-600 text-center">
+              Pagination controls will be implemented in the next task
+            </p>
+          </div>
+        </div>
       </div>
       </div>
     </div>
