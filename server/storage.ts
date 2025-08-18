@@ -263,7 +263,12 @@ export class DatabaseStorage implements IStorage {
 
     // Simplified approach: fetch all resources and filter in memory
     const allResources = await db
-      .select()
+      .select({
+        id: resources.id,
+        title: resources.title,
+        url: resources.url,
+        tags: resources.tags
+      })
       .from(resources)
       .orderBy(resources.title);
     
@@ -337,7 +342,12 @@ export class DatabaseStorage implements IStorage {
 
   async getResourceById(id: string): Promise<(Resource & { has_location: boolean }) | undefined> {
     const [resource] = await db
-      .select()
+      .select({
+        id: resources.id,
+        title: resources.title,
+        url: resources.url,
+        tags: resources.tags
+      })
       .from(resources)
       .where(eq(resources.id, id));
     
