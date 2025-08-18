@@ -363,37 +363,34 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
   // Resources routes
   app.get("/api/resources", async (req, res) => {
     try {
-      // Check if this is the new Resource Library format (with pagination params)
-      if (req.query.page || req.query.pageSize || req.query.sort || req.query.type) {
-        const params = {
-          page: req.query.page ? parseInt(req.query.page as string) : 1,
-          pageSize: req.query.pageSize ? parseInt(req.query.pageSize as string) : 24,
-          sort: req.query.sort as string,
-          q: req.query.q as string,
-          type: req.query.type as string,
-          topics: req.query.topics ? (Array.isArray(req.query.topics) ? req.query.topics : [req.query.topics]) as string[] : undefined,
-          crop: req.query.crop ? (Array.isArray(req.query.crop) ? req.query.crop : [req.query.crop]) as string[] : undefined,
-          system_type: req.query.system_type ? (Array.isArray(req.query.system_type) ? req.query.system_type : [req.query.system_type]) as string[] : undefined,
-          region: req.query.region as string,
-          audience: req.query.audience as string,
-          cost: req.query.cost as string,
-          status: req.query.status as string,
-          eligibility_geo: req.query.eligibility_geo as string,
-          format: req.query.format as string,
-          has_location: req.query.has_location ? req.query.has_location === 'true' : undefined,
-        };
-        
-        const result = await storage.listResources(params);
-        res.json(result);
-      } else {
-        // Legacy format for backwards compatibility
-        const { state, farmType } = req.query;
-        const resources = await storage.getFilteredResources(
-          state as string, 
-          farmType as string
-        );
-        res.json(resources);
+      // Use simplified Resource Library format
+      const page = req.query.page ? parseInt(req.query.page as string) : 1;
+      const pageSize = req.query.pageSize ? parseInt(req.query.pageSize as string) : 24;
+      const sort = req.query.sort as string;
+      const q = req.query.q as string;
+      
+      // Collect all filter values as tags for simplified filtering
+      const tags: string[] = [];
+      const filterFields = ['type', 'topics', 'crop', 'system_type', 'region', 'audience', 'cost', 'status', 'eligibility_geo', 'format'];
+      for (const field of filterFields) {
+        const values = req.query[field];
+        if (values) {
+          if (Array.isArray(values)) {
+            tags.push(...values);
+          } else {
+            tags.push(values as string);
+          }
+        }
       }
+        
+      const result = await storage.listResources({
+        page,
+        pageSize,
+        sort,
+        q,
+        tags
+      });
+      res.json(result);
     } catch (error) {
       console.error("Resources error:", error);
       res.status(500).json({ message: "Failed to fetch resources" });

@@ -245,87 +245,48 @@ export class DatabaseStorage implements IStorage {
       .where(sql`${conditions.join(' OR ')}`);
   }
 
-  // New Resource Library functions
+  // New Resource Library functions (simplified for current schema)
   async listResources(params: {
     page?: number;
     pageSize?: number;
     sort?: string;
     q?: string;
-    type?: string;
-    topics?: string[];
-    crop?: string[];
-    system_type?: string[];
-    region?: string;
-    audience?: string;
-    cost?: string;
-    status?: string;
-    eligibility_geo?: string;
-    format?: string;
-    has_location?: boolean;
-  }): Promise<{ items: (Resource & { has_location: boolean })[], total: number }> {
-    const { page = 1, pageSize = 24 } = params;
+    tags?: string[];
+  } = {}): Promise<{ items: (Resource & { has_location: boolean })[], total: number }> {
+    const { 
+      page = 1, 
+      pageSize = 24, 
+      sort = 'title',
+      q = '',
+      tags = []
+    } = params;
+
     const offset = (page - 1) * pageSize;
-    
-    // Build filter conditions
     const conditions: any[] = [];
     
-    if (params.q) {
+    // Search query - search in title and tags
+    if (q.trim()) {
       conditions.push(
         or(
-          ilike(resources.title, `%${params.q}%`),
-          ilike(resources.summary, `%${params.q}%`)
+          ilike(resources.title, `%${q}%`),
+          sql`${resources.tags} && ARRAY[${q}]::text[]`
         )
       );
     }
-    
-    if (params.type) {
-      conditions.push(eq(resources.type, params.type as any));
+
+    // Tag filters
+    if (tags.length > 0) {
+      conditions.push(sql`${resources.tags} && ${tags}::text[]`);
     }
-    
-    if (params.topics && params.topics.length > 0) {
-      conditions.push(sql`${resources.topics} && ${params.topics}`);
-    }
-    
-    if (params.crop && params.crop.length > 0) {
-      conditions.push(sql`${resources.crop} && ${params.crop}`);
-    }
-    
-    if (params.system_type && params.system_type.length > 0) {
-      conditions.push(sql`${resources.system_type} && ${params.system_type}`);
-    }
-    
-    if (params.region) {
-      conditions.push(eq(resources.region, params.region));
-    }
-    
-    if (params.cost) {
-      conditions.push(eq(resources.cost, params.cost));
-    }
-    
-    if (params.has_location !== undefined) {
-      if (params.has_location) {
-        conditions.push(sql`${resources.lat} IS NOT NULL AND ${resources.long} IS NOT NULL`);
-      } else {
-        conditions.push(sql`${resources.lat} IS NULL OR ${resources.long} IS NULL`);
-      }
-    }
-    
-    // Build sort conditions
-    let orderBy = resources.title; // Default sort
+
+    // Sorting (simplified for current schema)
+    let orderBy: any = resources.title; // Default alphabetical
     if (params.sort) {
       switch (params.sort) {
-        case 'verified_desc':
-          orderBy = desc(resources.ugga_verified);
-          break;
         case 'title_asc':
-          orderBy = resources.title;
-          break;
-        case 'due_soon':
-          orderBy = resources.last_verified_at;
-          break;
         case 'relevance':
         default:
-          orderBy = desc(resources.quality_score);
+          orderBy = resources.title;
           break;
       }
     }
@@ -355,10 +316,31 @@ export class DatabaseStorage implements IStorage {
       .offset(offset)
       .limit(pageSize);
     
-    // Add computed has_location field
+    // Map to extended interface with default values
     const items = rawItems.map((item: any) => ({
       ...item,
-      has_location: !!(item.lat && item.long)
+      // Infer type from tags
+      type: item.tags.find((tag: string) => 
+        ['university', 'organization', 'tool', 'education'].includes(tag)
+      ) || 'education',
+      // Infer topics from tags
+      topics: item.tags.filter((tag: string) => 
+        ['management', 'research', 'pest-management', 'automation'].includes(tag)
+      ),
+      // Infer crops from tags  
+      crop: item.tags.filter((tag: string) =>
+        ['vegetables', 'tomatoes', 'peppers', 'leafy-greens'].includes(tag)
+      ),
+      // Infer system type from tags
+      system_type: item.tags.filter((tag: string) =>
+        ['hydroponics', 'controlled-environment', 'organic'].includes(tag)
+      ),
+      cost: 'free', // Default assumption
+      ugga_verified: false, // Default
+      quality_score: 75, // Default
+      has_location: false, // No location data in current schema
+      region: 'US', // Default
+      summary: `Resource about ${item.tags.slice(0, 3).join(', ')}.`
     }));
     
     return { items, total };
@@ -374,14 +356,37 @@ export class DatabaseStorage implements IStorage {
     
     return {
       ...resource,
-      has_location: !!(resource.lat && resource.long)
+      // Map to extended interface with defaults (same as listResources)
+      type: resource.tags.find((tag: string) => 
+        ['university', 'organization', 'tool', 'education'].includes(tag)
+      ) || 'education',
+      topics: resource.tags.filter((tag: string) => 
+        ['management', 'research', 'pest-management', 'automation'].includes(tag)
+      ),
+      crop: resource.tags.filter((tag: string) =>
+        ['vegetables', 'tomatoes', 'peppers', 'leafy-greens'].includes(tag)
+      ),
+      system_type: resource.tags.filter((tag: string) =>
+        ['hydroponics', 'controlled-environment', 'organic'].includes(tag)
+      ),
+      cost: 'free',
+      ugga_verified: false,
+      quality_score: 75,
+      has_location: false,
+      region: 'US',
+      summary: `Resource about ${resource.tags.slice(0, 3).join(', ')}.`
     };
   }
 
-  async createResource(resourceData: InsertResource): Promise<Resource> {
+  async createResource(resourceData: Partial<Resource>): Promise<Resource> {
     const [resource] = await db
       .insert(resources)
-      .values({ ...resourceData, id: randomUUID() })
+      .values({ 
+        id: randomUUID(),
+        title: resourceData.title || '',
+        url: resourceData.url || '',
+        tags: resourceData.tags || []
+      })
       .returning();
     return resource;
   }

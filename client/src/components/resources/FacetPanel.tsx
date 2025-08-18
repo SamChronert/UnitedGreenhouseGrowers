@@ -210,17 +210,7 @@ function FacetPanelContent({
 
   return (
     <div className="space-y-6">
-      {/* Search */}
-      <div>
-        <Label htmlFor="search" className="text-sm font-medium">Search</Label>
-        <Input
-          id="search"
-          placeholder="Search resources..."
-          value={value.q || ''}
-          onChange={(e) => handleFilterChange('q', e.target.value)}
-          className="mt-1"
-        />
-      </div>
+      {/* Note: Search is handled by parent component with debouncing */}
 
       <Separator />
 
