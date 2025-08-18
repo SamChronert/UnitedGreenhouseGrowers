@@ -1,44 +1,53 @@
 # UGGA Platform
 
-The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first network designed to connect greenhouse growers nationwide, share vetted knowledge, and give growers a stronger voice in research and policy.
+United Greenhouse Growers Association (UGGA) web application - A collaborative platform connecting and empowering agricultural professionals through innovative technology and networking solutions.
 
 ## Overview
 
-This platform features tools for grower networking, decision-making assistance, and a curated resource library, all co-designed with founding members based on real grower feedback. The system is currently in its pilot phase with active member input on development.
+The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first network in its pilot phase, aiming to connect greenhouse growers nationwide, facilitate knowledge sharing, and amplify growers' voices in research and policy. The platform provides tools for grower networking, decision-making assistance, and a curated resource library, all co-designed with founding members based on direct grower feedback.
 
-## Tech Stack
+## Features
 
-- **Frontend**: React 18 with TypeScript, Vite, Tailwind CSS, shadcn/ui
-- **Backend**: Node.js 20 with Express.js, TypeScript
-- **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: JWT tokens with HTTP-only cookies
-- **AI Integration**: OpenAI GPT-4 for member matching and farm assessments
+- **Member Authentication & Profiles** - Secure registration and member management
+- **AI-Powered Find a Grower** - Connect with relevant growers based on expertise and location
+- **Farm Assessment Tool** - AI-powered greenhouse operation analysis and recommendations
+- **Resource Library** - Curated resources with state and farm type filtering
+- **Blog & News** - Industry updates and member-generated content
+- **Admin Dashboard** - Complete member and content management
+- **Responsive Design** - Works on all devices with accessibility features
 
-## Getting Started
+## Technology Stack
+
+### Frontend
+- **React 18** with TypeScript
+- **Wouter** for routing
+- **TanStack Query** for state management
+- **Tailwind CSS** with shadcn/ui components
+- **React Hook Form** with Zod validation
+- **Vite** for build tooling
+
+### Backend
+- **Node.js 20** with Express.js
+- **TypeScript** with ES modules
+- **PostgreSQL** with Drizzle ORM
+- **JWT** authentication with HTTP-only cookies
+- **OpenAI GPT-4o** for AI features
+- **SendGrid** for email services
+
+## Quick Start
 
 ### Prerequisites
-
-- Node.js 20 or higher
+- Node.js 18 or higher
 - PostgreSQL database
-- OpenAI API key (for AI features)
-
-### Environment Variables
-
-Create a `.env` file with the following variables:
-
-```env
-DATABASE_URL=your_postgresql_connection_string
-JWT_SECRET=your_jwt_secret_key
-OPENAI_API_KEY=your_openai_api_key
-SENDGRID_API_KEY=your_sendgrid_key_optional
-```
+- OpenAI API key (optional, for AI features)
+- SendGrid API key (optional, for email features)
 
 ### Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/SamChronert/UnitedGreenhouseGrowers.git
-cd UnitedGreenhouseGrowers
+git clone https://github.com/your-username/ugga-platform.git
+cd ugga-platform
 ```
 
 2. Install dependencies:
@@ -46,84 +55,72 @@ cd UnitedGreenhouseGrowers
 npm install
 ```
 
-3. Set up the database:
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+4. Push database schema:
 ```bash
 npm run db:push
 ```
 
-4. Start the development server:
+5. Start the development server:
 ```bash
 npm run dev
 ```
 
 The application will be available at `http://localhost:5000`
 
-### Available Scripts
+## Environment Variables
 
-- `npm run dev` - Start development server (both frontend and backend)
+See `.env.example` for all required and optional environment variables.
+
+**Required:**
+- `DATABASE_URL` - PostgreSQL connection string
+
+**Optional:**
+- `OPENAI_API_KEY` - For AI features
+- `SENDGRID_API_KEY` - For email functionality
+- `JWT_SECRET` - Authentication secret (uses secure default)
+
+## Scripts
+
+- `npm run dev` - Start development server
 - `npm run build` - Build for production
-- `npm run start` - Start production server
+- `npm start` - Start production server
+- `npm run check` - Type checking
 - `npm run db:push` - Push database schema changes
-- `npm run db:studio` - Open Drizzle Studio for database management
 
-## Project Structure
+## Deployment
 
-```
-├── client/              # React frontend
-│   ├── src/
-│   │   ├── components/  # UI components
-│   │   ├── pages/       # Page components
-│   │   └── hooks/       # Custom hooks
-├── server/              # Express backend
-│   ├── routes.ts        # API routes
-│   ├── auth.ts          # Authentication logic
-│   ├── storage.ts       # Database operations
-│   └── openai.ts        # AI integration
-├── shared/              # Shared types and schemas
-│   └── schema.ts        # Database schema
-└── README.md
-```
+The application is optimized for deployment on Replit with comprehensive error handling and fallbacks for missing services. See `DEPLOYMENT.md` for detailed deployment instructions.
 
-## Features
+### Health Check
 
-### Core Features
-- **Member Authentication**: Secure registration and login system
-- **Member Directory**: Search and connect with other growers
-- **Resource Library**: Curated, grower-reviewed resources
-- **Forum**: Community discussion platform
-- **Blog**: Industry insights and updates
+The application includes a health check endpoint at `/health` for monitoring deployment status.
 
-### AI-Powered Tools
-- **Find-a-Grower**: AI matching system to connect with relevant members
-- **Farm Assessment**: Comprehensive analysis and recommendations
+## Architecture
 
-### Admin Features
-- **Member Management**: View and manage member profiles
-- **Content Management**: Create and manage blog posts and resources
-- **Challenge Tracking**: Monitor and flag member-submitted challenges
-
-## Mission
-
-UGGA exists to solve fragmentation in the greenhouse industry by:
-- Connecting growers to share practical, tested solutions
-- Providing peer-reviewed resources over corporate marketing
-- Building community and knowledge sharing networks
-- Empowering growers in research and policy decisions
+- **Frontend**: React SPA with client-side routing
+- **Backend**: Express.js REST API
+- **Database**: PostgreSQL with Drizzle ORM
+- **AI Integration**: OpenAI GPT-4o for intelligent features
+- **Authentication**: JWT tokens with role-based access control
 
 ## Contributing
 
-This project is in pilot phase with active development based on founding member feedback. Please contact the development team for contribution guidelines.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
 ## License
 
 This project is proprietary to the United Greenhouse Growers Association.
 
-## Contact
+## Support
 
-For questions about the platform or membership, please contact:
-- Email: info@ugga.org
-- Phone: (555) 123-4567
-
----
-
-*Connecting growers, sharing knowledge, strengthening greenhouses.*
+For technical support or questions, please contact the development team.
