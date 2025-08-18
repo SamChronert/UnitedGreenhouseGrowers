@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, index, doublePrecision, unique } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -61,12 +61,36 @@ export const blogPosts = pgTable("blog_posts", {
   publishedAt: timestamp("published_at").defaultNow().notNull(),
 });
 
+// Resource type enum
+export type ResourceType = 'university' | 'organization' | 'grant' | 'tool' | 'education' | 'template' | 'consultant' | 'article';
+
 export const resources = pgTable("resources", {
   id: varchar("id").primaryKey().notNull(),
   title: varchar("title").notNull(),
   url: varchar("url").notNull(),
   tags: text("tags").array().notNull().default([]),
-});
+  // Extended fields for Resource Library
+  type: varchar("type").$type<ResourceType>(),
+  summary: text("summary"),
+  topics: text("topics").array().default([]),
+  crop: text("crop").array().default([]),
+  system_type: text("system_type").array().default([]),
+  region: varchar("region"),
+  cost: varchar("cost"),
+  last_verified_at: timestamp("last_verified_at"),
+  review_interval_days: integer("review_interval_days"),
+  ugga_verified: boolean("ugga_verified").default(false),
+  quality_score: integer("quality_score").default(0),
+  version: varchar("version"),
+  data: jsonb("data").default('{}'),
+  lat: doublePrecision("lat"),
+  long: doublePrecision("long"),
+}, (table) => ({
+  typeIdx: index("resources_type_idx").on(table.type),
+  uggaVerifiedIdx: index("resources_ugga_verified_idx").on(table.ugga_verified),
+  lastVerifiedIdx: index("resources_last_verified_idx").on(table.last_verified_at),
+  qualityScoreIdx: index("resources_quality_score_idx").on(table.quality_score),
+}));
 
 export const chatLogs = pgTable("chat_logs", {
   id: varchar("id").primaryKey().notNull(),
@@ -165,6 +189,24 @@ export const products = pgTable("products", {
   vendorIdx: index("products_vendor_idx").on(table.vendorName),
 }));
 
+// New tables for Resource Library
+export const favorites = pgTable("favorites", {
+  id: serial("id").primaryKey().notNull(),
+  user_id: varchar("user_id").notNull(),
+  resource_id: varchar("resource_id").notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userResourceUnique: unique("favorites_user_resource_unique").on(table.user_id, table.resource_id),
+}));
+
+export const analytics_events = pgTable("analytics_events", {
+  id: serial("id").primaryKey().notNull(),
+  user_id: varchar("user_id"),
+  name: varchar("name").notNull(),
+  payload: jsonb("payload").notNull(),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, {
@@ -222,6 +264,21 @@ export const assessmentTrainingDataRelations = relations(assessmentTrainingData,
   }),
 }));
 
+export const favoritesRelations = relations(favorites, ({ one }) => ({
+  user: one(users, {
+    fields: [favorites.user_id],
+    references: [users.id],
+  }),
+  resource: one(resources, {
+    fields: [favorites.resource_id],
+    references: [resources.id],
+  }),
+}));
+
+export const resourcesRelations = relations(resources, ({ many }) => ({
+  favorites: many(favorites),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -239,6 +296,16 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
 
 export const insertResourceSchema = createInsertSchema(resources).omit({
   id: true,
+});
+
+export const insertFavoriteSchema = createInsertSchema(favorites).omit({
+  id: true,
+  created_at: true,
+});
+
+export const insertAnalyticsEventSchema = createInsertSchema(analytics_events).omit({
+  id: true,
+  created_at: true,
 });
 
 export const insertChatLogSchema = createInsertSchema(chatLogs).omit({
@@ -304,3 +371,7 @@ export type BuyersDistributors = typeof buyersDistributors.$inferSelect;
 export type InsertBuyersDistributors = z.infer<typeof insertBuyersDistributorsSchema>;
 export type Products = typeof products.$inferSelect;
 export type InsertProducts = z.infer<typeof insertProductsSchema>;
+export type Favorite = typeof favorites.$inferSelect;
+export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
+export type AnalyticsEvent = typeof analytics_events.$inferSelect;
+export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;

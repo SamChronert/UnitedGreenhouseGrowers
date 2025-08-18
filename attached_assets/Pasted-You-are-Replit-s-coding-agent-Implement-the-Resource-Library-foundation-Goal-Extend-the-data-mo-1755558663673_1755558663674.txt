@@ -1,0 +1,61 @@
+You are Replit’s coding agent. Implement the Resource Library foundation.
+
+Goal
+- Extend the data model and API to support the Resource Library (types, facets, paging/sort) while preserving existing routes and auth.
+
+Repo files to create/modify
+1) shared/schema.ts  (Drizzle schema, imported as `@shared/schema`)
+   - Extend existing `resources` table by adding:
+     - `type` varchar (enum via TS union at runtime): 'university' | 'organization' | 'grant' | 'tool' | 'education' | 'template' | 'consultant' | 'article'
+     - `summary` text null
+     - `topics` text[] default '{}'
+     - `crop` text[] default '{}'
+     - `system_type` text[] default '{}'
+     - `region` varchar null
+     - `cost` varchar null
+     - `last_verified_at` timestamp null
+     - `review_interval_days` integer null
+     - `ugga_verified` boolean default false
+     - `quality_score` integer default 0
+     - `version` varchar null
+     - `data` jsonb default '{}'::jsonb
+     - `lat` double precision null
+     - `long` double precision null
+     - Add indexes: (type), (ugga_verified), (last_verified_at), (quality_score)
+   - New table: `favorites`
+     - columns: id serial PK, user_id varchar, resource_id integer, created_at timestamp default now()
+     - unique index on (user_id, resource_id)
+   - (Optional) New table: `analytics_events`
+     - columns: id serial PK, user_id varchar null, name varchar, payload jsonb, created_at timestamp default now()
+
+2) server/storage.ts
+   - Add helpers:
+     - `listResources(params)` → accepts paging (page=1,pageSize=24), sorting (relevance|verified_desc|title_asc|due_soon), q, all common facets, and type-specific facets per spec. Return `{items, total}`. Compute `has_location` on the fly from lat/long.
+     - `getResourceById(id)`
+     - `toggleFavorite(userId, resourceId, on)` and `listFavorites(userId, paging?)`
+     - `recordAnalytics({userId?, name, payload})` (no-op write if analytics table absent)
+   - Keep existing state/farmType filtering backwards-compatible.
+
+3) server/routes.ts
+   - Extend GET `/api/resources` to accept:
+     - `q`, `type`, `topics`, `crop`, `system_type`, `region`, `audience`, `cost`, `status`, `eligibility_geo`, `format`, `has_location`, `sort`, `page`, `pageSize`
+   - Add GET `/api/resources/:id`
+   - Add POST `/api/favorites/:id` and DELETE `/api/favorites/:id` (member-only)
+   - Add GET `/api/favorites` (member-only)
+   - Add POST `/api/analytics` → record events (best-effort)
+   - Reuse existing role guards and auth middlewares.
+
+4) (Dev seed) server/seed/resources.ts (optional)
+   - If `resources` empty in dev, insert 20–30 seed rows across types.
+
+Commands / verification
+- Run: `pnpm db:push` then `pnpm dev`
+- Hit: 
+  - `GET /api/resources?page=1&pageSize=24&type=grant&sort=verified_desc` → JSON with items + total
+  - `GET /api/resources/:id` → one row with computed `has_location`
+  - `POST /api/favorites/:id` then `GET /api/favorites` → shows item
+  - (Optional) `POST /api/analytics` with `{name:"lib.search_performed", payload:{q:"test"}}` → 200 OK
+
+Acceptance
+- API returns 200s and respects auth (member routes require auth).
+- No regressions to existing `/api/resources` behavior for state/farmType.

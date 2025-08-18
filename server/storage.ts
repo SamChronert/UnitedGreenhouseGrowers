@@ -3,6 +3,8 @@ import {
   profiles,
   blogPosts,
   resources,
+  favorites,
+  analytics_events,
   chatLogs,
   growerChallenges,
   forumPosts,
@@ -16,6 +18,10 @@ import {
   type InsertBlogPost,
   type Resource,
   type InsertResource,
+  type Favorite,
+  type InsertFavorite,
+  type AnalyticsEvent,
+  type InsertAnalyticsEvent,
   type ChatLog,
   type InsertChatLog,
   type GrowerChallenge,
@@ -55,9 +61,34 @@ export interface IStorage {
   // Resource operations
   getAllResources(): Promise<Resource[]>;
   getFilteredResources(state?: string, farmType?: string): Promise<Resource[]>;
+  listResources(params: {
+    page?: number;
+    pageSize?: number;
+    sort?: string;
+    q?: string;
+    type?: string;
+    topics?: string[];
+    crop?: string[];
+    system_type?: string[];
+    region?: string;
+    audience?: string;
+    cost?: string;
+    status?: string;
+    eligibility_geo?: string;
+    format?: string;
+    has_location?: boolean;
+  }): Promise<{ items: (Resource & { has_location: boolean })[], total: number }>;
+  getResourceById(id: string): Promise<(Resource & { has_location: boolean }) | undefined>;
   createResource(resource: InsertResource): Promise<Resource>;
   updateResource(id: string, updates: Partial<Resource>): Promise<Resource>;
   deleteResource(id: string): Promise<void>;
+  
+  // Favorites operations
+  toggleFavorite(userId: string, resourceId: string, on: boolean): Promise<void>;
+  listFavorites(userId: string, params?: { page?: number; pageSize?: number }): Promise<{ items: (Favorite & { resource: Resource & { has_location: boolean } })[], total: number }>;
+  
+  // Analytics operations
+  recordAnalytics(event: InsertAnalyticsEvent): Promise<void>;
   
   // Chat log operations
   createChatLog(chatLog: InsertChatLog): Promise<ChatLog>;
@@ -114,14 +145,14 @@ export class DatabaseStorage implements IStorage {
   async createUser(userData: InsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values([{
+      .values({
         id: randomUUID(),
         username: userData.username,
         email: userData.email,
         passwordHash: userData.passwordHash,
         emailVerified: userData.emailVerified || null,
-        role: userData.role || Role.MEMBER
-      }])
+        role: (userData.role as Role) || Role.MEMBER
+      })
       .returning();
     return user;
   }
@@ -214,11 +245,143 @@ export class DatabaseStorage implements IStorage {
       .where(sql`${conditions.join(' OR ')}`);
   }
 
+  // New Resource Library functions
+  async listResources(params: {
+    page?: number;
+    pageSize?: number;
+    sort?: string;
+    q?: string;
+    type?: string;
+    topics?: string[];
+    crop?: string[];
+    system_type?: string[];
+    region?: string;
+    audience?: string;
+    cost?: string;
+    status?: string;
+    eligibility_geo?: string;
+    format?: string;
+    has_location?: boolean;
+  }): Promise<{ items: (Resource & { has_location: boolean })[], total: number }> {
+    const { page = 1, pageSize = 24 } = params;
+    const offset = (page - 1) * pageSize;
+    
+    // Build filter conditions
+    const conditions: any[] = [];
+    
+    if (params.q) {
+      conditions.push(
+        or(
+          ilike(resources.title, `%${params.q}%`),
+          ilike(resources.summary, `%${params.q}%`)
+        )
+      );
+    }
+    
+    if (params.type) {
+      conditions.push(eq(resources.type, params.type as any));
+    }
+    
+    if (params.topics && params.topics.length > 0) {
+      conditions.push(sql`${resources.topics} && ${params.topics}`);
+    }
+    
+    if (params.crop && params.crop.length > 0) {
+      conditions.push(sql`${resources.crop} && ${params.crop}`);
+    }
+    
+    if (params.system_type && params.system_type.length > 0) {
+      conditions.push(sql`${resources.system_type} && ${params.system_type}`);
+    }
+    
+    if (params.region) {
+      conditions.push(eq(resources.region, params.region));
+    }
+    
+    if (params.cost) {
+      conditions.push(eq(resources.cost, params.cost));
+    }
+    
+    if (params.has_location !== undefined) {
+      if (params.has_location) {
+        conditions.push(sql`${resources.lat} IS NOT NULL AND ${resources.long} IS NOT NULL`);
+      } else {
+        conditions.push(sql`${resources.lat} IS NULL OR ${resources.long} IS NULL`);
+      }
+    }
+    
+    // Build sort conditions
+    let orderBy = resources.title; // Default sort
+    if (params.sort) {
+      switch (params.sort) {
+        case 'verified_desc':
+          orderBy = desc(resources.ugga_verified);
+          break;
+        case 'title_asc':
+          orderBy = resources.title;
+          break;
+        case 'due_soon':
+          orderBy = resources.last_verified_at;
+          break;
+        case 'relevance':
+        default:
+          orderBy = desc(resources.quality_score);
+          break;
+      }
+    }
+    
+    // Get total count
+    const countQuery = db
+      .select({ count: sql<number>`count(*)` })
+      .from(resources);
+    
+    if (conditions.length > 0) {
+      countQuery.where(and(...conditions));
+    }
+    
+    const [{ count: total }] = await countQuery;
+    
+    // Get items 
+    let query = db
+      .select()
+      .from(resources);
+      
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    const rawItems = await query
+      .orderBy(orderBy)
+      .offset(offset)
+      .limit(pageSize);
+    
+    // Add computed has_location field
+    const items = rawItems.map((item: any) => ({
+      ...item,
+      has_location: !!(item.lat && item.long)
+    }));
+    
+    return { items, total };
+  }
+
+  async getResourceById(id: string): Promise<(Resource & { has_location: boolean }) | undefined> {
+    const [resource] = await db
+      .select()
+      .from(resources)
+      .where(eq(resources.id, id));
+    
+    if (!resource) return undefined;
+    
+    return {
+      ...resource,
+      has_location: !!(resource.lat && resource.long)
+    };
+  }
+
   async createResource(resourceData: InsertResource): Promise<Resource> {
-    const id = randomUUID();
     const [resource] = await db
       .insert(resources)
-      .values({ ...resourceData, id })
+      .values({ ...resourceData, id: randomUUID() })
       .returning();
     return resource;
   }
@@ -234,6 +397,73 @@ export class DatabaseStorage implements IStorage {
 
   async deleteResource(id: string): Promise<void> {
     await db.delete(resources).where(eq(resources.id, id));
+  }
+
+  // Favorites operations
+  async toggleFavorite(userId: string, resourceId: string, on: boolean): Promise<void> {
+    if (on) {
+      try {
+        await db
+          .insert(favorites)
+          .values({ user_id: userId, resource_id: resourceId })
+          .onConflictDoNothing();
+      } catch (error) {
+        // Ignore conflict errors (already favorited)
+      }
+    } else {
+      await db
+        .delete(favorites)
+        .where(and(
+          eq(favorites.user_id, userId),
+          eq(favorites.resource_id, resourceId)
+        ));
+    }
+  }
+
+  async listFavorites(userId: string, params?: { page?: number; pageSize?: number }): Promise<{ items: (Favorite & { resource: Resource & { has_location: boolean } })[], total: number }> {
+    const { page = 1, pageSize = 24 } = params || {};
+    const offset = (page - 1) * pageSize;
+    
+    // Get total count
+    const [{ count: total }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(favorites)
+      .where(eq(favorites.user_id, userId));
+    
+    // Get items
+    const results = await db
+      .select()
+      .from(favorites)
+      .innerJoin(resources, eq(favorites.resource_id, resources.id))
+      .where(eq(favorites.user_id, userId))
+      .orderBy(desc(favorites.created_at))
+      .offset(offset)
+      .limit(pageSize);
+    
+    const items = results.map((result: any) => ({
+      id: result.favorites.id,
+      user_id: result.favorites.user_id,
+      resource_id: result.favorites.resource_id,
+      created_at: result.favorites.created_at,
+      resource: {
+        ...result.resources,
+        has_location: !!(result.resources.lat && result.resources.long)
+      }
+    }));
+    
+    return { items, total };
+  }
+
+  // Analytics operations
+  async recordAnalytics(event: InsertAnalyticsEvent): Promise<void> {
+    try {
+      await db
+        .insert(analytics_events)
+        .values(event);
+    } catch (error) {
+      // Best effort - don't fail if analytics table doesn't exist
+      console.warn('Failed to record analytics:', error);
+    }
   }
 
   // Chat log operations

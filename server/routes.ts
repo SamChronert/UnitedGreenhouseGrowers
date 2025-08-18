@@ -363,14 +363,109 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
   // Resources routes
   app.get("/api/resources", async (req, res) => {
     try {
-      const { state, farmType } = req.query;
-      const resources = await storage.getFilteredResources(
-        state as string, 
-        farmType as string
-      );
-      res.json(resources);
+      // Check if this is the new Resource Library format (with pagination params)
+      if (req.query.page || req.query.pageSize || req.query.sort || req.query.type) {
+        const params = {
+          page: req.query.page ? parseInt(req.query.page as string) : 1,
+          pageSize: req.query.pageSize ? parseInt(req.query.pageSize as string) : 24,
+          sort: req.query.sort as string,
+          q: req.query.q as string,
+          type: req.query.type as string,
+          topics: req.query.topics ? (Array.isArray(req.query.topics) ? req.query.topics : [req.query.topics]) as string[] : undefined,
+          crop: req.query.crop ? (Array.isArray(req.query.crop) ? req.query.crop : [req.query.crop]) as string[] : undefined,
+          system_type: req.query.system_type ? (Array.isArray(req.query.system_type) ? req.query.system_type : [req.query.system_type]) as string[] : undefined,
+          region: req.query.region as string,
+          audience: req.query.audience as string,
+          cost: req.query.cost as string,
+          status: req.query.status as string,
+          eligibility_geo: req.query.eligibility_geo as string,
+          format: req.query.format as string,
+          has_location: req.query.has_location ? req.query.has_location === 'true' : undefined,
+        };
+        
+        const result = await storage.listResources(params);
+        res.json(result);
+      } else {
+        // Legacy format for backwards compatibility
+        const { state, farmType } = req.query;
+        const resources = await storage.getFilteredResources(
+          state as string, 
+          farmType as string
+        );
+        res.json(resources);
+      }
     } catch (error) {
+      console.error("Resources error:", error);
       res.status(500).json({ message: "Failed to fetch resources" });
+    }
+  });
+
+  app.get("/api/resources/:id", async (req, res) => {
+    try {
+      const resource = await storage.getResourceById(req.params.id);
+      if (!resource) {
+        return res.status(404).json({ message: "Resource not found" });
+      }
+      res.json(resource);
+    } catch (error) {
+      console.error("Get resource error:", error);
+      res.status(500).json({ message: "Failed to fetch resource" });
+    }
+  });
+
+  // Favorites routes (member-only)
+  app.post("/api/favorites/:id", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      await storage.toggleFavorite(req.user!.id, req.params.id, true);
+      res.json({ message: "Resource added to favorites" });
+    } catch (error) {
+      console.error("Add favorite error:", error);
+      res.status(500).json({ message: "Failed to add favorite" });
+    }
+  });
+
+  app.delete("/api/favorites/:id", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      await storage.toggleFavorite(req.user!.id, req.params.id, false);
+      res.json({ message: "Resource removed from favorites" });
+    } catch (error) {
+      console.error("Remove favorite error:", error);
+      res.status(500).json({ message: "Failed to remove favorite" });
+    }
+  });
+
+  app.get("/api/favorites", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const params = {
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        pageSize: req.query.pageSize ? parseInt(req.query.pageSize as string) : 24,
+      };
+      
+      const result = await storage.listFavorites(req.user!.id, params);
+      res.json(result);
+    } catch (error) {
+      console.error("List favorites error:", error);
+      res.status(500).json({ message: "Failed to fetch favorites" });
+    }
+  });
+
+  // Analytics route (best-effort)
+  app.post("/api/analytics", async (req, res) => {
+    try {
+      const { name, payload } = req.body;
+      const userId = req.headers.authorization ? undefined : null; // Could extract from token if needed
+      
+      await storage.recordAnalytics({
+        user_id: userId,
+        name,
+        payload: payload || {}
+      });
+      
+      res.json({ message: "Analytics recorded" });
+    } catch (error) {
+      // Best effort - don't fail the request
+      console.warn("Analytics error:", error);
+      res.json({ message: "Analytics recorded" });
     }
   });
 
