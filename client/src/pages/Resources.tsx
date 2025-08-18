@@ -1,10 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Calendar, Users, Building, Briefcase, Wrench, ChevronDown, ChevronRight, Grid, List, Heart, Search, Plus } from "lucide-react";
+import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ExternalLink, Calendar, Users, Building, Briefcase, Wrench, ChevronDown, ChevronRight, Grid, List, Heart, Search, Plus, Book, FileText } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
 import InDevelopmentBanner from "@/components/InDevelopmentBanner";
+
+// Import new components for testing
+import ResourceCard from "@/components/resources/ResourceCard";
+import ResourceRow from "@/components/resources/ResourceRow";
+import FacetPanel from "@/components/resources/FacetPanel";
+import ProfileToggle from "@/components/resources/ProfileToggle";
+import MapToggle from "@/components/resources/MapToggle";
+import EmptyState from "@/components/common/EmptyState";
 
 export default function Resources() {
   const [selectedFilter, setSelectedFilter] = useState<string>("All");
@@ -16,6 +25,61 @@ export default function Resources() {
     tools: false,
     events: true
   });
+
+  // Component testing state
+  const [facetFilters, setFacetFilters] = useState({});
+  const [profileEnabled, setProfileEnabled] = useState(false);
+  const [isMapView, setIsMapView] = useState(false);
+
+  // Mock data for component testing
+  const mockResources = [
+    {
+      id: "1",
+      title: "USDA Greenhouse Management Guide",
+      summary: "Comprehensive guide to greenhouse management practices from the USDA",
+      type: "education" as const,
+      topics: ["management", "best-practices"],
+      crop: ["vegetables", "herbs"],
+      system_type: ["controlled-environment"],
+      region: "US",
+      cost: "free",
+      ugga_verified: true,
+      quality_score: 95,
+      has_location: false,
+      url: "https://usda.gov/guide"
+    },
+    {
+      id: "2", 
+      title: "Cornell Extension - Greenhouse Production",
+      summary: "Research-based greenhouse production techniques and disease management",
+      type: "university" as const,
+      topics: ["disease-management", "research"],
+      crop: ["tomatoes", "peppers"],
+      region: "Northeast",
+      cost: "free",
+      ugga_verified: true,
+      has_location: true,
+      url: "https://cornell.edu/extension"
+    },
+    {
+      id: "3",
+      title: "Climate Controller Pro",
+      summary: "Advanced climate control system for precision greenhouse management",
+      type: "tool" as const,
+      topics: ["climate-control", "automation"],
+      cost: "paid",
+      has_location: false,
+      last_verified_at: new Date("2023-01-01") // Stale
+    }
+  ];
+
+  const mockProfile = {
+    crops: ["tomatoes", "peppers", "leafy-greens"],
+    system_types: ["hydroponics", "controlled-environment"],
+    regions: ["Northeast", "US"],
+    experience_level: "intermediate",
+    operation_type: "commercial"
+  };
 
   const filters = ["All", "Organizations", "Events", "Tools"];
 
@@ -170,8 +234,105 @@ export default function Resources() {
           </Card>
         </div>
 
-        {/* Results Area */}
-        <div className="mb-8">{/* Placeholder for future results */}</div>
+        {/* Component Testing Area */}
+        <div className="mb-8 space-y-8">
+          <Card className="shadow-sm bg-yellow-50 border-yellow-200">
+            <CardContent className="p-4">
+              <h3 className="font-medium text-yellow-800 mb-2">Component Testing - Will be removed after verification</h3>
+              <p className="text-sm text-yellow-700">Testing the new Resource Library UI components with mock data</p>
+            </CardContent>
+          </Card>
+
+          {/* Test Layout */}
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Left Sidebar - FacetPanel & ProfileToggle */}
+            <div className="lg:col-span-1 space-y-4">
+              <FacetPanel
+                value={facetFilters}
+                onChange={setFacetFilters}
+                showStatus={true}
+                showFormat={true}
+                hasLocationAvailable={true}
+              />
+              
+              <ProfileToggle
+                isEnabled={profileEnabled}
+                onToggle={setProfileEnabled}
+                onApply={(profile) => console.log("Apply profile:", profile)}
+                onClear={() => console.log("Clear profile")}
+                userProfile={mockProfile}
+              />
+              
+              <MapToggle
+                hasLocationAvailable={true}
+                isMapView={isMapView}
+                onToggleView={setIsMapView}
+                locationCount={2}
+              />
+            </div>
+
+            {/* Main Content */}
+            <div className="lg:col-span-3 space-y-6">
+              {/* ResourceCard Grid */}
+              <div>
+                <h3 className="font-medium mb-4">ResourceCard Components (Grid View)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {mockResources.map((resource, index) => (
+                    <ResourceCard
+                      key={resource.id}
+                      resource={resource}
+                      onToggleFavorite={(id, on) => console.log("Toggle favorite:", id, on)}
+                      onOpen={(id) => console.log("Open resource:", id)}
+                      isFavorited={index === 0}
+                      showBadges={true}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* ResourceRow Table */}
+              <div>
+                <h3 className="font-medium mb-4">ResourceRow Components (List View)</h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Resource</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Topics</TableHead>
+                      <TableHead>Region/Cost</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {mockResources.map((resource, index) => (
+                      <ResourceRow
+                        key={resource.id}
+                        resource={resource}
+                        onToggleFavorite={(id, on) => console.log("Toggle favorite:", id, on)}
+                        onOpen={(id) => console.log("Open resource:", id)}
+                        isFavorited={index === 1}
+                        showBadges={true}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* EmptyState */}
+              <div>
+                <h3 className="font-medium mb-4">EmptyState Component</h3>
+                <EmptyState
+                  title="No resources found"
+                  body="We couldn't find any resources matching your current filters. Try adjusting your search criteria or suggest a new resource."
+                  icon={<Book className="h-10 w-10 text-gray-400" />}
+                  ctaText="Suggest a Resource"
+                  onCtaClick={() => console.log("Suggest resource clicked")}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Organizations Section */}
         {shouldShowSection("organizations") && (
