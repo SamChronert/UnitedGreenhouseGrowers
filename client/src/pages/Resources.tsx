@@ -17,6 +17,7 @@ import FacetPanel, { type FacetFilters } from "@/components/resources/FacetPanel
 import ProfileToggle, { type UserProfile } from "@/components/resources/ProfileToggle";
 import MapToggle from "@/components/resources/MapToggle";
 import EmptyState from "@/components/common/EmptyState";
+import { SuggestDialog } from "@/components/resources/SuggestDialog";
 
 // Import API
 import { listResources, type ResourceFilters } from "@/lib/api/resources";
@@ -299,10 +300,7 @@ export default function Resources() {
                 </Button>
               </Link>
               
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Suggest Resource
-              </Button>
+              <SuggestDialog />
             </div>
           </div>
         </div>
@@ -406,7 +404,7 @@ export default function Resources() {
                 body="We couldn't find any resources matching your current filters. Try adjusting your search criteria or suggest a new resource."
                 icon={<Book className="h-10 w-10 text-gray-400" />}
                 ctaText="Suggest a Resource"
-                onCtaClick={() => console.log("Suggest resource clicked")}
+                onCtaClick={() => {}} // Will be handled by SuggestDialog
               />
             )}
 
