@@ -410,17 +410,35 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
-  // Add feedback endpoint for resource update requests
-  app.post("/api/feedback", async (req, res) => {
+  // Add feedback endpoint for resource update requests and suggestions
+  app.post("/api/feedback", authenticate, async (req: AuthRequest, res) => {
     try {
-      const { type, resource_id, message, title } = req.body;
+      const { type, resource_id, message, title, resourceType, url, note } = req.body;
       
-      // For now, just log the feedback - in production this would save to database
-      console.log("Feedback received:", { type, resource_id, message, title });
+      // Save feedback to database
+      const feedbackId = randomUUID();
+      const feedback = {
+        id: feedbackId,
+        user_id: req.user!.id,
+        type,
+        title,
+        resource_id,
+        resource_type: resourceType,
+        url,
+        note: note || message,
+        status: 'pending'
+      };
+      
+      await db.execute(sql`
+        INSERT INTO feedback (id, user_id, type, title, resource_id, resource_type, url, note, status)
+        VALUES (${feedbackId}, ${req.user!.id}, ${type}, ${title || ''}, ${resource_id || ''}, ${resourceType || ''}, ${url || ''}, ${note || message || ''}, 'pending')
+      `);
+      
+      console.log(`${type} received from user ${req.user!.username}:`, feedback);
       
       res.json({ 
         message: "Feedback received successfully",
-        id: Date.now().toString() // Mock ID
+        id: feedbackId
       });
     } catch (error) {
       console.error("Feedback error:", error);
