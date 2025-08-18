@@ -410,6 +410,24 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
+  // Add feedback endpoint for resource update requests
+  app.post("/api/feedback", async (req, res) => {
+    try {
+      const { type, resource_id, message, title } = req.body;
+      
+      // For now, just log the feedback - in production this would save to database
+      console.log("Feedback received:", { type, resource_id, message, title });
+      
+      res.json({ 
+        message: "Feedback received successfully",
+        id: Date.now().toString() // Mock ID
+      });
+    } catch (error) {
+      console.error("Feedback error:", error);
+      res.status(500).json({ message: "Failed to submit feedback" });
+    }
+  });
+
   // Favorites routes (member-only)
   app.post("/api/favorites/:id", authenticate, requireMember, async (req: AuthRequest, res) => {
     try {

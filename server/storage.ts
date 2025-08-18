@@ -261,86 +261,75 @@ export class DatabaseStorage implements IStorage {
       tags = []
     } = params;
 
-    const offset = (page - 1) * pageSize;
-    const conditions: any[] = [];
+    // Simplified approach: fetch all resources and filter in memory
+    const allResources = await db
+      .select()
+      .from(resources)
+      .orderBy(resources.title);
     
-    // Search query - search in title and tags
+    // Apply search and filtering in memory
+    let filteredResources = allResources;
+    
+    // Search filter
     if (q.trim()) {
-      conditions.push(
-        or(
-          ilike(resources.title, `%${q}%`),
-          sql`${resources.tags} && ARRAY[${q}]::text[]`
-        )
+      const searchTerm = q.toLowerCase();
+      filteredResources = filteredResources.filter((item: any) =>
+        item.title.toLowerCase().includes(searchTerm) ||
+        (item.tags && item.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm)))
       );
     }
-
+    
     // Tag filters
     if (tags.length > 0) {
-      conditions.push(sql`${resources.tags} && ${tags}::text[]`);
-    }
-
-    // Sorting (simplified for current schema)
-    let orderBy: any = resources.title; // Default alphabetical
-    if (params.sort) {
-      switch (params.sort) {
-        case 'title_asc':
-        case 'relevance':
-        default:
-          orderBy = resources.title;
-          break;
-      }
+      filteredResources = filteredResources.filter((item: any) =>
+        item.tags && tags.some(tag => item.tags.includes(tag))
+      );
     }
     
-    // Get total count
-    const countQuery = db
-      .select({ count: sql<number>`count(*)` })
-      .from(resources);
-    
-    if (conditions.length > 0) {
-      countQuery.where(and(...conditions));
-    }
-    
-    const [{ count: total }] = await countQuery;
-    
-    // Get items 
-    let query = db
-      .select()
-      .from(resources);
-      
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions)) as any;
-    }
-    
-    const rawItems = await query
-      .orderBy(orderBy)
-      .offset(offset)
-      .limit(pageSize);
+    // Calculate pagination
+    const total = filteredResources.length;
+    const offset = (page - 1) * pageSize;
+    const rawItems = filteredResources.slice(offset, offset + pageSize);
     
     // Map to extended interface with default values
     const items = rawItems.map((item: any) => ({
       ...item,
       // Infer type from tags
-      type: item.tags.find((tag: string) => 
-        ['university', 'organization', 'tool', 'education'].includes(tag)
+      type: item.tags?.find?.((tag: string) => 
+        ['university', 'organization', 'tool', 'education', 'grant', 'template'].includes(tag)
       ) || 'education',
       // Infer topics from tags
-      topics: item.tags.filter((tag: string) => 
-        ['management', 'research', 'pest-management', 'automation'].includes(tag)
-      ),
+      topics: item.tags?.filter?.((tag: string) => 
+        ['management', 'research', 'pest-management', 'automation', 'best-practices', 'climate-control', 'business', 'planning', 'plant-science'].includes(tag)
+      ) || [],
       // Infer crops from tags  
-      crop: item.tags.filter((tag: string) =>
+      crop: item.tags?.filter?.((tag: string) =>
         ['vegetables', 'tomatoes', 'peppers', 'leafy-greens'].includes(tag)
-      ),
+      ) || [],
       // Infer system type from tags
-      system_type: item.tags.filter((tag: string) =>
+      system_type: item.tags?.filter?.((tag: string) =>
         ['hydroponics', 'controlled-environment', 'organic'].includes(tag)
-      ),
+      ) || [],
       cost: 'free', // Default assumption
       ugga_verified: false, // Default
       quality_score: 75, // Default
       has_location: false, // No location data in current schema
       region: 'US', // Default
-      summary: `Resource about ${item.tags.slice(0, 3).join(', ')}.`
+      summary: item.tags?.length > 0 ? `Resource about ${item.tags.slice(0, 3).join(', ')}.` : 'Educational resource for greenhouse growers.',
+      // Add grant-specific mock data for grants
+      data: item.tags?.includes?.('grant') ? {
+        sponsor: item.tags?.includes?.('university') ? 'USDA NIFA' : 'NSF',
+        program_name: item.title,
+        award_min: 50000,
+        award_max: 500000,
+        due_date: 'rolling',
+        status: 'open',
+        eligibility_geo: ['US'],
+        link_to_rfp: item.url
+      } : item.tags?.includes?.('template') ? {
+        version: '1.0',
+        version_notes: 'Latest version with updated formatting'
+      } : {}
     }));
     
     return { items, total };
@@ -357,24 +346,38 @@ export class DatabaseStorage implements IStorage {
     return {
       ...resource,
       // Map to extended interface with defaults (same as listResources)
-      type: resource.tags.find((tag: string) => 
-        ['university', 'organization', 'tool', 'education'].includes(tag)
+      type: resource.tags?.find((tag: string) => 
+        ['university', 'organization', 'tool', 'education', 'grant', 'template'].includes(tag)
       ) || 'education',
-      topics: resource.tags.filter((tag: string) => 
-        ['management', 'research', 'pest-management', 'automation'].includes(tag)
-      ),
-      crop: resource.tags.filter((tag: string) =>
+      topics: resource.tags?.filter((tag: string) => 
+        ['management', 'research', 'pest-management', 'automation', 'best-practices', 'climate-control', 'business', 'planning', 'plant-science'].includes(tag)
+      ) || [],
+      crop: resource.tags?.filter((tag: string) =>
         ['vegetables', 'tomatoes', 'peppers', 'leafy-greens'].includes(tag)
-      ),
-      system_type: resource.tags.filter((tag: string) =>
+      ) || [],
+      system_type: resource.tags?.filter((tag: string) =>
         ['hydroponics', 'controlled-environment', 'organic'].includes(tag)
-      ),
+      ) || [],
       cost: 'free',
       ugga_verified: false,
       quality_score: 75,
       has_location: false,
       region: 'US',
-      summary: `Resource about ${resource.tags.slice(0, 3).join(', ')}.`
+      summary: resource.tags?.length > 0 ? `Resource about ${resource.tags.slice(0, 3).join(', ')}.` : 'Educational resource for greenhouse growers.',
+      // Add type-specific mock data
+      data: resource.tags?.includes('grant') ? {
+        sponsor: resource.tags.includes('university') ? 'USDA NIFA' : 'NSF',
+        program_name: resource.title,
+        award_min: 50000,
+        award_max: 500000,
+        due_date: 'rolling',
+        status: 'open',
+        eligibility_geo: ['US'],
+        link_to_rfp: resource.url
+      } : resource.tags?.includes('template') ? {
+        version: '1.0',
+        version_notes: 'Latest version with updated formatting'
+      } : {}
     };
   }
 
