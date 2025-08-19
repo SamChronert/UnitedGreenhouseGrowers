@@ -90,9 +90,11 @@ export default function AdminResources() {
 
   const selectedType = form.watch("type") as ResourceType;
 
-  const { data: resources, isLoading } = useQuery<Resource[]>({
-    queryKey: ["/api/resources"],
+  const { data: resourceData, isLoading } = useQuery({
+    queryKey: ["/api/resources", { pageSize: 1000 }], // Get all resources for admin
   });
+  
+  const resources = resourceData?.items || [];
 
   const createResourceMutation = useMutation({
     mutationFn: (data: Partial<Resource>) =>
