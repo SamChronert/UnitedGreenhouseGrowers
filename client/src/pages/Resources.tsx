@@ -302,7 +302,7 @@ export default function Resources() {
         <header className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Resource Library</h1>
+              <h1 id="results-heading" className="text-3xl font-bold text-gray-900 mb-2">Resource Library</h1>
               <p className="text-gray-700">We're building a grower-reviewed resource library of guides, case studies, and extension bulletins — everything from irrigation best practices to supplier insights. Founding members will help decide what gets included, reviewed, and prioritized.</p>
             </div>
             
@@ -434,15 +434,13 @@ export default function Resources() {
                     <TabsTrigger 
                       value="grid" 
                       aria-label="Grid view"
-                      role="tab"
                     >
                       <Grid className="h-4 w-4" aria-hidden="true" />
                       <span className="sr-only">Grid view</span>
                     </TabsTrigger>
                     <TabsTrigger 
                       value="list"
-                      aria-label="List view" 
-                      role="tab"
+                      aria-label="List view"
                     >
                       <List className="h-4 w-4" aria-hidden="true" />
                       <span className="sr-only">List view</span>

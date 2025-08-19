@@ -64,6 +64,21 @@ export default function ResourceRow({
     }
   };
 
+  const handleHeartKeyDown = async (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!onToggleFavorite || isToggling) return;
+      
+      setIsToggling(true);
+      try {
+        await onToggleFavorite(resource.id, !isFavorited);
+      } finally {
+        setIsToggling(false);
+      }
+    }
+  };
+
   const isStale = resource.last_verified_at && 
     new Date(resource.last_verified_at) < new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
 
@@ -147,19 +162,19 @@ export default function ResourceRow({
         {showBadges && (
           <div className="flex flex-wrap gap-1">
             {resource.ugga_verified && (
-              <CheckCircle className="h-4 w-4 text-green-600" />
+              <CheckCircle className="h-4 w-4 text-green-600" aria-label="UGGA Verified" />
             )}
             
             {resource.has_location && (
-              <MapPin className="h-4 w-4 text-blue-600" />
+              <MapPin className="h-4 w-4 text-blue-600" aria-label="Has location data" />
             )}
             
             {isStale && (
-              <AlertTriangle className="h-4 w-4 text-yellow-600" />
+              <AlertTriangle className="h-4 w-4 text-yellow-600" aria-label="Needs review" />
             )}
             
             {resource.url && (
-              <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-ugga-primary transition-colors" />
+              <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-ugga-primary transition-colors" aria-label="Has external link" />
             )}
           </div>
         )}
@@ -179,15 +194,10 @@ export default function ResourceRow({
                 isFavorited ? "text-red-500 hover:text-red-600" : "text-gray-400 hover:text-red-500"
               )}
               aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleToggleFavorite(e as any);
-                }
-              }}
+              onKeyDown={handleHeartKeyDown}
+              aria-pressed={isFavorited}
             >
-              <Heart className={cn("h-4 w-4", isFavorited && "fill-current")} />
+              <Heart className={cn("h-4 w-4", isFavorited && "fill-current")} aria-hidden="true" />
             </Button>
           )}
         </div>
