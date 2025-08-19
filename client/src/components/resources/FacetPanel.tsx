@@ -142,6 +142,7 @@ function FacetSection({
   icon?: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(title === 'Type' || title === 'Topics');
+  const sectionId = `facet-${title.toLowerCase().replace(/\s+/g, '-')}`;
 
   const handleToggle = (value: string, checked: boolean) => {
     if (checked) {
@@ -151,38 +152,66 @@ function FacetSection({
     }
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      setIsOpen(!isOpen);
+    }
+  };
+
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger asChild>
-        <Button variant="ghost" className="w-full justify-between p-0 h-auto font-medium">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-between p-0 h-auto font-medium"
+          aria-expanded={isOpen}
+          aria-controls={`${sectionId}-content`}
+          onKeyDown={handleKeyDown}
+        >
           <div className="flex items-center gap-2">
-            {icon}
+            {icon && <span aria-hidden="true">{icon}</span>}
             {title}
             {selected.length > 0 && (
-              <Badge variant="secondary" className="ml-2 h-5 text-xs">
+              <Badge 
+                variant="secondary" 
+                className="ml-2 h-5 text-xs"
+                aria-label={`${selected.length} ${title.toLowerCase()} filters selected`}
+              >
                 {selected.length}
               </Badge>
             )}
           </div>
-          {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          {isOpen ? (
+            <ChevronDown className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          )}
         </Button>
       </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-2 pt-2">
-        {options.map((option) => (
-          <div key={option.value} className="flex items-center space-x-2">
-            <Checkbox
-              id={`${title}-${option.value}`}
-              checked={selected.includes(option.value)}
-              onCheckedChange={(checked) => handleToggle(option.value, checked as boolean)}
-            />
-            <Label
-              htmlFor={`${title}-${option.value}`}
-              className="text-sm font-normal cursor-pointer"
-            >
-              {option.label}
-            </Label>
-          </div>
-        ))}
+      <CollapsibleContent className="space-y-2 pt-2" id={`${sectionId}-content`}>
+        <div role="group" aria-labelledby={`${sectionId}-heading`}>
+          <div id={`${sectionId}-heading`} className="sr-only">{title} filter options</div>
+          {options.map((option) => (
+            <div key={option.value} className="flex items-center space-x-2">
+              <Checkbox
+                id={`${sectionId}-${option.value}`}
+                checked={selected.includes(option.value)}
+                onCheckedChange={(checked) => handleToggle(option.value, checked as boolean)}
+                aria-describedby={`${sectionId}-${option.value}-desc`}
+              />
+              <Label
+                htmlFor={`${sectionId}-${option.value}`}
+                className="text-sm font-normal cursor-pointer"
+              >
+                {option.label}
+              </Label>
+              <div id={`${sectionId}-${option.value}-desc`} className="sr-only">
+                {selected.includes(option.value) ? 'Selected' : 'Not selected'}
+              </div>
+            </div>
+          ))}
+        </div>
       </CollapsibleContent>
     </Collapsible>
   );
@@ -216,8 +245,14 @@ function FacetPanelContent({
 
       {/* Clear Filters */}
       {hasActiveFilters && (
-        <Button variant="outline" size="sm" onClick={clearAllFilters} className="w-full">
-          <X className="h-4 w-4 mr-2" />
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={clearAllFilters} 
+          className="w-full"
+          aria-label="Clear all applied filters"
+        >
+          <X className="h-4 w-4 mr-2" aria-hidden="true" />
           Clear All Filters
         </Button>
       )}
@@ -318,11 +353,15 @@ function FacetPanelContent({
               id="has-location"
               checked={value.has_location || false}
               onCheckedChange={(checked) => handleFilterChange('has_location', checked)}
+              aria-describedby="has-location-desc"
             />
             <Label htmlFor="has-location" className="text-sm font-normal cursor-pointer flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
+              <MapPin className="h-4 w-4" aria-hidden="true" />
               Has Location Data
             </Label>
+            <div id="has-location-desc" className="sr-only">
+              Filter to show only resources that have geographic location data
+            </div>
           </div>
         </>
       )}
@@ -342,18 +381,38 @@ export default function FacetPanel({
   showFormat,
   hasLocationAvailable
 }: FacetPanelProps) {
+  const activeFiltersCount = Object.values(value).flat().filter(Boolean).length;
+
   if (mobile) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
+          <Button 
+            variant="outline" 
+            size="sm"
+            aria-label={`Open filters panel${activeFiltersCount > 0 ? `, ${activeFiltersCount} filters applied` : ''}`}
+          >
+            <Filter className="h-4 w-4 mr-2" aria-hidden="true" />
             Filters
+            {activeFiltersCount > 0 && (
+              <Badge 
+                variant="secondary" 
+                className="ml-2"
+                aria-label={`${activeFiltersCount} filters applied`}
+              >
+                {activeFiltersCount}
+              </Badge>
+            )}
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-80">
+        <SheetContent 
+          side="left" 
+          className="w-80" 
+          role="dialog" 
+          aria-labelledby="filter-panel-title"
+        >
           <SheetHeader>
-            <SheetTitle>Filter Resources</SheetTitle>
+            <SheetTitle id="filter-panel-title">Filter Resources</SheetTitle>
           </SheetHeader>
           <div className="mt-6 max-h-[calc(100vh-8rem)] overflow-y-auto">
             <FacetPanelContent
@@ -372,10 +431,19 @@ export default function FacetPanel({
 
   // Desktop version - always open collapsible
   return (
-    <div className={cn("w-80 space-y-6 p-6 bg-white border rounded-lg", className)}>
+    <div 
+      className={cn("w-80 space-y-6 p-6 bg-white border rounded-lg", className)}
+      role="complementary"
+      aria-label="Resource filters"
+    >
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-900">Filter Resources</h3>
-        <Filter className="h-5 w-5 text-gray-500" />
+        <h3 
+          className="font-semibold text-gray-900"
+          id="filter-panel-heading"
+        >
+          Filter Resources
+        </h3>
+        <Filter className="h-5 w-5 text-gray-500" aria-hidden="true" />
       </div>
       
       <FacetPanelContent

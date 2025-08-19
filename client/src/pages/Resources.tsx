@@ -60,9 +60,18 @@ export default function Resources() {
   // Debounced search
   const [searchInput, setSearchInput] = useState(filters.q || '');
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   
   // Results announcement for accessibility
   const [announcement, setAnnouncement] = useState('');
+  
+  // Focus management
+  useEffect(() => {
+    // Focus search input on initial load
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, []);
 
   // Update URL when state changes
   const updateURL = useCallback((newFilters: FacetFilters, newSort: string, newPage: number, newView: string) => {
@@ -260,6 +269,22 @@ export default function Resources() {
     // TODO: Implement favorites API calls
   }, []);
 
+  // Keyboard event handlers
+  const handleCardKeyDown = useCallback((event: React.KeyboardEvent, resourceId: string) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleOpenResource(resourceId);
+    }
+  }, [handleOpenResource]);
+
+  const handleHeartKeyDown = useCallback((event: React.KeyboardEvent, resourceId: string, isFavorited: boolean) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      event.stopPropagation();
+      handleToggleFavorite(resourceId, isFavorited);
+    }
+  }, [handleToggleFavorite]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Development Banner */}
@@ -274,7 +299,7 @@ export default function Resources() {
           description="This feature is currently in development and needs some more work before it is fully functional."
         />
         {/* Header */}
-        <div className="mb-8">
+        <header className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Resource Library</h1>
@@ -284,31 +309,47 @@ export default function Resources() {
             {/* Header Actions */}
             <div className="flex items-center gap-3">
               <div className="flex-1 max-w-md">
+                <label htmlFor="resource-search" className="sr-only">
+                  Search resources
+                </label>
                 <input
+                  ref={searchInputRef}
+                  id="resource-search"
                   type="text"
                   placeholder="Search resources..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
+                  aria-describedby="search-description"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:border-transparent"
                 />
+                <div id="search-description" className="sr-only">
+                  Search through resource titles, descriptions, and tags
+                </div>
               </div>
               
               <Link href="/dashboard/resources/saved">
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Heart className="h-4 w-4" />
+                <Button variant="outline" size="sm" className="flex items-center gap-2" aria-describedby="saved-resources-desc">
+                  <Heart className="h-4 w-4" aria-hidden="true" />
                   Saved
                 </Button>
               </Link>
+              <div id="saved-resources-desc" className="sr-only">
+                View your saved resources
+              </div>
               
               <SuggestDialog />
             </div>
           </div>
-        </div>
+        </header>
 
         {/* Main Layout */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Left Sidebar - Facets & Controls */}
-          <div className="lg:col-span-1 space-y-4">
+          <aside 
+            className="lg:col-span-1 space-y-4"
+            aria-label="Resource filters and settings"
+            id="filter-panel"
+          >
             <FacetPanel
               value={filters}
               onChange={handleFilterChange}
@@ -331,15 +372,24 @@ export default function Resources() {
               onToggleView={setIsMapView}
               locationCount={resourceData?.items.filter(item => item.has_location).length}
             />
-          </div>
+          </aside>
 
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-6">
+          <main 
+            className="lg:col-span-3 space-y-6"
+            aria-labelledby="results-heading"
+            aria-describedby="results-description"
+          >
             {/* Controls Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               {/* Results Count & Status */}
               <div className="flex items-center gap-4">
-                <div aria-live="polite" aria-atomic="true" className="text-sm text-gray-600">
+                <div 
+                  aria-live="polite" 
+                  aria-atomic="true" 
+                  className="text-sm text-gray-600"
+                  id="results-description"
+                >
                   {isLoading ? 'Searching...' : announcement}
                 </div>
                 {profileEnabled && appliedProfileFilters.length > 0 && (
@@ -352,7 +402,7 @@ export default function Resources() {
                       onClick={handleClearProfile}
                       aria-label="Clear profile filters"
                     >
-                      <X className="h-3 w-3" />
+                      <X className="h-3 w-3" aria-hidden="true" />
                     </Button>
                   </Badge>
                 )}
@@ -361,23 +411,42 @@ export default function Resources() {
               {/* View Toggle & Sort */}
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Sort:</label>
+                  <label htmlFor="sort-select" className="text-sm text-gray-600">Sort:</label>
                   <select 
+                    id="sort-select"
                     value={sort} 
                     onChange={(e) => handleSortChange(e.target.value)}
-                    className="text-sm border border-gray-300 rounded px-2 py-1"
+                    className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-ugga-primary focus:border-transparent"
+                    aria-describedby="sort-description"
                   >
                     <option value="relevance">Relevance</option>
                     <option value="title_asc">Title A-Z</option>
                     <option value="verified_desc">UGGA Verified</option>
                     <option value="due_soon">Recently Updated</option>
                   </select>
+                  <div id="sort-description" className="sr-only">
+                    Sort resources by different criteria
+                  </div>
                 </div>
 
                 <Tabs value={viewMode} onValueChange={handleViewChange}>
-                  <TabsList>
-                    <TabsTrigger value="grid"><Grid className="h-4 w-4" /></TabsTrigger>
-                    <TabsTrigger value="list"><List className="h-4 w-4" /></TabsTrigger>
+                  <TabsList role="tablist" aria-label="View mode selection">
+                    <TabsTrigger 
+                      value="grid" 
+                      aria-label="Grid view"
+                      role="tab"
+                    >
+                      <Grid className="h-4 w-4" aria-hidden="true" />
+                      <span className="sr-only">Grid view</span>
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="list"
+                      aria-label="List view" 
+                      role="tab"
+                    >
+                      <List className="h-4 w-4" aria-hidden="true" />
+                      <span className="sr-only">List view</span>
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
@@ -410,31 +479,47 @@ export default function Resources() {
 
             {resourceData && resourceData.items.length > 0 && (
               <Tabs value={viewMode} onValueChange={handleViewChange}>
-                <TabsContent value="grid" className="mt-0">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {resourceData.items.map((resource) => (
-                      <ResourceCard
+                <TabsContent value="grid" className="mt-0" role="tabpanel" aria-labelledby="grid-tab">
+                  <div 
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                    role="grid"
+                    aria-label="Resources grid"
+                  >
+                    {resourceData.items.map((resource, index) => (
+                      <div
                         key={resource.id}
-                        resource={resource}
-                        onToggleFavorite={handleToggleFavorite}
-                        onOpen={handleOpenResource}
-                        isFavorited={false} // TODO: Get from favorites API
-                        showBadges={true}
-                      />
+                        role="gridcell"
+                        tabIndex={0}
+                        className="focus:outline-none focus:ring-2 focus:ring-ugga-primary rounded-lg"
+                        onKeyDown={(e) => handleCardKeyDown(e, resource.id)}
+                        aria-label={`Resource: ${resource.title}`}
+                        aria-describedby={`resource-${resource.id}-description`}
+                      >
+                        <ResourceCard
+                          resource={resource}
+                          onToggleFavorite={handleToggleFavorite}
+                          onOpen={handleOpenResource}
+                          isFavorited={false} // TODO: Get from favorites API
+                          showBadges={true}
+                        />
+                        <div id={`resource-${resource.id}-description`} className="sr-only">
+                          {resource.summary || `${resource.type} resource about ${resource.topics?.join(', ') || 'greenhouse growing'}`}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </TabsContent>
 
-                <TabsContent value="list" className="mt-0">
-                  <Table>
+                <TabsContent value="list" className="mt-0" role="tabpanel" aria-labelledby="list-tab">
+                  <Table role="table" aria-label="Resources table">
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Resource</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Topics</TableHead>
-                        <TableHead>Region/Cost</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
+                      <TableRow role="row">
+                        <TableHead role="columnheader">Resource</TableHead>
+                        <TableHead role="columnheader">Type</TableHead>
+                        <TableHead role="columnheader">Topics</TableHead>
+                        <TableHead role="columnheader">Region/Cost</TableHead>
+                        <TableHead role="columnheader">Status</TableHead>
+                        <TableHead role="columnheader">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -453,12 +538,16 @@ export default function Resources() {
                 </TabsContent>
               </Tabs>
             )}
-          </div>
+          </main>
         </div>
 
         {/* Pagination */}
         {resourceData && resourceData.total > 24 && (
-          <div className="mt-12 flex justify-center">
+          <nav 
+            className="mt-12 flex justify-center"
+            aria-label="Resource pagination"
+            role="navigation"
+          >
             <div className="flex items-center gap-2">
               <Button 
                 variant="outline" 
@@ -468,11 +557,16 @@ export default function Resources() {
                   setPage(newPage);
                   updateURL(filters, sort, newPage, viewMode);
                 }}
+                aria-label="Go to previous page"
               >
                 Previous
               </Button>
               
-              <span className="text-sm text-gray-600 px-4">
+              <span 
+                className="text-sm text-gray-600 px-4"
+                aria-live="polite"
+                aria-label={`Current page ${page} of ${Math.ceil(resourceData.total / 24)}`}
+              >
                 Page {page} of {Math.ceil(resourceData.total / 24)}
               </span>
               
@@ -484,11 +578,12 @@ export default function Resources() {
                   setPage(newPage);
                   updateURL(filters, sort, newPage, viewMode);
                 }}
+                aria-label="Go to next page"
               >
                 Next
               </Button>
             </div>
-          </div>
+          </nav>
         )}
       </div>
       </div>

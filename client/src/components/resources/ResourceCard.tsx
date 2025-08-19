@@ -51,6 +51,21 @@ export default function ResourceCard({
     }
   };
 
+  const handleHeartKeyDown = async (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!onToggleFavorite || isToggling) return;
+      
+      setIsToggling(true);
+      try {
+        await onToggleFavorite(resource.id, !isFavorited);
+      } finally {
+        setIsToggling(false);
+      }
+    }
+  };
+
   const handleOpen = () => {
     if (onOpen) {
       onOpen(resource.id);
@@ -112,15 +127,10 @@ export default function ResourceCard({
                 isFavorited ? "text-red-500 hover:text-red-600" : "text-gray-400 hover:text-red-500"
               )}
               aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleToggleFavorite(e as any);
-                }
-              }}
+              aria-pressed={isFavorited}
+              onKeyDown={handleHeartKeyDown}
             >
-              <Heart className={cn("h-4 w-4", isFavorited && "fill-current")} />
+              <Heart className={cn("h-4 w-4", isFavorited && "fill-current")} aria-hidden="true" />
             </Button>
           )}
         </div>
@@ -132,28 +142,28 @@ export default function ResourceCard({
           <div className="flex flex-wrap gap-2 mb-4">
             {resource.ugga_verified && (
               <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">
-                <CheckCircle className="h-3 w-3 mr-1" />
+                <CheckCircle className="h-3 w-3 mr-1" aria-hidden="true" />
                 UGGA Verified
               </Badge>
             )}
             
             {resource.last_verified_at && !isStale && (
               <Badge variant="outline" className="text-xs">
-                <Calendar className="h-3 w-3 mr-1" />
+                <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
                 Verified {formatDate(resource.last_verified_at)}
               </Badge>
             )}
             
             {isStale && (
               <Badge variant="destructive" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-                <AlertTriangle className="h-3 w-3 mr-1" />
+                <AlertTriangle className="h-3 w-3 mr-1" aria-hidden="true" />
                 Needs Review
               </Badge>
             )}
             
             {resource.has_location && (
               <Badge variant="outline" className="text-xs">
-                <MapPin className="h-3 w-3 mr-1" />
+                <MapPin className="h-3 w-3 mr-1" aria-hidden="true" />
                 Location
               </Badge>
             )}
