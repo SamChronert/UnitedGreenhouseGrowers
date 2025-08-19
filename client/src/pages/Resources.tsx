@@ -127,7 +127,7 @@ export default function Resources() {
   }, []);
 
   // Update type states cache
-  const updateTypeState = useCallback((typeId: string, newState: Partial<typeof currentState>) => {
+  const updateTypeState = useCallback((typeId: string, newState: Partial<ReturnType<typeof getCurrentState>>) => {
     setTypeStates(prev => ({
       ...prev,
       [typeId]: { ...getCurrentState(), ...newState }
