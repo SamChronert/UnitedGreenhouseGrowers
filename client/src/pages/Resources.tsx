@@ -460,7 +460,7 @@ export default function Resources() {
                         "whitespace-nowrap pb-4 px-3 py-2 border-b-2 font-medium text-sm transition-colors rounded-t-lg",
                         "focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2",
                         currentType.id === type.id
-                          ? "border-ugga-primary text-ugga-primary bg-green-50"
+                          ? "border-ugga-primary text-ugga-primary bg-ugga-primary/10"
                           : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50"
                       )}
                       aria-current={currentType.id === type.id ? "page" : undefined}
