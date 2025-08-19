@@ -90,7 +90,7 @@ export default function AdminResources() {
 
   const selectedType = form.watch("type") as ResourceType;
 
-  const { data: resourceData, isLoading } = useQuery({
+  const { data: resourceData, isLoading } = useQuery<{items: Resource[], total: number}>({
     queryKey: ["/api/resources", { pageSize: 1000 }], // Get all resources for admin
   });
   
@@ -157,10 +157,10 @@ export default function AdminResources() {
     },
   });
 
-  const filteredResources = resources?.filter(resource =>
+  const filteredResources = resources?.filter((resource: Resource) =>
     resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     resource.url?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    resource.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    resource.tags?.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
   ) || [];
 
   const handleSubmit = (data: ResourceFormData) => {
@@ -222,7 +222,8 @@ export default function AdminResources() {
       template_language: (resource.data as any)?.template_language,
     });
     
-    setIsCreateOpen(true);
+    // Switch to create/edit tab
+    setActiveTab("create");
   };
 
   const handleDelete = (id: string) => {
@@ -381,7 +382,7 @@ export default function AdminResources() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredResources.map((resource) => (
+                        {filteredResources.map((resource: Resource) => (
                           <TableRow key={resource.id}>
                             <TableCell className="font-medium max-w-xs">
                               <div className="truncate">{resource.title}</div>
@@ -406,7 +407,7 @@ export default function AdminResources() {
                             </TableCell>
                             <TableCell>
                               <div className="flex flex-wrap gap-1 max-w-xs">
-                                {resource.topics?.slice(0, 2).map((topic) => (
+                                {resource.topics?.slice(0, 2).map((topic: string) => (
                                   <Badge key={topic} variant="outline" className="text-xs">
                                     {topic}
                                   </Badge>
