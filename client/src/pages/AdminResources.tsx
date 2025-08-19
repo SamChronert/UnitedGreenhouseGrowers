@@ -157,8 +157,8 @@ export default function AdminResources() {
 
   const filteredResources = resources?.filter(resource =>
     resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    resource.url.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    resource.url?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    resource.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
   ) || [];
 
   const handleSubmit = (data: ResourceFormData) => {
