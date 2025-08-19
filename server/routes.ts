@@ -29,6 +29,8 @@ import {
   Role 
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import { sql } from "drizzle-orm";
+import { db } from "./db";
 
 // Rate limiting for AI endpoints
 const aiRateLimit = rateLimit({
@@ -464,6 +466,49 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     } catch (error) {
       console.error("Remove favorite error:", error);
       res.status(500).json({ message: "Failed to remove favorite" });
+    }
+  });
+
+  // Admin-only resource management endpoints
+  app.post("/api/admin/resources", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const resource = await storage.createResource(req.body);
+      res.json(resource);
+    } catch (error) {
+      console.error("Create resource error:", error);
+      res.status(500).json({ message: "Failed to create resource" });
+    }
+  });
+
+  app.put("/api/admin/resources/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const resource = await storage.updateResource(req.params.id, req.body);
+      res.json(resource);
+    } catch (error) {
+      console.error("Update resource error:", error);
+      res.status(500).json({ message: "Failed to update resource" });
+    }
+  });
+
+  app.delete("/api/admin/resources/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      await storage.deleteResource(req.params.id);
+      res.json({ message: "Resource deleted successfully" });
+    } catch (error) {
+      console.error("Delete resource error:", error);
+      res.status(500).json({ message: "Failed to delete resource" });
+    }
+  });
+
+  // CSV Import endpoint
+  app.post("/api/admin/resources/import", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const isDryRun = req.query.dryRun === '1';
+      const result = await storage.importResourcesFromCSV(req, isDryRun);
+      res.json(result);
+    } catch (error) {
+      console.error("CSV import error:", error);
+      res.status(500).json({ message: "Failed to process CSV import" });
     }
   });
 
