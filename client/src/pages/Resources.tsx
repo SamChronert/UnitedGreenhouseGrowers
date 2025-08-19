@@ -3,12 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ExternalLink, Grid, List, Heart, Plus, Book, Loader2, X } from "lucide-react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ExternalLink, Grid, List, Heart, Plus, Book, Loader2, X, SlidersHorizontal } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import InDevelopmentBanner from "@/components/InDevelopmentBanner";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 
 // Import Resource Library components
 import ResourceCard from "@/components/resources/ResourceCard";
@@ -22,6 +24,21 @@ import { SuggestDialog } from "@/components/resources/SuggestDialog";
 // Import API
 import { listResources, type ResourceFilters } from "@/lib/api/resources";
 
+// Resource Type Definitions
+const RESOURCE_TYPES = [
+  { id: 'all', label: 'All', slug: '' },
+  { id: 'university', label: 'University', slug: 'university' },
+  { id: 'organization', label: 'Organization', slug: 'organization' },
+  { id: 'grant', label: 'Grant', slug: 'grant' },
+  { id: 'tool', label: 'Tool/Software', slug: 'tool-software' },
+  { id: 'education', label: 'Education', slug: 'education' },
+  { id: 'template', label: 'Template', slug: 'template' },
+  { id: 'consultant', label: 'Consultant', slug: 'consultant' },
+  { id: 'article', label: 'Article/Research', slug: 'article-research' }
+] as const;
+
+type ResourceTypeId = typeof RESOURCE_TYPES[number]['id'];
+
 export default function Resources() {
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
@@ -29,25 +46,61 @@ export default function Resources() {
   // URL state management
   const urlParams = useMemo(() => new URLSearchParams(location.split('?')[1] || ''), [location]);
   
-  // Parse URL state
-  const [filters, setFilters] = useState<FacetFilters>(() => ({
-    q: urlParams.get('q') || '',
-    type: urlParams.getAll('type').filter(Boolean),
-    topics: urlParams.getAll('topics').filter(Boolean),
-    crop: urlParams.getAll('crop').filter(Boolean),
-    system_type: urlParams.getAll('system_type').filter(Boolean),
-    region: urlParams.getAll('region').filter(Boolean),
-    audience: urlParams.getAll('audience').filter(Boolean),
-    cost: urlParams.getAll('cost').filter(Boolean),
-    status: urlParams.getAll('status').filter(Boolean),
-    eligibility_geo: urlParams.getAll('eligibility_geo').filter(Boolean),
-    format: urlParams.getAll('format').filter(Boolean),
-    has_location: urlParams.get('has_location') === 'true'
-  }));
+  // Current resource type from URL
+  const currentTypeSlug = urlParams.get('type') || '';
+  const currentType = RESOURCE_TYPES.find(t => t.slug === currentTypeSlug) || RESOURCE_TYPES[0];
   
-  const [sort, setSort] = useState(urlParams.get('sort') || 'relevance');
-  const [page, setPage] = useState(parseInt(urlParams.get('page') || '1'));
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>(urlParams.get('view') as 'grid' | 'list' || 'grid');
+  // Per-type state cache
+  const [typeStates, setTypeStates] = useState<Record<string, {
+    filters: FacetFilters;
+    sort: string;
+    page: number;
+    viewMode: 'grid' | 'list';
+  }>>({});
+  
+  // Get current state for active type
+  const getCurrentState = useCallback(() => {
+    const cached = typeStates[currentType.id];
+    if (cached) return cached;
+    
+    // Initialize from URL or defaults
+    return {
+      filters: {
+        q: urlParams.get('q') || '',
+        type: currentType.slug ? [currentType.slug] : [],
+        topics: urlParams.getAll('topics').filter(Boolean),
+        crop: urlParams.getAll('crop').filter(Boolean),
+        system_type: urlParams.getAll('system_type').filter(Boolean),
+        region: urlParams.getAll('region').filter(Boolean),
+        audience: urlParams.getAll('audience').filter(Boolean),
+        cost: urlParams.getAll('cost').filter(Boolean),
+        status: urlParams.getAll('status').filter(Boolean),
+        eligibility_geo: urlParams.getAll('eligibility_geo').filter(Boolean),
+        format: urlParams.getAll('format').filter(Boolean),
+        has_location: urlParams.get('has_location') === 'true'
+      },
+      sort: urlParams.get('sort') || 'relevance',
+      page: parseInt(urlParams.get('page') || '1'),
+      viewMode: urlParams.get('view') as 'grid' | 'list' || 'grid'
+    };
+  }, [currentType, urlParams, typeStates]);
+  
+  const [filters, setFilters] = useState<FacetFilters>(() => getCurrentState().filters);
+  const [sort, setSort] = useState(() => getCurrentState().sort);
+  const [page, setPage] = useState(() => getCurrentState().page);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => getCurrentState().viewMode);
+
+  // Update local state when type changes
+  useEffect(() => {
+    const newState = getCurrentState();
+    setFilters(newState.filters);
+    setSort(newState.sort);
+    setPage(newState.page);
+    setViewMode(newState.viewMode);
+  }, [currentType.id, getCurrentState]);
+  
+  // Filter drawer state
+  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   
   // Profile state
   const [profileEnabled, setProfileEnabled] = useState(false);
@@ -73,15 +126,25 @@ export default function Resources() {
     }
   }, []);
 
+  // Update type states cache
+  const updateTypeState = useCallback((typeId: string, newState: Partial<typeof currentState>) => {
+    setTypeStates(prev => ({
+      ...prev,
+      [typeId]: { ...getCurrentState(), ...newState }
+    }));
+  }, [getCurrentState]);
+
   // Update URL when state changes
-  const updateURL = useCallback((newFilters: FacetFilters, newSort: string, newPage: number, newView: string) => {
+  const updateURL = useCallback((typeSlug: string, newFilters: FacetFilters, newSort: string, newPage: number, newView: string) => {
     const params = new URLSearchParams();
+    
+    // Add resource type
+    if (typeSlug) params.set('type', typeSlug);
     
     // Add search query
     if (newFilters.q?.trim()) params.set('q', newFilters.q);
     
-    // Add array filters
-    newFilters.type?.forEach(v => params.append('type', v));
+    // Add array filters (excluding type since it's handled above)
     newFilters.topics?.forEach(v => params.append('topics', v));
     newFilters.crop?.forEach(v => params.append('crop', v));
     newFilters.system_type?.forEach(v => params.append('system_type', v));
@@ -104,6 +167,45 @@ export default function Resources() {
     setLocation(newURL, { replace: true });
   }, [setLocation]);
 
+  // Handle resource type change
+  const handleTypeChange = useCallback((newTypeId: ResourceTypeId) => {
+    const newType = RESOURCE_TYPES.find(t => t.id === newTypeId) || RESOURCE_TYPES[0];
+    
+    // Save current state
+    updateTypeState(currentType.id, { filters, sort, page, viewMode });
+    
+    // Get cached state for new type or create default
+    const cachedState = typeStates[newTypeId];
+    const newState = cachedState || {
+      filters: {
+        q: filters.q, // Preserve search
+        type: newType.slug ? [newType.slug] : [],
+        topics: [],
+        crop: [],
+        system_type: [],
+        region: [],
+        audience: [],
+        cost: [],
+        status: [],
+        eligibility_geo: [],
+        format: [],
+        has_location: false
+      },
+      sort: 'relevance',
+      page: 1,
+      viewMode: 'grid' as const
+    };
+    
+    // Update local state
+    setFilters(newState.filters);
+    setSort(newState.sort);
+    setPage(newState.page);
+    setViewMode(newState.viewMode);
+    
+    // Update URL
+    updateURL(newType.slug, newState.filters, newState.sort, newState.page, newState.viewMode);
+  }, [currentType, filters, sort, page, viewMode, typeStates, updateTypeState, updateURL]);
+
   // Debounced search effect
   useEffect(() => {
     if (debounceTimeoutRef.current) {
@@ -115,7 +217,7 @@ export default function Resources() {
         const newFilters = { ...filters, q: searchInput };
         setFilters(newFilters);
         setPage(1); // Reset to first page on search
-        updateURL(newFilters, sort, 1, viewMode);
+        updateURL(currentType.slug, newFilters, sort, 1, viewMode);
       }
     }, 300);
     
@@ -124,26 +226,30 @@ export default function Resources() {
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [searchInput, filters, sort, viewMode, updateURL]);
+  }, [searchInput, filters, sort, viewMode, currentType, updateURL]);
 
   // Handle filter changes
   const handleFilterChange = useCallback((newFilters: FacetFilters) => {
     setFilters(newFilters);
     setPage(1);
-    updateURL(newFilters, sort, 1, viewMode);
-  }, [sort, viewMode, updateURL]);
+    updateTypeState(currentType.id, { filters: newFilters, page: 1 });
+    updateURL(currentType.slug, newFilters, sort, 1, viewMode);
+  }, [currentType, sort, viewMode, updateTypeState, updateURL]);
 
   // Handle sort changes
   const handleSortChange = useCallback((newSort: string) => {
     setSort(newSort);
-    updateURL(filters, newSort, page, viewMode);
-  }, [filters, page, viewMode, updateURL]);
+    updateTypeState(currentType.id, { sort: newSort });
+    updateURL(currentType.slug, filters, newSort, page, viewMode);
+  }, [currentType, filters, page, viewMode, updateTypeState, updateURL]);
 
   // Handle view mode changes
   const handleViewChange = useCallback((newView: string) => {
-    setViewMode(newView as 'grid' | 'list');
-    updateURL(filters, sort, page, newView);
-  }, [filters, sort, page, updateURL]);
+    const newViewMode = newView as 'grid' | 'list';
+    setViewMode(newViewMode);
+    updateTypeState(currentType.id, { viewMode: newViewMode });
+    updateURL(currentType.slug, filters, sort, page, newView);
+  }, [currentType, filters, sort, page, updateTypeState, updateURL]);
 
   // API query
   const queryParams: ResourceFilters = {
@@ -300,7 +406,7 @@ export default function Resources() {
         />
         {/* Header */}
         <header className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
               <h1 id="results-heading" className="text-3xl font-bold text-gray-900 mb-2">Resource Library</h1>
               <p className="text-gray-700">We're building a grower-reviewed resource library of guides, case studies, and extension bulletins — everything from irrigation best practices to supplier insights. Founding members will help decide what gets included, reviewed, and prioritized.</p>
@@ -340,204 +446,248 @@ export default function Resources() {
               <SuggestDialog />
             </div>
           </div>
+
+          {/* Resource Type Toggle */}
+          <div className="mb-6">
+            <nav className="border-b border-gray-200" aria-label="Resource type navigation">
+              <div className="flex overflow-x-auto scrollbar-hide">
+                <div className="flex space-x-8 min-w-max">
+                  {RESOURCE_TYPES.map((type) => (
+                    <button
+                      key={type.id}
+                      onClick={() => handleTypeChange(type.id)}
+                      className={cn(
+                        "whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors",
+                        "focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2",
+                        currentType.id === type.id
+                          ? "border-ugga-primary text-ugga-primary"
+                          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      )}
+                      aria-current={currentType.id === type.id ? "page" : undefined}
+                      role="tab"
+                      tabIndex={0}
+                    >
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </nav>
+          </div>
         </header>
 
-        {/* Main Layout */}
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Left Sidebar - Facets & Controls */}
-          <aside 
-            className="lg:col-span-1 space-y-4"
-            aria-label="Resource filters and settings"
-            id="filter-panel"
-          >
-            <FacetPanel
-              value={filters}
-              onChange={handleFilterChange}
-              showStatus={true}
-              showFormat={true}
-              hasLocationAvailable={hasLocationAvailable}
-            />
-            
-            <ProfileToggle
-              isEnabled={profileEnabled}
-              onToggle={handleProfileToggle}
-              onApply={() => {}} // Handled by toggle
-              onClear={handleClearProfile}
-              userProfile={userProfile}
-            />
-            
-            <MapToggle
-              hasLocationAvailable={hasLocationAvailable}
-              isMapView={isMapView}
-              onToggleView={setIsMapView}
-              locationCount={resourceData?.items.filter(item => item.has_location).length}
-            />
-          </aside>
-
-          {/* Main Content */}
-          <main 
-            className="lg:col-span-3 space-y-6"
-            aria-labelledby="results-heading"
-            aria-describedby="results-description"
-          >
-            {/* Controls Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              {/* Results Count & Status */}
-              <div className="flex items-center gap-4">
-                <div 
-                  aria-live="polite" 
-                  aria-atomic="true" 
-                  className="text-sm text-gray-600"
-                  id="results-description"
-                >
-                  {isLoading ? 'Searching...' : announcement}
-                </div>
-                {profileEnabled && appliedProfileFilters.length > 0 && (
-                  <Badge variant="secondary" className="bg-green-50 text-green-700">
-                    Profile filters applied
-                    <Button
-                      variant="ghost" 
-                      size="sm"
-                      className="h-4 w-4 p-0 ml-1 hover:bg-green-100"
-                      onClick={handleClearProfile}
-                      aria-label="Clear profile filters"
-                    >
-                      <X className="h-3 w-3" aria-hidden="true" />
-                    </Button>
-                  </Badge>
-                )}
-              </div>
-
-              {/* View Toggle & Sort */}
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <label htmlFor="sort-select" className="text-sm text-gray-600">Sort:</label>
-                  <select 
-                    id="sort-select"
-                    value={sort} 
-                    onChange={(e) => handleSortChange(e.target.value)}
-                    className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-ugga-primary focus:border-transparent"
-                    aria-describedby="sort-description"
-                  >
-                    <option value="relevance">Relevance</option>
-                    <option value="title_asc">Title A-Z</option>
-                    <option value="verified_desc">UGGA Verified</option>
-                    <option value="due_soon">Recently Updated</option>
-                  </select>
-                  <div id="sort-description" className="sr-only">
-                    Sort resources by different criteria
+        {/* Main Content */}
+        <main 
+          className="space-y-6"
+          aria-labelledby="results-heading"
+          aria-describedby="results-description"
+        >
+          {/* Controls Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* Results Count & Filters */}
+            <div className="flex items-center gap-4">
+              {/* Filter Drawer */}
+              <Sheet open={isFilterDrawerOpen} onOpenChange={setIsFilterDrawerOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+                    Filters
+                    {/* Show active filter count */}
+                    {Object.values(filters).flat().filter(Boolean).length > 1 && (
+                      <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                        {Object.values(filters).flat().filter(Boolean).length - (filters.q ? 1 : 0)}
+                      </Badge>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 sm:w-96">
+                  <SheetHeader>
+                    <SheetTitle>Filters for {currentType.label}</SheetTitle>
+                    <SheetDescription>
+                      Refine your search results with type-specific filters
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-4">
+                    <FacetPanel
+                      value={filters}
+                      onChange={handleFilterChange}
+                      showStatus={currentType.slug === 'grant'}
+                      showFormat={currentType.slug !== 'consultant'}
+                      hasLocationAvailable={hasLocationAvailable}
+                      resourceType={currentType.slug}
+                    />
+                    
+                    <ProfileToggle
+                      isEnabled={profileEnabled}
+                      onToggle={handleProfileToggle}
+                      onApply={() => {}} // Handled by toggle
+                      onClear={handleClearProfile}
+                      userProfile={userProfile}
+                    />
+                    
+                    <MapToggle
+                      hasLocationAvailable={hasLocationAvailable}
+                      isMapView={isMapView}
+                      onToggleView={setIsMapView}
+                      locationCount={resourceData?.items.filter(item => item.has_location).length}
+                    />
                   </div>
-                </div>
+                </SheetContent>
+              </Sheet>
 
-                <Tabs value={viewMode} onValueChange={handleViewChange}>
-                  <TabsList role="tablist" aria-label="View mode selection">
-                    <TabsTrigger 
-                      value="grid" 
-                      aria-label="Grid view"
-                    >
-                      <Grid className="h-4 w-4" aria-hidden="true" />
-                      <span className="sr-only">Grid view</span>
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="list"
-                      aria-label="List view"
-                    >
-                      <List className="h-4 w-4" aria-hidden="true" />
-                      <span className="sr-only">List view</span>
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
+              <div 
+                aria-live="polite" 
+                aria-atomic="true" 
+                className="text-sm text-gray-600"
+                id="results-description"
+              >
+                {isLoading ? 'Searching...' : announcement}
               </div>
+              {profileEnabled && appliedProfileFilters.length > 0 && (
+                <Badge variant="secondary" className="bg-green-50 text-green-700">
+                  Profile filters applied
+                  <Button
+                    variant="ghost" 
+                    size="sm"
+                    className="h-4 w-4 p-0 ml-1 hover:bg-green-100"
+                    onClick={handleClearProfile}
+                    aria-label="Clear profile filters"
+                  >
+                    <X className="h-3 w-3" aria-hidden="true" />
+                  </Button>
+                </Badge>
+              )}
             </div>
 
-            {/* Results */}
-            {error && (
-              <Card className="shadow-sm bg-red-50 border-red-200">
-                <CardContent className="p-4">
-                  <p className="text-red-800">Failed to load resources. Please try again.</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {isLoading && (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-ugga-primary" />
+            {/* View Toggle & Sort */}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <label htmlFor="sort-select" className="text-sm text-gray-600">Sort:</label>
+                <select 
+                  id="sort-select"
+                  value={sort} 
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-ugga-primary focus:border-transparent"
+                  aria-describedby="sort-description"
+                >
+                  <option value="relevance">Relevance</option>
+                  <option value="title_asc">Title A-Z</option>
+                  <option value="verified_desc">UGGA Verified</option>
+                  <option value="due_soon">Recently Updated</option>
+                </select>
+                <div id="sort-description" className="sr-only">
+                  Sort resources by different criteria
+                </div>
               </div>
-            )}
 
-            {resourceData && resourceData.items.length === 0 && (
-              <EmptyState
-                title="No resources found"
-                body="We couldn't find any resources matching your current filters. Try adjusting your search criteria or suggest a new resource."
-                icon={<Book className="h-10 w-10 text-gray-400" />}
-                ctaText="Suggest a Resource"
-                onCtaClick={() => {}} // Will be handled by SuggestDialog
-              />
-            )}
-
-            {resourceData && resourceData.items.length > 0 && (
               <Tabs value={viewMode} onValueChange={handleViewChange}>
-                <TabsContent value="grid" className="mt-0" role="tabpanel" aria-labelledby="grid-tab">
-                  <div 
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                    role="grid"
-                    aria-label="Resources grid"
+                <TabsList role="tablist" aria-label="View mode selection">
+                  <TabsTrigger 
+                    value="grid" 
+                    aria-label="Grid view"
                   >
-                    {resourceData.items.map((resource, index) => (
-                      <div
-                        key={resource.id}
-                        role="gridcell"
-                        tabIndex={0}
-                        className="focus:outline-none focus:ring-2 focus:ring-ugga-primary rounded-lg"
-                        onKeyDown={(e) => handleCardKeyDown(e, resource.id)}
-                        aria-label={`Resource: ${resource.title}`}
-                        aria-describedby={`resource-${resource.id}-description`}
-                      >
-                        <ResourceCard
-                          resource={resource}
-                          onToggleFavorite={handleToggleFavorite}
-                          onOpen={handleOpenResource}
-                          isFavorited={false} // TODO: Get from favorites API
-                          showBadges={true}
-                        />
-                        <div id={`resource-${resource.id}-description`} className="sr-only">
-                          {resource.summary || `${resource.type} resource about ${resource.topics?.join(', ') || 'greenhouse growing'}`}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </TabsContent>
+                    <Grid className="h-4 w-4" aria-hidden="true" />
+                    <span className="sr-only">Grid view</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="list"
+                    aria-label="List view"
+                  >
+                    <List className="h-4 w-4" aria-hidden="true" />
+                    <span className="sr-only">List view</span>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
 
-                <TabsContent value="list" className="mt-0" role="tabpanel" aria-labelledby="list-tab">
-                  <Table role="table" aria-label="Resources table">
-                    <TableHeader>
-                      <TableRow role="row">
-                        <TableHead role="columnheader">Resource</TableHead>
-                        <TableHead role="columnheader">Type</TableHead>
-                        <TableHead role="columnheader">Topics</TableHead>
-                        <TableHead role="columnheader">Region/Cost</TableHead>
-                        <TableHead role="columnheader">Status</TableHead>
-                        <TableHead role="columnheader">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {resourceData.items.map((resource) => (
-                        <ResourceRow
-                          key={resource.id}
-                          resource={resource}
-                          onToggleFavorite={handleToggleFavorite}
-                          onOpen={handleOpenResource}
-                          isFavorited={false} // TODO: Get from favorites API
-                          showBadges={true}
-                        />
-                      ))}
-                    </TableBody>
+            {/* Results */}
+          {error && (
+            <Card className="shadow-sm bg-red-50 border-red-200">
+              <CardContent className="p-4">
+                <p className="text-red-800">Failed to load resources. Please try again.</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {isLoading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-ugga-primary" />
+            </div>
+          )}
+
+          {resourceData && resourceData.items.length === 0 && (
+            <EmptyState
+              title="No resources found"
+              body="We couldn't find any resources matching your current filters. Try adjusting your search criteria or suggest a new resource."
+              icon={<Book className="h-10 w-10 text-gray-400" />}
+              ctaText="Suggest a Resource"
+              onCtaClick={() => {}} // Will be handled by SuggestDialog
+            />
+          )}
+
+          {resourceData && resourceData.items.length > 0 && (
+            <Tabs value={viewMode} onValueChange={handleViewChange}>
+              <TabsContent value="grid" className="mt-0" role="tabpanel" aria-labelledby="grid-tab">
+                <div 
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  role="grid"
+                  aria-label="Resources grid"
+                >
+                  {resourceData.items.map((resource, index) => (
+                    <div
+                      key={resource.id}
+                      role="gridcell"
+                      tabIndex={0}
+                      className="focus:outline-none focus:ring-2 focus:ring-ugga-primary rounded-lg"
+                      onKeyDown={(e) => handleCardKeyDown(e, resource.id)}
+                      aria-label={`Resource: ${resource.title}`}
+                      aria-describedby={`resource-${resource.id}-description`}
+                    >
+                      <ResourceCard
+                        resource={resource}
+                        onToggleFavorite={handleToggleFavorite}
+                        onOpen={handleOpenResource}
+                        isFavorited={false} // TODO: Get from favorites API
+                        showBadges={true}
+                      />
+                      <div id={`resource-${resource.id}-description`} className="sr-only">
+                        {resource.summary || `${resource.type} resource about ${resource.topics?.join(', ') || 'greenhouse growing'}`}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="list" className="mt-0" role="tabpanel" aria-labelledby="list-tab">
+                <Table role="table" aria-label="Resources table">
+                  <TableHeader>
+                    <TableRow role="row">
+                      <TableHead role="columnheader">Resource</TableHead>
+                      <TableHead role="columnheader">Type</TableHead>
+                      <TableHead role="columnheader">Topics</TableHead>
+                      <TableHead role="columnheader">Region/Cost</TableHead>
+                      <TableHead role="columnheader">Status</TableHead>
+                      <TableHead role="columnheader">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {resourceData.items.map((resource) => (
+                      <ResourceRow
+                        key={resource.id}
+                        resource={resource}
+                        onToggleFavorite={handleToggleFavorite}
+                        onOpen={handleOpenResource}
+                        isFavorited={false} // TODO: Get from favorites API
+                        showBadges={true}
+                      />
+                    ))}
+                  </TableBody>
                   </Table>
                 </TabsContent>
               </Tabs>
             )}
           </main>
-        </div>
 
         {/* Pagination */}
         {resourceData && resourceData.total > 24 && (
@@ -553,7 +703,7 @@ export default function Resources() {
                 onClick={() => {
                   const newPage = page - 1;
                   setPage(newPage);
-                  updateURL(filters, sort, newPage, viewMode);
+                  updateURL(currentType.slug, filters, sort, newPage, viewMode);
                 }}
                 aria-label="Go to previous page"
               >
@@ -574,7 +724,7 @@ export default function Resources() {
                 onClick={() => {
                   const newPage = page + 1;
                   setPage(newPage);
-                  updateURL(filters, sort, newPage, viewMode);
+                  updateURL(currentType.slug, filters, sort, newPage, viewMode);
                 }}
                 aria-label="Go to next page"
               >
@@ -583,7 +733,7 @@ export default function Resources() {
             </div>
           </nav>
         )}
-      </div>
+        </div>
       </div>
     </div>
   );

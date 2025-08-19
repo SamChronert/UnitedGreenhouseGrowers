@@ -39,6 +39,7 @@ export interface FacetPanelProps {
   showEligibilityGeo?: boolean;
   showFormat?: boolean;
   hasLocationAvailable?: boolean;
+  resourceType?: string;
 }
 
 const FILTER_OPTIONS = {
