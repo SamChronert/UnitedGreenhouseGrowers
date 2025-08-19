@@ -67,7 +67,7 @@ export default function Resources() {
     return {
       filters: {
         q: urlParams.get('q') || '',
-        type: currentType.slug ? [currentType.slug] : [],
+        type: currentType.slug ? [currentType.slug] : [], // Type is set based on active tab
         topics: urlParams.getAll('topics').filter(Boolean),
         crop: urlParams.getAll('crop').filter(Boolean),
         system_type: urlParams.getAll('system_type').filter(Boolean),
@@ -457,11 +457,11 @@ export default function Resources() {
                       key={type.id}
                       onClick={() => handleTypeChange(type.id)}
                       className={cn(
-                        "whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors",
+                        "whitespace-nowrap pb-4 px-3 py-2 border-b-2 font-medium text-sm transition-colors rounded-t-lg",
                         "focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2",
                         currentType.id === type.id
-                          ? "border-ugga-primary text-ugga-primary"
-                          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                          ? "border-ugga-primary text-ugga-primary bg-green-50"
+                          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50"
                       )}
                       aria-current={currentType.id === type.id ? "page" : undefined}
                       role="tab"
@@ -493,11 +493,17 @@ export default function Resources() {
                     <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
                     Filters
                     {/* Show active filter count */}
-                    {Object.values(filters).flat().filter(Boolean).length > 1 && (
-                      <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                        {Object.values(filters).flat().filter(Boolean).length - (filters.q ? 1 : 0)}
-                      </Badge>
-                    )}
+                    {(() => {
+                      const activeFilters = { ...filters };
+                      delete activeFilters.type; // Type is handled by tabs, not filters
+                      delete activeFilters.q; // Search is separate from filters
+                      const count = Object.values(activeFilters).flat().filter(Boolean).length;
+                      return count > 0 ? (
+                        <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                          {count}
+                        </Badge>
+                      ) : null;
+                    })()}
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-80 sm:w-96">

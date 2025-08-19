@@ -43,16 +43,6 @@ export interface FacetPanelProps {
 }
 
 const FILTER_OPTIONS = {
-  type: [
-    { value: 'university', label: 'University' },
-    { value: 'organization', label: 'Organization' },
-    { value: 'grant', label: 'Grant/Funding' },
-    { value: 'tool', label: 'Tool/Software' },
-    { value: 'education', label: 'Educational' },
-    { value: 'template', label: 'Template' },
-    { value: 'consultant', label: 'Consultant' },
-    { value: 'article', label: 'Article/Research' },
-  ],
   topics: [
     { value: 'management', label: 'Management' },
     { value: 'pest-management', label: 'Pest Management' },
@@ -260,13 +250,6 @@ function FacetPanelContent({
 
       {/* Core Facets */}
       <div className="space-y-4">
-        <FacetSection
-          title="Type"
-          options={FILTER_OPTIONS.type}
-          selected={value.type || []}
-          onChange={(values) => handleFilterChange('type', values)}
-        />
-
         <FacetSection
           title="Topics"
           options={FILTER_OPTIONS.topics}
