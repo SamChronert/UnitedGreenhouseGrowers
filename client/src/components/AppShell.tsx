@@ -9,6 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -31,8 +37,8 @@ export default function AppShell({ children }: AppShellProps) {
   const { isDemo, showDemoAction } = useDemo();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // For mobile overlay
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // For desktop collapse
 
   const logoutMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/auth/logout"),
@@ -75,13 +81,15 @@ export default function AppShell({ children }: AppShellProps) {
       {/* Sidebar */}
       <aside className={cn(
         "fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 transform transition-all duration-300 ease-in-out lg:static lg:inset-0",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full",
+        // Mobile: controlled by sidebarOpen, Desktop: always visible
+        "lg:translate-x-0",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         sidebarCollapsed ? "lg:w-16" : "lg:w-64",
         "w-64"
       )}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+          <div className="flex items-center h-16 px-4 border-b border-gray-200">
             <Link href="/" className="flex items-center min-w-0">
               <img src={uggaLogo} alt="UGGA Logo" className="h-8 w-8 flex-shrink-0" />
               {!sidebarCollapsed && (
@@ -97,15 +105,6 @@ export default function AppShell({ children }: AppShellProps) {
                 </>
               )}
             </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden lg:flex p-1"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-            </Button>
           </div>
 
           {/* Navigation */}
@@ -119,50 +118,72 @@ export default function AppShell({ children }: AppShellProps) {
               return (
                 <div key={feature.id}>
                   {isDemo && !feature.path.startsWith("/demo") ? (
-                    <button
-                      onClick={() => handleNavClick(feature.path)}
-                      className={cn(
-                        "w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2",
-                        isActive
-                          ? "bg-ugga-primary/10 text-ugga-primary border-r-2 border-ugga-primary"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      )}
-                    >
-                      <FeatureIcon iconName={feature.iconName} />
-                      {!sidebarCollapsed && (
-                        <>
-                          <span className="ml-3 truncate">{feature.label}</span>
-                          {feature.inDevelopment && (
-                            <span className="ml-auto text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
-                              Dev
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => handleNavClick(feature.path)}
+                            className={cn(
+                              "w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2",
+                              isActive
+                                ? "bg-ugga-primary/10 text-ugga-primary border-r-2 border-ugga-primary"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            )}
+                          >
+                            <FeatureIcon iconName={feature.iconName} />
+                            {!sidebarCollapsed && (
+                              <>
+                                <span className="ml-3 truncate">{feature.label}</span>
+                                {feature.inDevelopment && (
+                                  <span className="ml-auto text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
+                                    Dev
+                                  </span>
+                                )}
+                              </>
+                            )}
+                          </button>
+                        </TooltipTrigger>
+                        {sidebarCollapsed && (
+                          <TooltipContent side="right">
+                            <p>{feature.label}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   ) : (
-                    <Link
-                      href={feature.path}
-                      className={cn(
-                        "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2",
-                        isActive
-                          ? "bg-ugga-primary/10 text-ugga-primary border-r-2 border-ugga-primary"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      )}
-                      onClick={() => setSidebarOpen(false)}
-                    >
-                      <FeatureIcon iconName={feature.iconName} />
-                      {!sidebarCollapsed && (
-                        <>
-                          <span className="ml-3 truncate">{feature.label}</span>
-                          {feature.inDevelopment && (
-                            <span className="ml-auto text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
-                              Dev
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </Link>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Link
+                            href={feature.path}
+                            className={cn(
+                              "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2",
+                              isActive
+                                ? "bg-ugga-primary/10 text-ugga-primary border-r-2 border-ugga-primary"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            )}
+                            onClick={() => setSidebarOpen(false)}
+                          >
+                            <FeatureIcon iconName={feature.iconName} />
+                            {!sidebarCollapsed && (
+                              <>
+                                <span className="ml-3 truncate">{feature.label}</span>
+                                {feature.inDevelopment && (
+                                  <span className="ml-auto text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
+                                    Dev
+                                  </span>
+                                )}
+                              </>
+                            )}
+                          </Link>
+                        </TooltipTrigger>
+                        {sidebarCollapsed && (
+                          <TooltipContent side="right">
+                            <p>{feature.label}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </div>
               );
@@ -171,16 +192,27 @@ export default function AppShell({ children }: AppShellProps) {
           
           {/* Return to Website Button */}
           <div className="px-4 pb-4 border-t border-gray-200 pt-4 flex-shrink-0">
-            <Link
-              href="/"
-              className="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <Home className="h-4 w-4" />
-              {!sidebarCollapsed && (
-                <span className="ml-3 truncate">Return to UGGA Website</span>
-              )}
-            </Link>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link
+                    href="/"
+                    className="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <Home className="h-4 w-4" />
+                    {!sidebarCollapsed && (
+                      <span className="ml-3 truncate">Return to UGGA Website</span>
+                    )}
+                  </Link>
+                </TooltipTrigger>
+                {sidebarCollapsed && (
+                  <TooltipContent side="right">
+                    <p>Return to UGGA Website</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
       </aside>
@@ -191,6 +223,17 @@ export default function AppShell({ children }: AppShellProps) {
         <header className="bg-white border-b border-gray-200 px-4 py-3" role="banner">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
+              {/* Desktop collapse button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="hidden lg:flex mr-3 p-2"
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              </Button>
+              
               {/* Mobile menu button */}
               <Button
                 variant="ghost"
