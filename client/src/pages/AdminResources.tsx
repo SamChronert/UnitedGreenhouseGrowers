@@ -44,10 +44,10 @@ export default function AdminResources() {
 
   // Fetch resources by type
   const { data: resourceData, isLoading } = useQuery<{items: Resource[], total: number}>({
-    queryKey: ["/api/resources", { type: selectedResourceType, pageSize: 1000 }],
+    queryKey: [`/api/resources?type=${selectedResourceType}&limit=1000`],
   });
   
-  const resources = resourceData?.items.filter(r => r.type === selectedResourceType) || [];
+  const resources = resourceData?.items || [];
 
   // Mutations
   const createResourceMutation = useMutation({
