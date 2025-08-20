@@ -414,34 +414,35 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
         }
       }
       
-      // Build WHERE conditions
-      const whereConditions = [];
+      // Build WHERE conditions - separate cursor from other filters
+      const filterConditions = [];
       const params: any[] = [];
       let paramIndex = 1;
+      let cursorCondition: string | null = null;
       
       // Type filter
       if (type) {
-        whereConditions.push(`type = '${type.replace(/'/g, "''")}'`);
+        filterConditions.push(`type = '${type.replace(/'/g, "''")}'`);
       }
       
       // Text search
       if (q) {
         const searchTerm = q.replace(/'/g, "''").substring(0, 200);
-        whereConditions.push(`(title ILIKE '%${searchTerm}%' OR summary ILIKE '%${searchTerm}%' OR array_to_string(tags, ' ') ILIKE '%${searchTerm}%')`);
+        filterConditions.push(`(title ILIKE '%${searchTerm}%' OR summary ILIKE '%${searchTerm}%' OR array_to_string(tags, ' ') ILIKE '%${searchTerm}%')`);
       }
       
       // JSON path filters
       for (const [key, value] of Object.entries(filters)) {
         if (value && typeof value === 'string') {
-          whereConditions.push(`data->>'${key}' = '${value.replace(/'/g, "''")}'`);
+          filterConditions.push(`data->>'${key}' = '${value.replace(/'/g, "''")}'`);
         }
       }
       
-      // Cursor-based pagination
+      // Cursor-based pagination - store separately
       if (cursor) {
         try {
           const [id, timestamp] = Buffer.from(cursor, 'base64').toString().split('|');
-          whereConditions.push(`(id, COALESCE(data->>'createdAt', '1970-01-01')) > ('${id.replace(/'/g, "''").substring(0, 100)}', '${timestamp.replace(/'/g, "''").substring(0, 50)}')`);
+          cursorCondition = `(id, COALESCE(data->>'createdAt', '1970-01-01')) > ('${id.replace(/'/g, "''").substring(0, 100)}', '${timestamp.replace(/'/g, "''").substring(0, 50)}')`;
         } catch {
           return res.status(400).json({ message: "Invalid cursor format" });
         }
@@ -467,24 +468,24 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       if (type === 'grants') {
         for (const [key, value] of Object.entries(filters)) {
           if (key === 'amountMin' && value && typeof value === 'string') {
-            whereConditions.push(`COALESCE((data->>'amountMin')::int, 0) >= ${parseInt(value)}`);
+            filterConditions.push(`COALESCE((data->>'amountMin')::int, 0) >= ${parseInt(value)}`);
           } else if (key === 'amountMax' && value && typeof value === 'string') {
-            whereConditions.push(`COALESCE((data->>'amountMax')::int, 999999999) <= ${parseInt(value)}`);
+            filterConditions.push(`COALESCE((data->>'amountMax')::int, 999999999) <= ${parseInt(value)}`);
           } else if (key === 'focusAreas' && value && typeof value === 'string') {
             const areas = value.split(',').map(area => `'${area.replace(/'/g, "''")}'`);
             const areaConditions = areas.map(area => `data->'focusAreas' ? ${area}`);
-            whereConditions.push(`(${areaConditions.join(' OR ')})`);
+            filterConditions.push(`(${areaConditions.join(' OR ')})`);
           } else if (key === 'orgTypes' && value && typeof value === 'string') {
             const types = value.split(',').map(type => `'${type.replace(/'/g, "''")}'`);
             const typeConditions = types.map(type => `data->'eligibility'->'orgTypes' ? ${type}`);
-            whereConditions.push(`(${typeConditions.join(' OR ')})`);
+            filterConditions.push(`(${typeConditions.join(' OR ')})`);
           } else if (key === 'regions' && value && typeof value === 'string') {
             const regions = value.split(',').map(region => `'${region.replace(/'/g, "''")}'`);
             const regionConditions = regions.map(region => `(data->'eligibility'->'regions' ? ${region} OR data->'eligibility'->'regions' ? 'All US States')`);
-            whereConditions.push(`(${regionConditions.join(' OR ')})`);
+            filterConditions.push(`(${regionConditions.join(' OR ')})`);
           } else if (key === 'hideExpired' && value === 'true') {
             const today = new Date().toISOString().split('T')[0];
-            whereConditions.push(`(data->>'rfpDueDate' >= '${today}' OR data->>'status' = 'Rolling')`);
+            filterConditions.push(`(data->>'rfpDueDate' >= '${today}' OR data->>'status' = 'Rolling')`);
           }
         }
       }
@@ -493,15 +494,19 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       if (type === 'organizations') {
         for (const [key, value] of Object.entries(filters)) {
           if (key === 'functions' && value && typeof value === 'string') {
-            whereConditions.push(`data->'functions' ? '${value.replace(/'/g, "''")}'`);
+            filterConditions.push(`data->'functions' ? '${value.replace(/'/g, "''")}'`);
           } else if (key === 'country' && value && typeof value === 'string') {
-            whereConditions.push(`data->'hq'->>'country' = '${value.replace(/'/g, "''")}'`);
+            filterConditions.push(`data->'hq'->>'country' = '${value.replace(/'/g, "''")}'`);
           }
         }
       }
       
-      // Build final SQL query
-      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+      // Build final SQL query - combine filter conditions with cursor condition for main query
+      const allConditions = [...filterConditions];
+      if (cursorCondition) {
+        allConditions.push(cursorCondition);
+      }
+      const whereClause = allConditions.length > 0 ? `WHERE ${allConditions.join(' AND ')}` : '';
       
       const baseQuery = `
         SELECT id, title, url, type, summary, data, tags 
@@ -529,9 +534,9 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
         nextCursor = Buffer.from(`${lastItem.id}|${timestamp}`).toString('base64');
       }
       
-      // Get total count using same filters
-      const countWhereClause = whereConditions.slice(0, -1).length > 0 ? 
-        `WHERE ${whereConditions.slice(0, -1).join(' AND ')}` : '';
+      // Get total count using ONLY filter conditions (exclude cursor)
+      const countWhereClause = filterConditions.length > 0 ? 
+        `WHERE ${filterConditions.join(' AND ')}` : '';
       
       const countQuery = `
         SELECT COUNT(*) as count 
