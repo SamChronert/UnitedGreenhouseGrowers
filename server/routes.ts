@@ -421,24 +421,19 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       
       // Type filter
       if (type) {
-        whereConditions.push(`type = $${paramIndex}`);
-        params.push(type);
-        paramIndex++;
+        whereConditions.push(`type = '${type.replace(/'/g, "''")}'`);
       }
       
       // Text search
       if (q) {
-        whereConditions.push(`(title ILIKE $${paramIndex} OR summary ILIKE $${paramIndex} OR array_to_string(tags, ' ') ILIKE $${paramIndex})`);
-        params.push(`%${q}%`);
-        paramIndex++;
+        const searchTerm = q.replace(/'/g, "''").substring(0, 200);
+        whereConditions.push(`(title ILIKE '%${searchTerm}%' OR summary ILIKE '%${searchTerm}%' OR array_to_string(tags, ' ') ILIKE '%${searchTerm}%')`);
       }
       
       // JSON path filters
       for (const [key, value] of Object.entries(filters)) {
         if (value && typeof value === 'string') {
-          whereConditions.push(`data->>'${key}' = $${paramIndex}`);
-          params.push(value);
-          paramIndex++;
+          whereConditions.push(`data->>'${key}' = '${value.replace(/'/g, "''")}'`);
         }
       }
       
@@ -446,9 +441,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       if (cursor) {
         try {
           const [id, timestamp] = Buffer.from(cursor, 'base64').toString().split('|');
-          whereConditions.push(`(id, COALESCE(data->>'createdAt', '1970-01-01')) > ($${paramIndex}, $${paramIndex + 1})`);
-          params.push(id, timestamp);
-          paramIndex += 2;
+          whereConditions.push(`(id, COALESCE(data->>'createdAt', '1970-01-01')) > ('${id.replace(/'/g, "''").substring(0, 100)}', '${timestamp.replace(/'/g, "''").substring(0, 50)}')`);
         } catch {
           return res.status(400).json({ message: "Invalid cursor format" });
         }
@@ -500,13 +493,9 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       if (type === 'organizations') {
         for (const [key, value] of Object.entries(filters)) {
           if (key === 'functions' && value && typeof value === 'string') {
-            whereConditions.push(`data->'functions' ? $${paramIndex}`);
-            params.push(value);
-            paramIndex++;
+            whereConditions.push(`data->'functions' ? '${value.replace(/'/g, "''")}'`);
           } else if (key === 'country' && value && typeof value === 'string') {
-            whereConditions.push(`data->'hq'->>'country' = $${paramIndex}`);
-            params.push(value);
-            paramIndex++;
+            whereConditions.push(`data->'hq'->>'country' = '${value.replace(/'/g, "''")}'`);
           }
         }
       }

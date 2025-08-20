@@ -1,0 +1,87 @@
+[Context Header]
+- Project: UnitedGreenhouseGrowers
+- Design Doc: "UGGA Resource Library Overhaul" (Doc ID: RLDD-v1)
+- Invariants: (1) Keep existing auth system, (2) Maintain current routing structure, (3) A11y WCAG AA minimum, (4) No breaking changes to other pages, (5) Preserve existing blog functionality
+
+[Goal]
+Create the Tools & Templates tab (TB-10) with sub-tabs, tools list, templates gallery with preview modals, and download/Google Sheets integration.
+
+[Actions for Replit Agent]
+1. Create `src/components/tabs/ToolsTemplatesTab.jsx` with sub-tab navigation:
+   - Two sub-tabs: "Tools" and "Templates"
+   - Maintain sub-tab state in URL: `?tab=tools_templates&sub=tools`
+2. Implement Tools sub-tab:
+   - Grid of tool cards showing: name, icon/screenshot, category, cost type (Free/Paid/Freemium), description
+   - Filters: category (Planning, Operations, Finance, Marketing), platform (Web, iOS, Android, Desktop), cost type
+   - Each card links to external tool website (track outbound clicks)
+   - Add 10-15 seed tools (calculators, planning software, monitoring systems)
+3. Implement Templates sub-tab:
+   - Gallery view with preview thumbnails
+   - Categories: Financial Planning, Crop Planning, Operations, Compliance, Marketing
+   - Template cards show: title, description, format icons (CSV/XLSX/GSheets), preview button
+4. Create `src/components/TemplatePreviewModal.jsx`:
+   - Display modal with template details
+   - Show preview of spreadsheet (first 5 rows, 5 columns)
+   - Use a safe CSV/XLSX parser (like SheetJS read-only mode)
+   - Action buttons:
+     - "Download CSV" - triggers file download
+     - "Download XLSX" - triggers file download  
+     - "Open in Google Sheets" - opens Google Sheets template link
+     - "Copy Template Link" - copies shareable URL
+5. Add seed templates (8-10) with structure:
+   ```
+   {
+     type: 'templates',
+     title: 'Greenhouse Cost Calculator',
+     data: {
+       category: 'Financial Planning',
+       fileRefs: {
+         csv: '/files/templates/cost-calc.csv',
+         xlsx: '/files/templates/cost-calc.xlsx',
+         gsheetTemplateUrl: 'https://docs.google.com/spreadsheets/d/.../copy'
+       },
+       previewSample: {
+         columns: ['Month', 'Revenue', 'Costs', 'Profit'],
+         rows: [
+           ['January', '$10,000', '$7,000', '$3,000'],
+           ['February', '$12,000', '$7,500', '$4,500']
+         ]
+       }
+     }
+   }
+   ```
+6. Implement file handling:
+   - Store template files in `public/files/templates/` or CDN
+   - Implement secure file serving with proper headers
+   - Add download tracking analytics
+7. Add loading states:
+   - Skeleton cards while loading
+   - Spinner in preview modal while parsing file
+8. Implement error handling:
+   - Graceful fallback if preview fails
+   - Show "Preview unavailable" with download still enabled
+
+[Checks & Tests]
+- Navigate to Tools & Templates tab, verify sub-tabs work
+- Test Tools: filter by category and platform, click external links
+- Test Templates: open preview modal for each template
+- Verify preview shows spreadsheet data correctly
+- Test all download buttons (CSV, XLSX)
+- Test "Open in Google Sheets" creates a copy
+- Verify analytics events fire for downloads and external clicks
+- Test on mobile: gallery should be responsive
+- Check loading states by throttling network
+- Show me the preview modal with spreadsheet data
+- Download a CSV and verify it opens correctly
+
+[Commit/PR]
+Commit message: "feat: implement Tools & Templates tab with preview
+
+- Add sub-tabs for Tools and Templates
+- Create template gallery with preview modal
+- Implement CSV/XLSX download and Google Sheets integration
+- Add safe spreadsheet preview functionality"
+
+[Stop Condition]
+PASS: Tools link externally, templates preview and download correctly, Google Sheets integration works
+FAIL: If preview parsing fails, ensure SheetJS is properly configured. If downloads fail, check file paths and headers.

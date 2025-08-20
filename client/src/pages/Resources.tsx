@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import TabsBar from "@/components/TabsBar";
 import TabIntro from "@/components/TabIntro";
 import UniversitiesTab from "@/components/tabs/UniversitiesTab";
+import ToolsTemplatesTab from "@/components/tabs/ToolsTemplatesTab";
 import { SuggestDialog } from "@/components/resources/SuggestDialog";
 
 // Analytics helper
@@ -100,9 +101,7 @@ export default function Resources() {
             )}
             
             {activeTab === 'tools-templates' && (
-              <div className="text-center py-12 text-gray-500">
-                Tools & Templates tab coming soon...
-              </div>
+              <ToolsTemplatesTab onAnalyticsEvent={handleAnalyticsEvent} />
             )}
             
             {activeTab === 'learning' && (
