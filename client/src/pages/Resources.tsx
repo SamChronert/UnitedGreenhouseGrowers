@@ -14,10 +14,36 @@ import BlogsBulletinsTab from "@/components/tabs/BlogsBulletinsTab";
 import IndustryNewsTab from "@/components/tabs/IndustryNewsTab";
 import { SuggestDialog } from "@/components/resources/SuggestDialog";
 
-// Analytics helper
+// Import analytics tracking
+import { trackTabView, trackSearchSubmit, trackFilterChange, trackResourceOpen, trackOutboundClick, trackTemplateDownload } from "@/lib/analytics";
+
+// Analytics helper - bridge to new analytics system
 const recordAnalyticsEvent = (eventName: string, payload: any) => {
   console.log('[Analytics]', eventName, payload);
-  // TODO: Send to actual analytics service
+  
+  // Map old event names to new analytics tracking
+  switch (eventName) {
+    case 'tab_view':
+      trackTabView(payload.tab, payload);
+      break;
+    case 'search_submit':
+      trackSearchSubmit(payload.query, payload.tab, payload.filters);
+      break;
+    case 'filter_change':
+      trackFilterChange(payload.tab, payload.filterType, payload.filterValue);
+      break;
+    case 'resource_open':
+      trackResourceOpen(payload.resourceId, payload.tab, payload.position, payload.fromSearch);
+      break;
+    case 'outbound_click':
+      trackOutboundClick(payload.url, payload.tab, payload.resourceId);
+      break;
+    case 'template_download':
+      trackTemplateDownload(payload.templateId, payload.templateType, payload.tab);
+      break;
+    default:
+      console.log('Unmapped analytics event:', eventName, payload);
+  }
 };
 
 export default function Resources() {
@@ -33,8 +59,15 @@ export default function Resources() {
   
   // Tab change handler
   const handleTabChange = useCallback((tabId: string) => {
+    const previousTab = activeTab;
     setActiveTab(tabId);
-  }, []);
+    
+    // Track tab view with new analytics
+    trackTabView(tabId, {
+      previousTab,
+      timestamp: Date.now()
+    });
+  }, [activeTab]);
   
   // Analytics event handler
   const handleAnalyticsEvent = useCallback((eventName: string, payload: any) => {

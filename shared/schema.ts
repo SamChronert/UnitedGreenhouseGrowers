@@ -203,10 +203,18 @@ export const favorites = pgTable("favorites", {
 export const analytics_events = pgTable("analytics_events", {
   id: serial("id").primaryKey().notNull(),
   user_id: varchar("user_id"),
-  name: varchar("name").notNull(),
-  payload: jsonb("payload").notNull(),
+  session_id: varchar("session_id"),
+  event_type: varchar("event_type", { length: 50 }).notNull(),
+  tab: varchar("tab", { length: 50 }),
+  resource_id: varchar("resource_id"),
+  payload: jsonb("payload").notNull().default('{}'),
   created_at: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  eventTypeIdx: index("analytics_event_type_idx").on(table.event_type),
+  tabIdx: index("analytics_tab_idx").on(table.tab),
+  createdAtIdx: index("analytics_created_at_idx").on(table.created_at),
+  sessionIdx: index("analytics_session_idx").on(table.session_id),
+}));
 
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({

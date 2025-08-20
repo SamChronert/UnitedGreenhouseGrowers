@@ -625,30 +625,6 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
-  // Analytics endpoint for client-side event tracking
-  app.post("/api/analytics", async (req, res) => {
-    try {
-      const { events } = req.body;
-      
-      if (!Array.isArray(events)) {
-        return res.status(400).json({ message: "Events must be an array" });
-      }
-      
-      // Log analytics events (in production, you'd send to analytics service)
-      events.forEach(event => {
-        console.log(`[Analytics] ${event.eventType}:`, {
-          data: event.data,
-          timestamp: new Date(event.timestamp).toISOString(),
-          sessionId: event.sessionId
-        });
-      });
-      
-      res.json({ message: "Analytics events received", count: events.length });
-    } catch (error) {
-      console.error("Analytics error:", error);
-      res.status(500).json({ message: "Failed to process analytics events" });
-    }
-  });
 
   // Add feedback endpoint for resource update requests and suggestions
   app.post("/api/feedback", authenticate, async (req: AuthRequest, res) => {
@@ -750,6 +726,32 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
+  // Analytics API endpoints for admin dashboard
+  app.get("/api/admin/analytics", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const filters: any = {};
+      
+      if (req.query.startDate) {
+        filters.startDate = new Date(req.query.startDate as string);
+      }
+      if (req.query.endDate) {
+        filters.endDate = new Date(req.query.endDate as string);
+      }
+      if (req.query.eventType) {
+        filters.eventType = req.query.eventType as string;
+      }
+      if (req.query.tab) {
+        filters.tab = req.query.tab as string;
+      }
+      
+      const analytics = await storage.getAnalyticsData(filters);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Analytics data error:", error);
+      res.status(500).json({ message: "Failed to fetch analytics data" });
+    }
+  });
+
   app.get("/api/favorites", authenticate, requireMember, async (req: AuthRequest, res) => {
     try {
       const params = {
@@ -765,23 +767,59 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
-  // Analytics route (best-effort)
-  app.post("/api/analytics", async (req, res) => {
+  // Analytics ingestion endpoint with rate limiting
+  const analyticsRateLimit = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 100, // 100 events per minute per session
+    keyGenerator: (req) => req.body?.[0]?.sessionId || req.ip,
+    message: { message: "Analytics rate limit exceeded" },
+    standardHeaders: false,
+    legacyHeaders: false,
+  });
+
+  app.post("/api/analytics", analyticsRateLimit, async (req, res) => {
     try {
-      const { name, payload } = req.body;
-      const userId = req.headers.authorization ? undefined : null; // Could extract from token if needed
+      const events = req.body;
       
-      await storage.recordAnalytics({
-        user_id: userId,
-        name,
-        payload: payload || {}
-      });
+      if (!Array.isArray(events)) {
+        return res.status(400).json({ message: "Events must be an array" });
+      }
       
-      res.json({ message: "Analytics recorded" });
+      if (events.length === 0) {
+        return res.status(204).end();
+      }
+      
+      if (events.length > 20) {
+        return res.status(400).json({ message: "Too many events in batch" });
+      }
+      
+      // Validate event schema
+      const validEventTypes = ['tab_view', 'search_submit', 'filter_change', 'resource_open', 'outbound_click', 'template_download'];
+      
+      for (const event of events) {
+        if (!event.eventType || !validEventTypes.includes(event.eventType)) {
+          return res.status(400).json({ message: "Invalid event type" });
+        }
+        if (!event.sessionId || typeof event.sessionId !== 'string') {
+          return res.status(400).json({ message: "Invalid session ID" });
+        }
+        if (!event.timestamp || typeof event.timestamp !== 'number') {
+          return res.status(400).json({ message: "Invalid timestamp" });
+        }
+      }
+      
+      // Get user ID from auth (optional)
+      const userId = req.user?.id || null;
+      
+      // Store events in database (batch insert)
+      await storage.recordAnalyticsEvents(events, userId);
+      
+      // Fire-and-forget response
+      res.status(204).end();
     } catch (error) {
       // Best effort - don't fail the request
-      console.warn("Analytics error:", error);
-      res.json({ message: "Analytics recorded" });
+      console.warn("Analytics ingestion error:", error);
+      res.status(204).end();
     }
   });
 

@@ -90,6 +90,18 @@ export interface IStorage {
   
   // Analytics operations
   recordAnalytics(event: InsertAnalyticsEvent): Promise<void>;
+  recordAnalyticsEvents(events: any[], userId?: string | null): Promise<void>;
+  getAnalyticsData(filters: {
+    startDate?: Date;
+    endDate?: Date;
+    eventType?: string;
+    tab?: string;
+  }): Promise<{
+    totalEvents: number;
+    eventsByType: { eventType: string; count: number }[];
+    eventsByTab: { tab: string; count: number }[];
+    dailyEvents: { date: string; count: number }[];
+  }>;
   
   // Chat log operations
   createChatLog(chatLog: InsertChatLog): Promise<ChatLog>;
@@ -521,6 +533,116 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       // Best effort - don't fail if analytics table doesn't exist
       console.warn('Failed to record analytics:', error);
+    }
+  }
+
+  async recordAnalyticsEvents(events: any[], userId?: string | null): Promise<void> {
+    try {
+      const analyticsData = events.map(event => ({
+        id: randomUUID(),
+        user_id: userId,
+        session_id: event.sessionId,
+        event_type: event.eventType,
+        tab: event.tab || null,
+        resource_id: event.resourceId || null,
+        payload: event.payload || {},
+        created_at: new Date(event.timestamp)
+      }));
+
+      await db
+        .insert(analytics_events)
+        .values(analyticsData);
+    } catch (error) {
+      // Best effort - don't fail if analytics ingestion fails
+      console.warn('Failed to record analytics events:', error);
+    }
+  }
+
+  async getAnalyticsData(filters: {
+    startDate?: Date;
+    endDate?: Date;
+    eventType?: string;
+    tab?: string;
+  }): Promise<{
+    totalEvents: number;
+    eventsByType: { eventType: string; count: number }[];
+    eventsByTab: { tab: string; count: number }[];
+    dailyEvents: { date: string; count: number }[];
+  }> {
+    try {
+      const whereConditions = [];
+      
+      if (filters.startDate) {
+        whereConditions.push(gte(analytics_events.created_at, filters.startDate));
+      }
+      if (filters.endDate) {
+        whereConditions.push(sql`${analytics_events.created_at} <= ${filters.endDate}`);  
+      }
+      if (filters.eventType) {
+        whereConditions.push(eq(analytics_events.event_type, filters.eventType));
+      }
+      if (filters.tab) {
+        whereConditions.push(eq(analytics_events.tab, filters.tab));
+      }
+
+      const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
+      // Get total events count
+      const totalResult = await db
+        .select({ count: sql<number>`count(*)`.as('count') })
+        .from(analytics_events)
+        .where(whereClause);
+      const totalEvents = totalResult[0]?.count || 0;
+
+      // Get events by type
+      const eventsByTypeResult = await db
+        .select({
+          eventType: analytics_events.event_type,
+          count: sql<number>`count(*)`.as('count')
+        })
+        .from(analytics_events)
+        .where(whereClause)
+        .groupBy(analytics_events.event_type)
+        .orderBy(sql`count(*) DESC`);
+
+      // Get events by tab (excluding null tabs)
+      const eventsByTabResult = await db
+        .select({
+          tab: analytics_events.tab,
+          count: sql<number>`count(*)`.as('count')
+        })
+        .from(analytics_events)
+        .where(and(whereClause, sql`${analytics_events.tab} IS NOT NULL`))
+        .groupBy(analytics_events.tab)
+        .orderBy(sql`count(*) DESC`);
+
+      // Get daily events (last 30 days)
+      const dailyEventsResult = await db
+        .select({
+          date: sql<string>`DATE(${analytics_events.created_at})`.as('date'),
+          count: sql<number>`count(*)`.as('count')
+        })
+        .from(analytics_events)
+        .where(and(whereClause, gte(analytics_events.created_at, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000))))
+        .groupBy(sql`DATE(${analytics_events.created_at})`)
+        .orderBy(sql`DATE(${analytics_events.created_at})`);
+
+      return {
+        totalEvents,
+        eventsByType: eventsByTypeResult.map(row => ({ eventType: row.eventType, count: row.count })),
+        eventsByTab: eventsByTabResult
+          .filter(row => row.tab)
+          .map(row => ({ tab: row.tab!, count: row.count })),
+        dailyEvents: dailyEventsResult.map(row => ({ date: row.date, count: row.count }))
+      };
+    } catch (error) {
+      console.error('Failed to get analytics data:', error);
+      return {
+        totalEvents: 0,
+        eventsByType: [],
+        eventsByTab: [],
+        dailyEvents: []
+      };
     }
   }
 

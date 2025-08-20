@@ -1,135 +1,281 @@
 interface AnalyticsEvent {
-  eventType: string;
-  data: Record<string, any>;
+  eventType: 'tab_view' | 'search_submit' | 'filter_change' | 'resource_open' | 'outbound_click' | 'template_download';
+  tab?: string;
+  resourceId?: string;
+  payload?: Record<string, any>;
+}
+
+interface QueuedEvent extends AnalyticsEvent {
   timestamp: number;
   sessionId: string;
 }
 
 class Analytics {
-  private events: AnalyticsEvent[] = [];
+  private eventQueue: QueuedEvent[] = [];
   private sessionId: string;
-  private batchTimer: NodeJS.Timeout | null = null;
+  private maxQueueSize = 20;
+  private flushInterval = 5000; // 5 seconds
+  private flushTimer: NodeJS.Timeout | null = null;
+  private isEnabled = true;
   
   constructor() {
-    this.sessionId = this.generateSessionId();
+    this.sessionId = this.getOrCreateSessionId();
     this.setupUnloadHandler();
+    this.checkDNTHeader();
   }
   
-  private generateSessionId(): string {
-    return Math.random().toString(36).substring(2) + Date.now().toString(36);
+  private getOrCreateSessionId(): string {
+    let sessionId = sessionStorage.getItem('ugga_session_id');
+    if (!sessionId) {
+      sessionId = 'sess_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+      sessionStorage.setItem('ugga_session_id', sessionId);
+    }
+    return sessionId;
+  }
+
+  private checkDNTHeader(): void {
+    // Respect Do Not Track header
+    if (navigator.doNotTrack === '1' || window.doNotTrack === '1') {
+      this.isEnabled = false;
+    }
   }
   
-  private setupUnloadHandler() {
-    // Send events on page unload
+  private setupUnloadHandler(): void {
+    // Use sendBeacon on page unload for reliable delivery
     window.addEventListener('beforeunload', () => {
-      this.flush();
+      if (this.eventQueue.length > 0) {
+        this.sendBeacon();
+      }
     });
-    
-    // Send events on visibility change (user switches tabs)
+
+    // Also flush on visibility change (tab switching)
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') {
-        this.flush();
+      if (document.visibilityState === 'hidden' && this.eventQueue.length > 0) {
+        this.sendBeacon();
       }
     });
   }
   
-  /**
-   * Track an analytics event
-   */
-  trackEvent(eventType: string, data: Record<string, any> = {}) {
-    const event: AnalyticsEvent = {
-      eventType,
-      data,
-      timestamp: Date.now(),
-      sessionId: this.sessionId
-    };
-    
-    this.events.push(event);
-    
-    // Schedule batch send if not already scheduled
-    if (!this.batchTimer) {
-      this.batchTimer = setTimeout(() => {
-        this.flush();
-      }, 5000); // Send every 5 seconds
+  private sendBeacon(): void {
+    if (!this.isEnabled || this.eventQueue.length === 0) return;
+
+    const events = [...this.eventQueue];
+    this.eventQueue = [];
+
+    try {
+      navigator.sendBeacon(
+        '/api/analytics',
+        JSON.stringify(events)
+      );
+    } catch (error) {
+      console.warn('Analytics beacon failed:', error);
     }
   }
-  
-  /**
-   * Immediately send all queued events
-   */
-  private flush() {
-    if (this.events.length === 0) return;
-    
-    const eventsToSend = [...this.events];
-    this.events = [];
-    
-    if (this.batchTimer) {
-      clearTimeout(this.batchTimer);
-      this.batchTimer = null;
-    }
-    
-    // Send events to analytics endpoint (fire and forget)
+
+  private async flushEvents(): Promise<void> {
+    if (!this.isEnabled || this.eventQueue.length === 0) return;
+
+    const events = [...this.eventQueue];
+    this.eventQueue = [];
+
     try {
-      // Use sendBeacon for better reliability on page unload
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon('/api/analytics', JSON.stringify({
-          events: eventsToSend
-        }));
-      } else {
-        // Fallback to fetch for older browsers
-        fetch('/api/analytics', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ events: eventsToSend }),
-          keepalive: true
-        }).catch(() => {
-          // Silently fail - analytics shouldn't break user experience
-        });
+      const response = await fetch('/api/analytics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(events),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        console.warn('Analytics request failed:', response.status);
+        // Don't re-queue events to avoid infinite loops
       }
     } catch (error) {
-      // Silently fail - analytics shouldn't break user experience
-      console.debug('Analytics error:', error);
+      console.warn('Analytics request error:', error);
     }
   }
+
+  private scheduleFlush(): void {
+    if (this.flushTimer) {
+      clearTimeout(this.flushTimer);
+    }
+
+    this.flushTimer = setTimeout(() => {
+      this.flushEvents();
+    }, this.flushInterval);
+  }
+
+  public track(eventType: AnalyticsEvent['eventType'], data: Omit<AnalyticsEvent, 'eventType'> = {}): void {
+    if (!this.isEnabled) return;
+
+    // Sanitize payload to remove any PII
+    const sanitizedPayload = this.sanitizePayload(data.payload || {});
+
+    const event: QueuedEvent = {
+      eventType,
+      tab: data.tab,
+      resourceId: data.resourceId,
+      payload: sanitizedPayload,
+      timestamp: Date.now(),
+      sessionId: this.sessionId,
+    };
+
+    this.eventQueue.push(event);
+
+    // Flush if queue is full or schedule flush
+    if (this.eventQueue.length >= this.maxQueueSize) {
+      this.flushEvents();
+    } else {
+      this.scheduleFlush();
+    }
+  }
+
+  private sanitizePayload(payload: Record<string, any>): Record<string, any> {
+    const sanitized = { ...payload };
+    
+    // Remove potential PII fields
+    const piiFields = ['email', 'name', 'phone', 'address', 'ip', 'user_id'];
+    piiFields.forEach(field => {
+      delete sanitized[field];
+    });
+
+    // Limit string lengths to prevent abuse
+    Object.keys(sanitized).forEach(key => {
+      if (typeof sanitized[key] === 'string' && sanitized[key].length > 200) {
+        sanitized[key] = sanitized[key].substring(0, 200) + '...';
+      }
+    });
+
+    return sanitized;
+  }
+
+  // Public API methods
+  public trackTabView(tab: string, additionalData: Record<string, any> = {}): void {
+    this.track('tab_view', {
+      tab,
+      payload: additionalData,
+    });
+  }
+
+  public trackSearchSubmit(query: string, tab?: string, filters?: Record<string, any>): void {
+    this.track('search_submit', {
+      tab,
+      payload: {
+        queryLength: query.length, // Track query length, not content
+        hasFilters: Boolean(filters && Object.keys(filters).length > 0),
+        filterCount: filters ? Object.keys(filters).length : 0,
+      },
+    });
+  }
+
+  public trackFilterChange(tab: string, filterType: string, filterValue: string): void {
+    this.track('filter_change', {
+      tab,
+      payload: {
+        filterType,
+        hasValue: Boolean(filterValue),
+      },
+    });
+  }
+
+  public trackResourceOpen(resourceId: string, tab: string, position?: number, fromSearch?: boolean): void {
+    this.track('resource_open', {
+      tab,
+      resourceId,
+      payload: {
+        position,
+        fromSearch,
+      },
+    });
+  }
+
+  public trackOutboundClick(url: string, tab?: string, resourceId?: string): void {
+    // Extract domain for tracking, not full URL for privacy
+    const domain = new URL(url).hostname;
+    
+    this.track('outbound_click', {
+      tab,
+      resourceId,
+      payload: {
+        domain,
+      },
+    });
+  }
+
+  public trackTemplateDownload(templateId: string, templateType: string, tab?: string): void {
+    this.track('template_download', {
+      tab,
+      resourceId: templateId,
+      payload: {
+        templateType,
+      },
+    });
+  }
+
+  // Method to disable analytics (for opt-out)
+  public disable(): void {
+    this.isEnabled = false;
+    this.eventQueue = [];
+    if (this.flushTimer) {
+      clearTimeout(this.flushTimer);
+    }
+  }
+
+  public enable(): void {
+    this.isEnabled = true;
+  }
+
+  // Legacy method for backward compatibility
+  trackEvent(eventType: string, data: Record<string, any> = {}) {
+    // Convert old format to new format
+    this.track(eventType as any, { payload: data });
+  }
+  
 }
 
-// Singleton instance
-const analytics = new Analytics();
+// Create singleton instance
+export const analytics = new Analytics();
 
-/**
- * Track an analytics event with automatic batching
- * @param eventType - Type of event (e.g. 'tab_view', 'resource_click')
- * @param data - Event data payload
- */
-export function trackEvent(eventType: string, data: Record<string, any> = {}) {
-  analytics.trackEvent(eventType, data);
-}
-
-// Convenience functions for common events
-export const trackTabView = (tabId: string, tabLabel: string) => {
-  trackEvent('tab_view', { tab_id: tabId, tab_label: tabLabel });
+// Convenience functions for easier usage
+export const trackEvent = (eventType: AnalyticsEvent['eventType'], data?: Omit<AnalyticsEvent, 'eventType'>) => {
+  analytics.track(eventType, data);
 };
 
+export const trackTabView = (tab: string, additionalData?: Record<string, any>) => {
+  analytics.trackTabView(tab, additionalData);
+};
+
+export const trackSearchSubmit = (query: string, tab?: string, filters?: Record<string, any>) => {
+  analytics.trackSearchSubmit(query, tab, filters);
+};
+
+export const trackFilterChange = (tab: string, filterType: string, filterValue: string) => {
+  analytics.trackFilterChange(tab, filterType, filterValue);
+};
+
+export const trackResourceOpen = (resourceId: string, tab: string, position?: number, fromSearch?: boolean) => {
+  analytics.trackResourceOpen(resourceId, tab, position, fromSearch);
+};
+
+export const trackOutboundClick = (url: string, tab?: string, resourceId?: string) => {
+  analytics.trackOutboundClick(url, tab, resourceId);
+};
+
+export const trackTemplateDownload = (templateId: string, templateType: string, tab?: string) => {
+  analytics.trackTemplateDownload(templateId, templateType, tab);
+};
+
+// Legacy functions for backward compatibility
 export const trackResourceClick = (resourceId: string, resourceType: string, resourceTitle: string) => {
-  trackEvent('resource_click', { 
-    resource_id: resourceId, 
-    resource_type: resourceType, 
-    resource_title: resourceTitle 
-  });
+  analytics.trackResourceOpen(resourceId, resourceType, undefined, false);
 };
 
 export const trackSearch = (query: string, resultCount: number, resourceType?: string) => {
-  trackEvent('search', { 
-    query, 
-    result_count: resultCount, 
-    resource_type: resourceType 
-  });
+  analytics.trackSearchSubmit(query, resourceType);
 };
 
 export const trackFilter = (filterType: string, filterValue: string, resourceType?: string) => {
-  trackEvent('filter', { 
-    filter_type: filterType, 
-    filter_value: filterValue, 
-    resource_type: resourceType 
-  });
+  analytics.trackFilterChange(resourceType || '', filterType, filterValue);
 };

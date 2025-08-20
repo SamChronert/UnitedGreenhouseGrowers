@@ -27,6 +27,7 @@ import AdminBlog from "@/pages/AdminBlog";
 import AdminMembers from "@/pages/AdminMembers";
 import AdminChallenges from "@/pages/AdminChallenges";
 import AdminAssessmentTrainer from "@/pages/AdminAssessmentTrainer";
+import AdminAnalytics from "@/pages/AdminAnalytics";
 import Forum from "@/pages/Forum";
 import SalesHub from "@/pages/SalesHub";
 import ProductHub from "@/pages/ProductHub";
@@ -136,6 +137,11 @@ function Router() {
       <Route path="/admin/assessment-trainer">
         <AuthGuard requireAdmin>
           <AdminAssessmentTrainer />
+        </AuthGuard>
+      </Route>
+      <Route path="/admin/analytics">
+        <AuthGuard requireAdmin>
+          <AdminAnalytics />
         </AuthGuard>
       </Route>
 
