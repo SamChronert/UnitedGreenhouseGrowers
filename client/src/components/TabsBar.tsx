@@ -9,14 +9,14 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
+  { id: 'tools-templates', label: 'Tools & Templates', slug: 'tools-templates' },
   { id: 'universities', label: 'Universities', slug: 'universities' },
   { id: 'organizations', label: 'Organizations', slug: 'organizations' },
-  { id: 'grants', label: 'Grants', slug: 'grants' },
-  { id: 'tax-incentives', label: 'Tax Incentives', slug: 'tax-incentives' },
-  { id: 'tools-templates', label: 'Tools & Templates', slug: 'tools-templates' },
   { id: 'learning', label: 'Learning', slug: 'learning' },
+  { id: 'grants', label: 'Grants', slug: 'grants' },
   { id: 'blogs-bulletins', label: 'Blogs & Bulletins', slug: 'blogs-bulletins' },
-  { id: 'industry-news', label: 'Industry News', slug: 'industry-news' }
+  { id: 'industry-news', label: 'Industry News', slug: 'industry-news' },
+  { id: 'tax-incentives', label: 'Tax Incentives', slug: 'tax-incentives' }
 ];
 
 interface TabsBarProps {
@@ -103,10 +103,10 @@ export default function TabsBar({ activeTab, onTabChange, onAnalyticsEvent }: Ta
       <nav aria-label="Resource type navigation">
         <div 
           ref={tabsRef}
-          className="flex overflow-x-auto scrollbar-hide"
+          className="flex flex-wrap gap-x-8 gap-y-4 sm:overflow-x-auto sm:flex-nowrap scrollbar-hide"
           role="tablist"
         >
-          <div className="flex space-x-8 min-w-max px-1">
+          <div className="flex flex-wrap gap-x-8 gap-y-4 sm:flex-nowrap sm:space-x-8 sm:min-w-max px-1">
             {TABS.map((tab, index) => {
               const isActive = tab.id === activeTab;
               const tabIndex = isActive ? 0 : -1;

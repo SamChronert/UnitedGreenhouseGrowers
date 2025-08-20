@@ -50,12 +50,12 @@ const recordAnalyticsEvent = (eventName: string, payload: any) => {
 
 export default function Resources() {
   const [location] = useLocation();
-  const [activeTab, setActiveTab] = useState('universities');
+  const [activeTab, setActiveTab] = useState('tools-templates');
   
   // Update activeTab when location changes
   useEffect(() => {
     const urlParams = new URLSearchParams(location.split('?')[1] || '');
-    const tabFromUrl = urlParams.get('tab') || 'universities';
+    const tabFromUrl = urlParams.get('tab') || 'tools-templates';
     setActiveTab(tabFromUrl);
   }, [location]);
   
