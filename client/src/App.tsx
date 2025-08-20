@@ -27,63 +27,134 @@ import AdminChallenges from "@/pages/AdminChallenges";
 import AdminAssessmentTrainer from "@/pages/AdminAssessmentTrainer";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 
+function LayoutWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <Layout>
+      <main id="main-content" role="main" aria-label="Main content">
+        {children}
+      </main>
+    </Layout>
+  );
+}
+
 function Router() {
   return (
     <Switch>
-      {/* Public routes */}
-      <Route path="/" component={Home} />
-      <Route path="/about" component={About} />
-      <Route path="/contact" component={Contact} />
-      <Route path="/blog" component={Blog} />
-      <Route path="/blog/:slug" component={BlogPost} />
-      <Route path="/resources" component={Resources} />
+      {/* App Shell routes - bypass main Layout */}
       <Route path="/demo" nest>
         <DashboardWrapper isDemo />
       </Route>
-      <Route path="/register" component={Register} />
-      <Route path="/login" component={Login} />
-
-      {/* Protected dashboard routes - using App Shell */}
+      
       <Route path="/dashboard" nest>
         <AuthGuard requireMember>
           <DashboardWrapper />
         </AuthGuard>
       </Route>
 
-      {/* Admin routes */}
+      {/* Public routes with Layout */}
+      <Route path="/">
+        <LayoutWrapper>
+          <Home />
+        </LayoutWrapper>
+      </Route>
+      
+      <Route path="/about">
+        <LayoutWrapper>
+          <About />
+        </LayoutWrapper>
+      </Route>
+      
+      <Route path="/contact">
+        <LayoutWrapper>
+          <Contact />
+        </LayoutWrapper>
+      </Route>
+      
+      <Route path="/blog" component={BlogPost}>
+        <LayoutWrapper>
+          <Blog />
+        </LayoutWrapper>
+      </Route>
+      
+      <Route path="/blog/:slug">
+        <LayoutWrapper>
+          <BlogPost />
+        </LayoutWrapper>
+      </Route>
+      
+      <Route path="/resources">
+        <LayoutWrapper>
+          <Resources />
+        </LayoutWrapper>
+      </Route>
+      
+      <Route path="/register">
+        <LayoutWrapper>
+          <Register />
+        </LayoutWrapper>
+      </Route>
+      
+      <Route path="/login">
+        <LayoutWrapper>
+          <Login />
+        </LayoutWrapper>
+      </Route>
+
+      {/* Admin routes with Layout */}
       <Route path="/admin/resources">
-        <AuthGuard requireAdmin>
-          <AdminResources />
-        </AuthGuard>
+        <LayoutWrapper>
+          <AuthGuard requireAdmin>
+            <AdminResources />
+          </AuthGuard>
+        </LayoutWrapper>
       </Route>
+      
       <Route path="/admin/blog">
-        <AuthGuard requireAdmin>
-          <AdminBlog />
-        </AuthGuard>
+        <LayoutWrapper>
+          <AuthGuard requireAdmin>
+            <AdminBlog />
+          </AuthGuard>
+        </LayoutWrapper>
       </Route>
+      
       <Route path="/admin/members">
-        <AuthGuard requireAdmin>
-          <AdminMembers />
-        </AuthGuard>
+        <LayoutWrapper>
+          <AuthGuard requireAdmin>
+            <AdminMembers />
+          </AuthGuard>
+        </LayoutWrapper>
       </Route>
+      
       <Route path="/admin/challenges">
-        <AuthGuard requireAdmin>
-          <AdminChallenges />
-        </AuthGuard>
+        <LayoutWrapper>
+          <AuthGuard requireAdmin>
+            <AdminChallenges />
+          </AuthGuard>
+        </LayoutWrapper>
       </Route>
+      
       <Route path="/admin/assessment-trainer">
-        <AuthGuard requireAdmin>
-          <AdminAssessmentTrainer />
-        </AuthGuard>
+        <LayoutWrapper>
+          <AuthGuard requireAdmin>
+            <AdminAssessmentTrainer />
+          </AuthGuard>
+        </LayoutWrapper>
       </Route>
+      
       <Route path="/admin/analytics">
-        <AuthGuard requireAdmin>
-          <AdminAnalytics />
-        </AuthGuard>
+        <LayoutWrapper>
+          <AuthGuard requireAdmin>
+            <AdminAnalytics />
+          </AuthGuard>
+        </LayoutWrapper>
       </Route>
 
       {/* Fallback to 404 */}
-      <Route component={NotFound} />
+      <Route>
+        <LayoutWrapper>
+          <NotFound />
+        </LayoutWrapper>
+      </Route>
     </Switch>
   );
 }
@@ -93,12 +164,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AccessibilityProvider enableReporting={process.env.NODE_ENV === 'development'}>
         <TooltipProvider>
-          <Layout>
-            <main id="main-content" role="main" aria-label="Main content">
-              <Router />
-            </main>
-            <Toaster />
-          </Layout>
+          <Router />
+          <Toaster />
         </TooltipProvider>
       </AccessibilityProvider>
     </QueryClientProvider>
