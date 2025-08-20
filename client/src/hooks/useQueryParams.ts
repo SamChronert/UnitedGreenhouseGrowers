@@ -1,18 +1,25 @@
 import { useLocation } from 'wouter';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 
 /**
  * A robust hook for managing query parameters that works reliably with Wouter.
- * Reads params from window.location.search directly (not Wouter's location)
- * and uses Wouter's setLocation to update the URL while preserving existing params.
+ * Reads params from window.location.search and reacts to URL changes properly.
  */
 export function useQueryParams() {
   const [location, setLocation] = useLocation();
-
-  // Get current query parameters from window.location.search
+  
+  // Track current search params in state to ensure reactivity
+  const [searchParams, setSearchParams] = useState(() => window.location.search);
+  
+  // Update searchParams when location changes (including browser back/forward)
+  useEffect(() => {
+    setSearchParams(window.location.search);
+  }, [location]);
+  
+  // Create URLSearchParams object from current search params
   const params = useMemo(() => {
-    return new URLSearchParams(window.location.search);
-  }, [window.location.search]);
+    return new URLSearchParams(searchParams);
+  }, [searchParams]);
 
   // Get a specific parameter value
   const getParam = useCallback((key: string): string | null => {
