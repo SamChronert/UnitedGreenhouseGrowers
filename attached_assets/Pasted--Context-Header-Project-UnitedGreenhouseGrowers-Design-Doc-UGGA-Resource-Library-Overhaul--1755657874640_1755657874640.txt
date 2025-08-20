@@ -1,0 +1,75 @@
+[Context Header]
+- Project: UnitedGreenhouseGrowers
+- Design Doc: "UGGA Resource Library Overhaul" (Doc ID: RLDD-v1)
+- Invariants: (1) Keep existing auth system, (2) Maintain current routing structure, (3) A11y WCAG AA minimum, (4) No breaking changes to other pages, (5) Preserve existing blog functionality
+
+[Goal]
+Implement the Organizations tab (TB-07) with sections grouped by function, collapsible groups, and grid/list toggle within each section.
+
+[Actions for Replit Agent]
+1. Create `src/components/tabs/OrganizationsTab.jsx` with grouped layout
+2. Define organization functions for grouping:
+   - "Associations & Policy"
+   - "Standards & Tools"
+   - "Research & Education"
+   - "Technology & Innovation"
+   - "Market & Distribution"
+3. Create `src/components/GroupedSection.jsx`:
+   - Collapsible header with function name and count
+   - Short description for each function (2-3 sentences)
+   - aria-expanded attribute for accessibility
+   - Smooth expand/collapse animation
+   - Grid/list toggle within each section
+4. Implement organization cards showing:
+   - Organization name and logo (if available)
+   - Primary function (as badge/tag)
+   - Secondary tags for cross-functional areas
+   - Headquarters location (city, state/country)
+   - Website link with external icon
+5. Add seed data for 20-30 organizations with structure:
+   ```
+   {
+     type: 'organizations',
+     title: 'Organization Name',
+     data: {
+       functions: ['Associations & Policy', 'Research & Education'],
+       hq: {city: 'Washington', state: 'DC', country: 'USA'},
+       urls: {site: 'https://...'},
+       description: '...'
+     }
+   }
+   ```
+6. Connect to the data layer:
+   - Use `useResources` hook with type='organizations'
+   - Client-side grouping by primary function (first in array)
+   - Maintain expanded/collapsed state in component state
+7. Add organization-specific filters:
+   - Function multi-select
+   - Country/region filter
+   - Alphabetical or relevance sort
+8. Implement view persistence:
+   - Remember grid/list preference per section in localStorage
+   - Remember which sections are expanded/collapsed
+
+[Checks & Tests]
+- Navigate to Organizations tab and verify grouped display
+- Test expand/collapse for each function group
+- Toggle between grid and list view within a section
+- Verify organization cards show all required information
+- Test filters: select function and verify correct filtering
+- Check keyboard navigation through sections
+- Verify collapsed sections don't fetch unnecessary data
+- Test with screen reader to ensure proper announcements
+- Show me the rendered HTML structure for one expanded section
+
+[Commit/PR]
+Commit message: "feat: implement Organizations tab with grouped sections
+
+- Add collapsible sections grouped by function
+- Implement grid/list toggle per section
+- Add organization cards with function tags
+- Include filters for function and location"
+
+[Stop Condition]
+PASS: Organizations display in grouped sections, expand/collapse works, toggles persist
+FAIL: If grouping fails, check data structure. If animations stutter, simplify transitions.

@@ -470,58 +470,36 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
           orderBy = 'id';
       }
       
-      // Build drizzle query with conditions
-      let query = db.select({
-        id: resources.id,
-        title: resources.title,
-        url: resources.url,
-        type: resources.type,
-        summary: resources.summary,
-        data: resources.data,
-        tags: resources.tags
-      }).from(resources);
-      
-      // Apply WHERE conditions
-      const conditions = [];
-      if (type) {
-        conditions.push(eq(resources.type, type));
-      }
-      if (q) {
-        conditions.push(
-          or(
-            like(resources.title, `%${q}%`),
-            like(resources.summary, `%${q}%`)
-          )
-        );
-      }
-      
-      // Apply JSON filters
-      for (const [key, value] of Object.entries(filters)) {
-        if (value && typeof value === 'string') {
-          conditions.push(sql`${resources.data}->>${key} = ${value}`);
+      // Special handling for organization function filters
+      if (type === 'organizations') {
+        for (const [key, value] of Object.entries(filters)) {
+          if (key === 'functions' && value && typeof value === 'string') {
+            whereConditions.push(`data->'functions' ? $${paramIndex}`);
+            params.push(value);
+            paramIndex++;
+          } else if (key === 'country' && value && typeof value === 'string') {
+            whereConditions.push(`data->'hq'->>'country' = $${paramIndex}`);
+            params.push(value);
+            paramIndex++;
+          }
         }
       }
       
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
-      }
+      // Build final SQL query
+      const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
       
-      // Apply ordering
-      switch (sort) {
-        case 'title':
-          query = query.orderBy(asc(resources.title));
-          break;
-        case 'newest':
-          query = query.orderBy(desc(sql`${resources.data}->>'createdAt'`));
-          break;
-        default:
-          query = query.orderBy(asc(resources.id));
-      }
+      const baseQuery = `
+        SELECT id, title, url, type, summary, data, tags 
+        FROM resources 
+        ${whereClause}
+        ORDER BY ${orderBy}
+        LIMIT $${paramIndex}
+      `;
+      params.push(limit + 1);
       
-      // Apply limit
-      query = query.limit(limit + 1);
-      
-      const items = await query;
+      // Execute query
+      const result = await db.execute(sql.raw(baseQuery, ...params));
+      const items = result.rows;
       
       // Prepare response
       const hasNext = items.length > limit;
@@ -537,34 +515,18 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
         nextCursor = Buffer.from(`${lastItem.id}|${timestamp}`).toString('base64');
       }
       
-      // Get total count
-      let countQuery = db.select({ count: count() }).from(resources);
+      // Get total count using same filters
+      const countWhereClause = whereConditions.slice(0, -1).length > 0 ? 
+        `WHERE ${whereConditions.slice(0, -1).join(' AND ')}` : '';
       
-      const countConditions = [];
-      if (type) {
-        countConditions.push(eq(resources.type, type));
-      }
-      if (q) {
-        countConditions.push(
-          or(
-            like(resources.title, `%${q}%`),
-            like(resources.summary, `%${q}%`)
-          )
-        );
-      }
+      const countQuery = `
+        SELECT COUNT(*) as count 
+        FROM resources 
+        ${countWhereClause}
+      `;
       
-      for (const [key, value] of Object.entries(filters)) {
-        if (value && typeof value === 'string') {
-          countConditions.push(sql`${resources.data}->>${key} = ${value}`);
-        }
-      }
-      
-      if (countConditions.length > 0) {
-        countQuery = countQuery.where(and(...countConditions));
-      }
-      
-      const countResult = await countQuery;
-      const total = countResult[0]?.count || 0;
+      const countResult = await db.execute(sql.raw(countQuery, ...params.slice(0, -1)));
+      const total = Number(countResult.rows[0]?.count) || 0;
       
       res.json({
         items,

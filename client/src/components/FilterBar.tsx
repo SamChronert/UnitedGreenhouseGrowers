@@ -67,13 +67,22 @@ const FILTER_CONFIGS: Record<string, any> = {
     }
   },
   organizations: {
-    state: {
-      label: 'State',
+    functions: {
+      label: 'Function',
       options: [
-        { value: 'CA', label: 'California' },
-        { value: 'NY', label: 'New York' },
-        { value: 'TX', label: 'Texas' },
-        { value: 'FL', label: 'Florida' }
+        { value: 'Associations & Policy', label: 'Associations & Policy' },
+        { value: 'Standards & Tools', label: 'Standards & Tools' },
+        { value: 'Research & Education', label: 'Research & Education' },
+        { value: 'Technology & Innovation', label: 'Technology & Innovation' },
+        { value: 'Market & Distribution', label: 'Market & Distribution' }
+      ]
+    },
+    country: {
+      label: 'Country',
+      options: [
+        { value: 'USA', label: 'United States' },
+        { value: 'CAN', label: 'Canada' },
+        { value: 'BEL', label: 'Belgium' }
       ]
     }
   }
