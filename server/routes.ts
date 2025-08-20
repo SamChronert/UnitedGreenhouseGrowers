@@ -158,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Send verification email (simplified for MVP)
       const fromEmail = process.env.FROM_EMAIL || "info@greenhousegrowers.org";
-      await sendEmail(process.env.SENDGRID_API_KEY!, {
+      await sendEmail({
         to: user.email,
         from: fromEmail,
         subject: "Welcome to UGGA - Email Verification",
@@ -600,7 +600,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
         resourceTypes.map(async (type) => {
           const countQuery = `SELECT COUNT(*) as count FROM resources WHERE type = '${type.replace(/'/g, "''")}'`;
           const result = await db.execute(sql.raw(countQuery));
-          const count = parseInt(result.rows[0]?.count || '0');
+          const count = parseInt((result.rows[0]?.count || '0') as string);
           return { type, total: count };
         })
       );
@@ -649,7 +649,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
         const values = req.query[field];
         if (values) {
           if (Array.isArray(values)) {
-            tags.push(...values);
+            tags.push(...(values as string[]));
           } else {
             tags.push(values as string);
           }
@@ -835,7 +835,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     legacyHeaders: false,
   });
 
-  app.post("/api/analytics", analyticsRateLimit, async (req, res) => {
+  app.post("/api/analytics", analyticsRateLimit, async (req: AuthRequest, res) => {
     try {
       const events = req.body;
       
