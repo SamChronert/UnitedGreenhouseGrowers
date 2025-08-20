@@ -9,6 +9,7 @@ import TabsBar from "@/components/TabsBar";
 import TabIntro from "@/components/TabIntro";
 import UniversitiesTab from "@/components/tabs/UniversitiesTab";
 import OrganizationsTab from "@/components/tabs/OrganizationsTab";
+import GrantsTab from "@/components/tabs/GrantsTab";
 import ToolsTemplatesTab from "@/components/tabs/ToolsTemplatesTab";
 import LearningTab from "@/components/tabs/LearningTab";
 import BlogsBulletinsTab from "@/components/tabs/BlogsBulletinsTab";
@@ -128,9 +129,7 @@ export default function Resources() {
             )}
             
             {activeTab === 'grants' && (
-              <div className="text-center py-12 text-gray-500">
-                Grants tab coming soon...
-              </div>
+              <GrantsTab onAnalyticsEvent={handleAnalyticsEvent} />
             )}
             
             {activeTab === 'tax-incentives' && (
