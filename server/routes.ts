@@ -396,7 +396,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     filters: z.string().optional(),
     sort: z.enum(['relevance', 'title', 'newest', 'quality', 'dueDate', 'agency', 'amount', 'provider', 'cost']).default('relevance'),
     cursor: z.string().optional(),
-    limit: z.coerce.number().min(1).max(100).default(20)
+    limit: z.coerce.number().min(1).max(10000).default(20)
   });
 
   // Resources routes - New type-aware API
