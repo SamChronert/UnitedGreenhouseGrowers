@@ -649,6 +649,31 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
+  // Analytics endpoint for client-side event tracking
+  app.post("/api/analytics", async (req, res) => {
+    try {
+      const { events } = req.body;
+      
+      if (!Array.isArray(events)) {
+        return res.status(400).json({ message: "Events must be an array" });
+      }
+      
+      // Log analytics events (in production, you'd send to analytics service)
+      events.forEach(event => {
+        console.log(`[Analytics] ${event.eventType}:`, {
+          data: event.data,
+          timestamp: new Date(event.timestamp).toISOString(),
+          sessionId: event.sessionId
+        });
+      });
+      
+      res.json({ message: "Analytics events received", count: events.length });
+    } catch (error) {
+      console.error("Analytics error:", error);
+      res.status(500).json({ message: "Failed to process analytics events" });
+    }
+  });
+
   // Add feedback endpoint for resource update requests and suggestions
   app.post("/api/feedback", authenticate, async (req: AuthRequest, res) => {
     try {

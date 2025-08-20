@@ -1,226 +1,113 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ExternalLink, MapPin, GraduationCap } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ExternalLink, MapPin, GraduationCap, AlertCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface University {
-  id: string;
-  type: 'universities';
-  title: string;
-  summary: string;
-  data: {
-    city: string;
-    state: string;
-    country: string;
-    programName: string;
-    urls: {
-      site: string;
-      extension?: string;
-    };
-  };
-}
-
-const MOCK_UNIVERSITIES: University[] = [
-  {
-    id: 'ucd-1',
-    type: 'universities',
-    title: 'University of California, Davis',
-    summary: 'Leading research in controlled environment agriculture and greenhouse technology development.',
-    data: {
-      city: 'Davis',
-      state: 'CA',
-      country: 'USA',
-      programName: 'Controlled Environment Agriculture Program',
-      urls: {
-        site: 'https://ucdavis.edu',
-        extension: 'https://extension.ucdavis.edu'
-      }
-    }
-  },
-  {
-    id: 'cornell-1',
-    type: 'universities',
-    title: 'Cornell University',
-    summary: 'Innovative greenhouse research and extension services for sustainable agriculture.',
-    data: {
-      city: 'Ithaca',
-      state: 'NY',
-      country: 'USA',
-      programName: 'Greenhouse and Floriculture Program',
-      urls: {
-        site: 'https://cornell.edu',
-        extension: 'https://cce.cornell.edu'
-      }
-    }
-  },
-  {
-    id: 'ncsu-1',
-    type: 'universities',
-    title: 'North Carolina State University',
-    summary: 'Comprehensive greenhouse management research and grower education programs.',
-    data: {
-      city: 'Raleigh',
-      state: 'NC',
-      country: 'USA',
-      programName: 'Greenhouse and Nursery Extension',
-      urls: {
-        site: 'https://ncsu.edu',
-        extension: 'https://extension.ncsu.edu'
-      }
-    }
-  },
-  {
-    id: 'osu-1',
-    type: 'universities',
-    title: 'Ohio State University',
-    summary: 'Advanced greenhouse technology and sustainable production system research.',
-    data: {
-      city: 'Columbus',
-      state: 'OH',
-      country: 'USA',
-      programName: 'Greenhouse Program',
-      urls: {
-        site: 'https://osu.edu',
-        extension: 'https://extension.osu.edu'
-      }
-    }
-  },
-  {
-    id: 'uga-1',
-    type: 'universities',
-    title: 'University of Georgia',
-    summary: 'Climate-controlled agriculture research and extension for southeastern growers.',
-    data: {
-      city: 'Athens',
-      state: 'GA',
-      country: 'USA',
-      programName: 'Controlled Environment Agriculture',
-      urls: {
-        site: 'https://uga.edu',
-        extension: 'https://extension.uga.edu'
-      }
-    }
-  },
-  {
-    id: 'purdue-1',
-    type: 'universities',
-    title: 'Purdue University',
-    summary: 'Innovative greenhouse automation and precision agriculture research.',
-    data: {
-      city: 'West Lafayette',
-      state: 'IN',
-      country: 'USA',
-      programName: 'Greenhouse Technology Program',
-      urls: {
-        site: 'https://purdue.edu',
-        extension: 'https://extension.purdue.edu'
-      }
-    }
-  },
-  {
-    id: 'uariz-1',
-    type: 'universities',
-    title: 'University of Arizona',
-    summary: 'Desert greenhouse technology and water-efficient production systems.',
-    data: {
-      city: 'Tucson',
-      state: 'AZ',
-      country: 'USA',
-      programName: 'Controlled Environment Agriculture Center',
-      urls: {
-        site: 'https://arizona.edu',
-        extension: 'https://extension.arizona.edu'
-      }
-    }
-  },
-  {
-    id: 'wsu-1',
-    type: 'universities',
-    title: 'Washington State University',
-    summary: 'Pacific Northwest greenhouse research and sustainable growing practices.',
-    data: {
-      city: 'Pullman',
-      state: 'WA',
-      country: 'USA',
-      programName: 'Greenhouse and Nursery Program',
-      urls: {
-        site: 'https://wsu.edu',
-        extension: 'https://extension.wsu.edu'
-      }
-    }
-  }
-];
-
-const US_REGIONS = [
-  { id: 'all', label: 'All Regions' },
-  { id: 'northeast', label: 'Northeast', states: ['ME', 'NH', 'VT', 'MA', 'RI', 'CT', 'NY', 'NJ', 'PA'] },
-  { id: 'southeast', label: 'Southeast', states: ['DE', 'MD', 'VA', 'WV', 'KY', 'TN', 'NC', 'SC', 'GA', 'FL', 'AL', 'MS', 'AR', 'LA'] },
-  { id: 'midwest', label: 'Midwest', states: ['OH', 'MI', 'IN', 'WI', 'IL', 'MN', 'IA', 'MO', 'ND', 'SD', 'NE', 'KS'] },
-  { id: 'southwest', label: 'Southwest', states: ['TX', 'OK', 'NM', 'AZ'] },
-  { id: 'west', label: 'West', states: ['CO', 'WY', 'MT', 'ID', 'WA', 'OR', 'UT', 'NV', 'CA', 'AK', 'HI'] }
-];
+import { useInfiniteResources, useResourcesList, Resource, ResourceFilters } from "@/hooks/useResources";
+import SearchBox from "@/components/SearchBox";
+import FilterBar from "@/components/FilterBar";
+import { trackTabView, trackResourceClick } from "@/lib/analytics";
 
 interface UniversitiesTabProps {
-  onAnalyticsEvent: (eventName: string, payload: any) => void;
+  onAnalyticsEvent?: (eventName: string, payload: any) => void;
 }
 
 export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabProps) {
-  const [selectedRegions, setSelectedRegions] = useState<string[]>(['all']);
-  const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
+  // URL state management
+  const [location, setLocation] = useLocation();
+  const urlParams = useMemo(() => new URLSearchParams(location.split('?')[1] || ''), [location]);
+  
+  // Local state
+  const [searchQuery, setSearchQuery] = useState(urlParams.get('q') || '');
+  const [filters, setFilters] = useState<ResourceFilters>(() => {
+    const filtersParam = urlParams.get('filters');
+    return filtersParam ? JSON.parse(filtersParam) : {};
+  });
+  const [sort, setSort] = useState(urlParams.get('sort') || 'relevance');
+  const [selectedUniversity, setSelectedUniversity] = useState<Resource | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Filter universities by region
-  const filteredUniversities = useMemo(() => {
-    if (selectedRegions.includes('all')) {
-      return MOCK_UNIVERSITIES;
+  // Track tab view on mount
+  useEffect(() => {
+    trackTabView('universities', 'Universities');
+    onAnalyticsEvent?.('tab_view', { tab: 'universities' });
+  }, [onAnalyticsEvent]);
+
+  // Data fetching with infinite query
+  const infiniteQuery = useInfiniteResources({
+    type: 'universities',
+    query: searchQuery,
+    filters,
+    sort: sort as any,
+    enabled: true
+  });
+
+  const universities = useResourcesList(infiniteQuery);
+  const { data, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage } = infiniteQuery;
+
+  // Update URL when filters/search change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    if (searchQuery.trim()) {
+      params.set('q', searchQuery.trim());
     }
     
-    return MOCK_UNIVERSITIES.filter(university => {
-      return selectedRegions.some(regionId => {
-        const region = US_REGIONS.find(r => r.id === regionId);
-        return region?.states?.includes(university.data.state);
-      });
-    });
-  }, [selectedRegions]);
-
-  // Handle region filter change
-  const handleRegionChange = useCallback((regionId: string) => {
-    if (regionId === 'all') {
-      setSelectedRegions(['all']);
-    } else {
-      setSelectedRegions(prev => {
-        const withoutAll = prev.filter(id => id !== 'all');
-        if (withoutAll.includes(regionId)) {
-          const newRegions = withoutAll.filter(id => id !== regionId);
-          return newRegions.length === 0 ? ['all'] : newRegions;
-        } else {
-          return [...withoutAll, regionId];
-        }
-      });
+    if (Object.keys(filters).length > 0) {
+      params.set('filters', JSON.stringify(filters));
     }
-  }, []);
+    
+    if (sort !== 'relevance') {
+      params.set('sort', sort);
+    }
+    
+    const newSearch = params.toString();
+    const basePath = location.split('?')[0];
+    const newLocation = newSearch ? `${basePath}?${newSearch}` : basePath;
+    
+    if (newLocation !== location) {
+      setLocation(newLocation);
+    }
+  }, [searchQuery, filters, sort, location, setLocation]);
 
   // Handle university card click
-  const handleUniversityClick = useCallback((university: University) => {
+  const handleUniversityClick = useCallback((university: Resource) => {
     setSelectedUniversity(university);
     setIsModalOpen(true);
     
-    // Fire analytics event
-    onAnalyticsEvent('resource_open', {
+    // Track analytics
+    trackResourceClick(university.id, 'university', university.title);
+    onAnalyticsEvent?.('resource_open', {
       resource_id: university.id,
       resource_type: 'university',
       resource_title: university.title
     });
   }, [onAnalyticsEvent]);
 
-  // Handle modal close with escape key
+  // Handle modal close
   const handleModalClose = useCallback(() => {
     setIsModalOpen(false);
     setSelectedUniversity(null);
   }, []);
+
+  // Handle infinite scroll
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Retry function for errors
+  const handleRetry = useCallback(() => {
+    infiniteQuery.refetch();
+  }, [infiniteQuery]);
+
+  // Get total count from first page
+  const totalCount = data?.pages[0]?.total || 0;
 
   return (
     <div 
@@ -229,77 +116,163 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
       aria-labelledby="universities-tab"
       className="space-y-6"
     >
-      {/* Region Filter */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-medium text-gray-900">Filter by Region</h3>
-        <div className="flex flex-wrap gap-2">
-          {US_REGIONS.map(region => {
-            const isSelected = selectedRegions.includes(region.id);
-            return (
-              <button
-                key={region.id}
-                onClick={() => handleRegionChange(region.id)}
-                className={cn(
-                  "px-3 py-1.5 text-sm rounded-full border transition-colors",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-                  isSelected
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                )}
-                aria-pressed={isSelected}
-              >
-                {region.label}
-              </button>
-            );
-          })}
-        </div>
+      {/* Search and Filters */}
+      <div className="space-y-4">
+        <SearchBox
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search universities by name, program, or location..."
+          resources={universities}
+          resourceType="universities"
+          className="max-w-md"
+        />
+        
+        <FilterBar
+          resourceType="universities"
+          filters={filters}
+          onFiltersChange={setFilters}
+          sort={sort}
+          onSortChange={setSort}
+        />
       </div>
 
       {/* Results Count */}
-      <div className="text-sm text-gray-600">
-        {filteredUniversities.length} {filteredUniversities.length === 1 ? 'university' : 'universities'} found
-      </div>
+      {!isLoading && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            {totalCount} {totalCount === 1 ? 'university' : 'universities'} found
+            {Object.keys(filters).length > 0 || searchQuery.trim() ? ' (filtered)' : ''}
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>Failed to load universities. Please try again.</span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleRetry}
+              className="ml-4"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Loading Skeletons */}
+      {isLoading && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i}>
+              <CardHeader className="pb-3">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent className="pt-0">
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-2/3" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* University Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredUniversities.map(university => (
-          <Card 
-            key={university.id} 
-            className="cursor-pointer transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
-            onClick={() => handleUniversityClick(university)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleUniversityClick(university);
-              }
-            }}
-            tabIndex={0}
-            role="button"
-            aria-label={`View details for ${university.title}`}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-lg leading-tight">
-                  {university.title}
-                </CardTitle>
-                <GraduationCap className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
-              </div>
-              <div className="flex items-center text-sm text-gray-600 mt-1">
-                <MapPin className="h-4 w-4 mr-1" aria-hidden="true" />
-                {university.data.city}, {university.data.state}
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <p className="text-sm text-gray-700 mb-3">
-                {university.data.programName}
-              </p>
-              <p className="text-sm text-gray-600 line-clamp-2">
-                {university.summary}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {!isLoading && !error && universities.length > 0 && (
+        <div className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {universities.map(university => (
+              <Card 
+                key={university.id} 
+                className="cursor-pointer transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+                onClick={() => handleUniversityClick(university)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleUniversityClick(university);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`View details for ${university.title}`}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg leading-tight">
+                      {university.title}
+                    </CardTitle>
+                    <GraduationCap className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600 mt-1">
+                    <MapPin className="h-4 w-4 mr-1" aria-hidden="true" />
+                    {university.data?.city || 'Location'}, {university.data?.state || 'State'}
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="text-sm text-gray-700 mb-3">
+                    {university.data?.programName || 'Academic Program'}
+                  </p>
+                  <p className="text-sm text-gray-600 line-clamp-2">
+                    {university.summary}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Load More Button */}
+          {hasNextPage && (
+            <div className="text-center">
+              <Button
+                onClick={handleLoadMore}
+                disabled={isFetchingNextPage}
+                variant="outline"
+                className="w-auto"
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Loading more...
+                  </>
+                ) : (
+                  'Load More Universities'
+                )}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !error && universities.length === 0 && (
+        <div className="text-center py-12">
+          <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No universities found</h3>
+          <p className="text-gray-600 mb-4">
+            {searchQuery.trim() || Object.keys(filters).length > 0 
+              ? "Try adjusting your search or filters to find more results."
+              : "No universities are currently available."}
+          </p>
+          {(searchQuery.trim() || Object.keys(filters).length > 0) && (
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setSearchQuery('');
+                setFilters({});
+                setSort('relevance');
+              }}
+            >
+              Clear Search and Filters
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* University Details Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -313,14 +286,14 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
                 </DialogTitle>
                 <DialogDescription className="flex items-center gap-1 text-base">
                   <MapPin className="h-4 w-4" aria-hidden="true" />
-                  {selectedUniversity.data.city}, {selectedUniversity.data.state}, {selectedUniversity.data.country}
+                  {selectedUniversity.data?.city || 'Location'}, {selectedUniversity.data?.state || 'State'}, {selectedUniversity.data?.country || 'Country'}
                 </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-4">
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-2">Program</h4>
-                  <p className="text-gray-700">{selectedUniversity.data.programName}</p>
+                  <p className="text-gray-700">{selectedUniversity.data?.programName || 'Academic Program'}</p>
                 </div>
                 
                 <div>
@@ -331,7 +304,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
                 <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <Button asChild className="flex-1">
                     <a 
-                      href={selectedUniversity.data.urls.site}
+                      href={selectedUniversity.data?.urls?.site || selectedUniversity.url}
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-2"
@@ -340,7 +313,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
                       Visit Website
                     </a>
                   </Button>
-                  {selectedUniversity.data.urls.extension && (
+                  {selectedUniversity.data?.urls?.extension && (
                     <Button variant="outline" asChild className="flex-1">
                       <a 
                         href={selectedUniversity.data.urls.extension}
