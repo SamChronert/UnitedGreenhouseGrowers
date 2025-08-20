@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Layout from "@/components/Layout";
 import AuthGuard from "@/components/AuthGuard";
+import AccessibilityProvider from "@/components/AccessibilityProvider";
 import NotFound from "@/pages/not-found";
 
 // Pages
@@ -154,12 +155,16 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Layout>
-          <Toaster />
-          <Router />
-        </Layout>
-      </TooltipProvider>
+      <AccessibilityProvider enableReporting={process.env.NODE_ENV === 'development'}>
+        <TooltipProvider>
+          <Layout>
+            <main id="main-content" role="main" aria-label="Main content">
+              <Router />
+            </main>
+            <Toaster />
+          </Layout>
+        </TooltipProvider>
+      </AccessibilityProvider>
     </QueryClientProvider>
   );
 }

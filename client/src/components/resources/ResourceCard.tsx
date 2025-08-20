@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, ExternalLink, MapPin, Calendar, CheckCircle, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, memo } from "react";
 
 export interface ResourceCardProps {
   resource: {
@@ -29,7 +29,7 @@ export interface ResourceCardProps {
   className?: string;
 }
 
-export default function ResourceCard({
+const ResourceCard = memo(function ResourceCard({
   resource,
   onToggleFavorite,
   onOpen,
@@ -217,4 +217,6 @@ export default function ResourceCard({
       </CardContent>
     </Card>
   );
-}
+});
+
+export default ResourceCard;

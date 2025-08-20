@@ -1,0 +1,102 @@
+[Context Header]
+- Project: UnitedGreenhouseGrowers
+- Design Doc: "UGGA Resource Library Overhaul" (Doc ID: RLDD-v1)
+- Invariants: (1) Keep existing auth system, (2) Maintain current routing structure, (3) A11y WCAG AA minimum, (4) No breaking changes to other pages, (5) Preserve existing blog functionality
+
+[Goal]
+Complete performance optimizations, accessibility audit, add geocoding utility (TB-06), and prepare for production release (TB-16).
+
+[Actions for Replit Agent]
+1. Implement performance optimizations:
+   - Add React.memo to resource cards and list items
+   - Implement virtual scrolling for lists >50 items using react-window
+   - Lazy load heavy components (Map, Chart.js) with React.lazy
+   - Add image lazy loading with IntersectionObserver
+   - Implement code splitting per tab component
+   - Add response caching headers to API endpoints
+   - Enable gzip compression on server
+
+2. Create geocoding utility script `scripts/geocode-universities.js`:
+   - Read universities without geo data from database
+   - Batch geocode using free service (Nominatim or similar)
+   - Cache results to avoid duplicate API calls
+   - Rate limit to respect API terms (1 request/second)
+   - Update database with lat/lon values
+   - Log progress and errors
+   - Run with: `npm run geocode`
+
+3. Implement Universities map view (complete TB-05):
+   - Conditionally show map/list toggle only if geo data exists
+   - Lazy load map library (Leaflet or Mapbox GL JS)
+   - Plot university markers with popups
+   - Cluster nearby markers at zoom levels
+   - Sync map bounds with region filter
+   - Fallback to list if no geo data
+
+4. Accessibility audit and fixes:
+   - Run axe-core automated testing
+   - Fix color contrast issues (WCAG AA minimum 4.5:1)
+   - Ensure all interactive elements have focus styles
+   - Add skip navigation link
+   - Verify screen reader announcements for dynamic content
+   - Test keyboard-only navigation through entire flow
+   - Add aria-live regions for loading/error states
+   - Ensure modals trap focus properly
+
+5. Performance testing and optimization:
+   - Run Lighthouse audit, target scores: Performance >85, Accessibility >95
+   - Measure Core Web Vitals: LCP <2.5s, FID <100ms, CLS <0.1
+   - Profile React components for unnecessary re-renders
+   - Optimize database queries (add EXPLAIN ANALYZE)
+   - Add CDN for static assets if not present
+
+6. Create documentation:
+   - Update README with Resource Library section
+   - Document API endpoints in `docs/api/resources.md`
+   - Create admin guide in `docs/admin-guide.md`
+   - Add architecture decision record (ADR) for hybrid data model
+
+7. Pre-release checklist:
+   - Remove all console.log statements
+   - Verify error handling shows user-friendly messages
+   - Test on mobile devices (iOS Safari, Chrome Android)
+   - Cross-browser testing (Chrome, Firefox, Safari, Edge)
+   - Verify analytics tracking in production mode
+   - Create database backup before deployment
+   - Set up monitoring alerts for API errors
+
+8. Create PR with comprehensive description:
+   - Summary of all changes
+   - Screenshots of each tab
+   - Performance metrics before/after
+   - Testing instructions
+   - Rollback plan
+
+[Checks & Tests]
+- Run `npm run geocode` and verify universities get coordinates
+- Check map view shows markers for geocoded universities
+- Run Lighthouse audit and verify scores meet targets
+- Test with screen reader (NVDA/JAWS on Windows, VoiceOver on Mac)
+- Test keyboard-only navigation through all features
+- Load test API with 100 concurrent requests
+- Verify virtual scrolling activates for long lists
+- Check bundle size and code splitting works
+- Test on mobile devices and multiple browsers
+- Show me Lighthouse scores
+- Show me the map with university markers
+- Show me Core Web Vitals measurements
+
+[Commit/PR]
+Commit message: "feat: complete Resource Library overhaul with performance and a11y
+
+- Add virtual scrolling and lazy loading for performance
+- Implement geocoding and map view for universities
+- Fix all accessibility issues for WCAG AA compliance
+- Add comprehensive analytics and admin tools
+- Document architecture and API endpoints"
+
+Create PR with title: "Feature: Resource Library Overhaul - Tabbed Experience with Hybrid Data Model"
+
+[Stop Condition]
+PASS: Lighthouse scores meet targets, accessibility audit passes, map works with geo data, PR created
+FAIL: If performance is poor, profile and optimize queries. If a11y fails, fix issues before release.

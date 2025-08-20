@@ -33,7 +33,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
 
   // Track tab view on mount
   useEffect(() => {
-    trackTabView('universities', 'Universities');
+    trackTabView('universities', { tab_name: 'Universities' });
     onAnalyticsEvent?.('tab_view', { tab: 'universities' });
   }, [onAnalyticsEvent]);
 

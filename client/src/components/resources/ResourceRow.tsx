@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Heart, ExternalLink, MapPin, Calendar, CheckCircle, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, memo } from "react";
 
 export interface ResourceRowProps {
   resource: {
@@ -29,7 +29,7 @@ export interface ResourceRowProps {
   className?: string;
 }
 
-export default function ResourceRow({
+const ResourceRow = memo(function ResourceRow({
   resource,
   onToggleFavorite,
   onOpen,
@@ -204,4 +204,6 @@ export default function ResourceRow({
       </TableCell>
     </TableRow>
   );
-}
+});
+
+export default ResourceRow;
