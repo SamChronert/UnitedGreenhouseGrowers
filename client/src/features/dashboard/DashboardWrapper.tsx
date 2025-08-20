@@ -28,58 +28,58 @@ export default function DashboardWrapper({ isDemo = false }: DashboardWrapperPro
       <AppShell>
         <Switch>
           {/* Home Route */}
-          <Route path="/dashboard" component={DashboardHome} />
+          <Route path="/" component={DashboardHome} />
           
           {/* Feature Routes - Lazy Loaded */}
-          <Route path="/dashboard/resources">
+          <Route path="/resources">
             <LazyWrapper>
               <Resources />
             </LazyWrapper>
           </Route>
           
-          <Route path="/dashboard/resources/saved">
+          <Route path="/resources/saved">
             <LazyWrapper>
               <SavedResources />
             </LazyWrapper>
           </Route>
           
-          <Route path="/dashboard/resources/:id">
+          <Route path="/resources/:id">
             <LazyWrapper>
               <ResourceDetail />
             </LazyWrapper>
           </Route>
           
-          <Route path="/dashboard/forum">
+          <Route path="/forum">
             <LazyWrapper>
               <Forum />
             </LazyWrapper>
           </Route>
           
-          <Route path="/dashboard/saleshub">
+          <Route path="/saleshub">
             <LazyWrapper>
               <SalesHub />
             </LazyWrapper>
           </Route>
           
-          <Route path="/dashboard/producthub">
+          <Route path="/producthub">
             <LazyWrapper>
               <ProductHub />
             </LazyWrapper>
           </Route>
           
-          <Route path="/dashboard/assessment">
+          <Route path="/assessment">
             <LazyWrapper>
               <Assessment />
             </LazyWrapper>
           </Route>
           
-          <Route path="/dashboard/find-grower">
+          <Route path="/find-grower">
             <LazyWrapper>
               <FindGrower />
             </LazyWrapper>
           </Route>
           
-          <Route path="/dashboard/profile">
+          <Route path="/profile">
             <LazyWrapper>
               <Profile />
             </LazyWrapper>

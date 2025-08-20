@@ -360,7 +360,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <h3 className="font-semibold text-lg mb-4 text-gray-800">Quick Links</h3>
               <ul className="space-y-2">
                 <li><Link href="/about" className="text-gray-700 hover:text-ugga-primary transition-colors">About Us</Link></li>
-                <li><Link href="/resources" className="text-gray-700 hover:text-ugga-primary transition-colors">Resources</Link></li>
+                <li><Link href="/library" className="text-gray-700 hover:text-ugga-primary transition-colors">Resources</Link></li>
                 <li><Link href="/blog" className="text-gray-700 hover:text-ugga-primary transition-colors">Blog</Link></li>
                 <li><Link href="/contact" className="text-gray-700 hover:text-ugga-primary transition-colors">Contact</Link></li>
               </ul>

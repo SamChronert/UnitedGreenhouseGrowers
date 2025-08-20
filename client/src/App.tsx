@@ -45,7 +45,7 @@ function Router() {
         <DashboardWrapper isDemo />
       </Route>
       
-      <Route path="/dashboard*">
+      <Route path="/dashboard" nest>
         <AuthGuard requireMember>
           <DashboardWrapper />
         </AuthGuard>
@@ -82,7 +82,7 @@ function Router() {
         </LayoutWrapper>
       </Route>
       
-      <Route path="/resources">
+      <Route path="/library">
         <LayoutWrapper>
           <Resources />
         </LayoutWrapper>
