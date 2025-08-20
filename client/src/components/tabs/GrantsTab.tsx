@@ -63,7 +63,6 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
     return filtersParam ? JSON.parse(filtersParam) : {};
   });
   const [sort, setSort] = useState(urlParams.get('sort') || 'dueDate');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [hideExpired, setHideExpired] = useState(true);
   const [amountRange, setAmountRange] = useState([0, 10000000]); // $0 - $10M
   const [selectedFocusAreas, setSelectedFocusAreas] = useState<string[]>([]);
@@ -111,7 +110,7 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
     type: 'grants',
     query: searchQuery,
     filters: grantsFilters,
-    sort: `${sort}:${sortDirection}` as any,
+    sort: sort as any,
     enabled: true
   });
 
@@ -130,7 +129,7 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
       params.set('filters', JSON.stringify(grantsFilters));
     }
     
-    if (sort !== 'dueDate') {
+    if (sort !== 'relevance') {
       params.set('sort', sort);
     }
     
@@ -155,13 +154,8 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
 
   // Handle column sort
   const handleSort = useCallback((column: string) => {
-    if (sort === column) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSort(column);
-      setSortDirection('asc');
-    }
-  }, [sort]);
+    setSort(column);
+  }, []);
 
   // Export to CSV
   const handleExportCSV = useCallback(() => {
@@ -434,26 +428,26 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('title')}
                   >
-                    Grant Name {sort === 'title' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Grant Name {sort === 'title' && '•'}
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('agency')}
                   >
-                    Agency {sort === 'agency' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Agency {sort === 'agency' && '•'}
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('amount')}
                   >
-                    Amount Range {sort === 'amount' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Amount Range {sort === 'amount' && '•'}
                   </TableHead>
                   <TableHead>Focus Areas</TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-gray-50 select-none"
                     onClick={() => handleSort('dueDate')}
                   >
-                    Due Date {sort === 'dueDate' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Due Date {sort === 'dueDate' && '•'}
                   </TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
