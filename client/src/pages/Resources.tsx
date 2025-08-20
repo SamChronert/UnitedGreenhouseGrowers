@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Link, useLocation } from "wouter";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,8 @@ const recordAnalyticsEvent = (eventName: string, payload: any) => {
 export default function Resources() {
   const [location] = useLocation();
   
-  // URL state management for tabs
-  const urlParams = useMemo(() => new URLSearchParams(location.split('?')[1] || ''), [location]);
+  // URL state management for tabs - parse directly without useMemo to ensure updates
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
   const activeTab = urlParams.get('tab') || 'universities';
   
   // Tab change handler
