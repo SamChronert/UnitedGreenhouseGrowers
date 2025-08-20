@@ -6,6 +6,7 @@ import rateLimit from "express-rate-limit";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { z } from "zod";
 import { storage } from "./storage";
 import { 
   authenticate, 
@@ -26,10 +27,11 @@ import {
   insertBlogPostSchema, 
   insertResourceSchema,
   insertGrowerChallengeSchema,
-  Role 
+  Role,
+  resources
 } from "@shared/schema";
 import { randomUUID } from "crypto";
-import { sql } from "drizzle-orm";
+import { sql, eq, and, or, like, desc, asc, count } from "drizzle-orm";
 import { db } from "./db";
 
 // Rate limiting for AI endpoints
@@ -362,8 +364,243 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
-  // Resources routes
+  // Resource filter validation schemas
+  const ResourceFiltersSchema = z.object({
+    state: z.string().optional(),
+    country: z.string().optional(),
+    programName: z.string().optional(),
+    rfpDueDate: z.string().optional(),
+    eligibility: z.string().optional()
+  }).passthrough();
+  
+  const ResourceQuerySchema = z.object({
+    type: z.enum(['universities', 'organizations', 'grants', 'tax_incentives', 'tools', 'templates', 'learning', 'blogs', 'bulletins', 'industry_news']).optional(),
+    q: z.string().optional(),
+    filters: z.string().optional(),
+    sort: z.enum(['relevance', 'title', 'newest', 'quality']).default('relevance'),
+    cursor: z.string().optional(),
+    limit: z.coerce.number().min(1).max(100).default(20)
+  });
+
+  // Resources routes - New type-aware API
   app.get("/api/resources", async (req, res) => {
+    try {
+      // Validate query parameters
+      const queryResult = ResourceQuerySchema.safeParse(req.query);
+      if (!queryResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid query parameters", 
+          errors: queryResult.error.errors 
+        });
+      }
+      
+      const { type, q, filters: filtersStr, sort, cursor, limit } = queryResult.data;
+      
+      // Parse and validate filters JSON
+      let filters = {};
+      if (filtersStr) {
+        try {
+          const parsedFilters = JSON.parse(filtersStr);
+          const filterResult = ResourceFiltersSchema.safeParse(parsedFilters);
+          if (!filterResult.success) {
+            return res.status(400).json({ 
+              message: "Invalid filters format", 
+              errors: filterResult.error.errors 
+            });
+          }
+          filters = filterResult.data;
+        } catch {
+          return res.status(400).json({ message: "Invalid JSON in filters parameter" });
+        }
+      }
+      
+      // Build WHERE conditions
+      const whereConditions = [];
+      const params: any[] = [];
+      let paramIndex = 1;
+      
+      // Type filter
+      if (type) {
+        whereConditions.push(`type = $${paramIndex}`);
+        params.push(type);
+        paramIndex++;
+      }
+      
+      // Text search
+      if (q) {
+        whereConditions.push(`(title ILIKE $${paramIndex} OR summary ILIKE $${paramIndex} OR array_to_string(tags, ' ') ILIKE $${paramIndex})`);
+        params.push(`%${q}%`);
+        paramIndex++;
+      }
+      
+      // JSON path filters
+      for (const [key, value] of Object.entries(filters)) {
+        if (value && typeof value === 'string') {
+          whereConditions.push(`data->>'${key}' = $${paramIndex}`);
+          params.push(value);
+          paramIndex++;
+        }
+      }
+      
+      // Cursor-based pagination
+      if (cursor) {
+        try {
+          const [id, timestamp] = Buffer.from(cursor, 'base64').toString().split('|');
+          whereConditions.push(`(id, COALESCE(data->>'createdAt', '1970-01-01')) > ($${paramIndex}, $${paramIndex + 1})`);
+          params.push(id, timestamp);
+          paramIndex += 2;
+        } catch {
+          return res.status(400).json({ message: "Invalid cursor format" });
+        }
+      }
+      
+      // Build ORDER BY clause
+      let orderBy = 'id';
+      switch (sort) {
+        case 'title':
+          orderBy = 'title, id';
+          break;
+        case 'newest':
+          orderBy = "COALESCE(data->>'createdAt', '1970-01-01') DESC, id";
+          break;
+        case 'quality':
+          orderBy = "COALESCE((data->>'qualityScore')::int, 0) DESC, id";
+          break;
+        default:
+          orderBy = 'id';
+      }
+      
+      // Build drizzle query with conditions
+      let query = db.select({
+        id: resources.id,
+        title: resources.title,
+        url: resources.url,
+        type: resources.type,
+        summary: resources.summary,
+        data: resources.data,
+        tags: resources.tags
+      }).from(resources);
+      
+      // Apply WHERE conditions
+      const conditions = [];
+      if (type) {
+        conditions.push(eq(resources.type, type));
+      }
+      if (q) {
+        conditions.push(
+          or(
+            like(resources.title, `%${q}%`),
+            like(resources.summary, `%${q}%`)
+          )
+        );
+      }
+      
+      // Apply JSON filters
+      for (const [key, value] of Object.entries(filters)) {
+        if (value && typeof value === 'string') {
+          conditions.push(sql`${resources.data}->>${key} = ${value}`);
+        }
+      }
+      
+      if (conditions.length > 0) {
+        query = query.where(and(...conditions));
+      }
+      
+      // Apply ordering
+      switch (sort) {
+        case 'title':
+          query = query.orderBy(asc(resources.title));
+          break;
+        case 'newest':
+          query = query.orderBy(desc(sql`${resources.data}->>'createdAt'`));
+          break;
+        default:
+          query = query.orderBy(asc(resources.id));
+      }
+      
+      // Apply limit
+      query = query.limit(limit + 1);
+      
+      const items = await query;
+      
+      // Prepare response
+      const hasNext = items.length > limit;
+      if (hasNext) {
+        items.pop(); // Remove the extra item
+      }
+      
+      // Generate next cursor
+      let nextCursor: string | null = null;
+      if (hasNext && items.length > 0) {
+        const lastItem = items[items.length - 1] as any;
+        const timestamp = lastItem.data?.createdAt || '1970-01-01';
+        nextCursor = Buffer.from(`${lastItem.id}|${timestamp}`).toString('base64');
+      }
+      
+      // Get total count
+      let countQuery = db.select({ count: count() }).from(resources);
+      
+      const countConditions = [];
+      if (type) {
+        countConditions.push(eq(resources.type, type));
+      }
+      if (q) {
+        countConditions.push(
+          or(
+            like(resources.title, `%${q}%`),
+            like(resources.summary, `%${q}%`)
+          )
+        );
+      }
+      
+      for (const [key, value] of Object.entries(filters)) {
+        if (value && typeof value === 'string') {
+          countConditions.push(sql`${resources.data}->>${key} = ${value}`);
+        }
+      }
+      
+      if (countConditions.length > 0) {
+        countQuery = countQuery.where(and(...countConditions));
+      }
+      
+      const countResult = await countQuery;
+      const total = countResult[0]?.count || 0;
+      
+      res.json({
+        items,
+        nextCursor,
+        total
+      });
+      
+    } catch (error) {
+      console.error("Resources API error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Get resource by ID
+  app.get("/api/resources/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const result = await db.execute(
+        sql`SELECT * FROM resources WHERE id = ${id}`
+      );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Resource not found" });
+      }
+      
+      res.json(result.rows[0]);
+      
+    } catch (error) {
+      console.error("Resource detail API error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  // Legacy resources route for backward compatibility
+  app.get("/api/resources/legacy", async (req, res) => {
     try {
       // Use simplified Resource Library format
       const page = req.query.page ? parseInt(req.query.page as string) : 1;

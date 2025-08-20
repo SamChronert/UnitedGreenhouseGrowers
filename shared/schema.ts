@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, index, doublePrecision, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, index, doublePrecision, unique, sql } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -62,7 +62,7 @@ export const blogPosts = pgTable("blog_posts", {
 });
 
 // Resource type enum
-export type ResourceType = 'university' | 'organization' | 'grant' | 'tool' | 'education' | 'template' | 'consultant' | 'article';
+export type ResourceType = 'universities' | 'organizations' | 'grants' | 'tax_incentives' | 'tools' | 'templates' | 'learning' | 'blogs' | 'bulletins' | 'industry_news';
 
 export const resources = pgTable("resources", {
   id: varchar("id").primaryKey().notNull(),
@@ -90,6 +90,7 @@ export const resources = pgTable("resources", {
   uggaVerifiedIdx: index("resources_ugga_verified_idx").on(table.ugga_verified),
   lastVerifiedIdx: index("resources_last_verified_idx").on(table.last_verified_at),
   qualityScoreIdx: index("resources_quality_score_idx").on(table.quality_score),
+  // JSON path indices will be created manually for better control
 }));
 
 export const chatLogs = pgTable("chat_logs", {

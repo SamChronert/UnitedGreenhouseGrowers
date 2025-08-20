@@ -1,0 +1,54 @@
+[Context Header]
+- Project: UnitedGreenhouseGrowers
+- Design Doc: "UGGA Resource Library Overhaul" (Doc ID: RLDD-v1)
+- Invariants: (1) Keep existing auth system, (2) Maintain current routing structure, (3) A11y WCAG AA minimum, (4) No breaking changes to other pages, (5) Preserve existing blog functionality
+
+[Goal]
+Implement the hybrid data model with type-scoped JSON fields (TB-02) and create the type-aware API with filters and pagination (TB-03).
+
+[Actions for Replit Agent]
+1. Create a new database migration file to extend the resources table:
+   - Add `type` ENUM column with values: ('universities', 'organizations', 'grants', 'tax_incentives', 'tools', 'templates', 'learning', 'blogs', 'bulletins', 'industry_news')
+   - Add `data` JSONB column for type-specific fields
+   - Add indices: `CREATE INDEX idx_resources_type ON resources(type)`
+   - Add JSON path indices: `CREATE INDEX idx_universities_state ON resources((data->>'state')) WHERE type = 'universities'`
+   - Add more indices for common filters: `(data->>'country')`, `(data->>'rfpDueDate')` for grants, etc.
+2. Run the migration: `npm run migrate` or equivalent command
+3. Create or update `server/routes/resources.js` with a new endpoint:
+   - `GET /api/resources` accepting query params: `type`, `q`, `filters` (JSON string), `sort`, `cursor`, `limit`
+4. Implement the query builder in `server/handlers/resources.js`:
+   - Parse and validate the `type` parameter
+   - Build WHERE clause for text search: `ILIKE` on title, summary, tags
+   - Parse `filters` JSON and add JSON path conditions: `data->>'state' = $1`
+   - Implement cursor-based pagination (use id + timestamp for stable cursor)
+   - Default limit to 20, max 100
+   - Return format: `{items: [], nextCursor: string | null, total: number}`
+5. Add input validation and sanitization:
+   - Whitelist allowed filter keys per type
+   - Escape/parameterize all queries to prevent SQL injection
+   - Validate sort fields against allowed list
+6. Create seed data for universities (10-15 records) with proper type and data structure
+7. Add a detail endpoint: `GET /api/resources/:id` returning full record
+8. Add error handling: return 400 for invalid filters, 404 for not found, 500 with generic message for server errors
+
+[Checks & Tests]
+- Test the API with curl or in browser: `GET /api/resources?type=universities&limit=5`
+- Test filtering: `/api/resources?type=universities&filters={"state":"CA"}`
+- Test search: `/api/resources?type=universities&q=Berkeley`
+- Test pagination: verify nextCursor is returned and works when passed back
+- Verify SQL injection protection by trying malicious input in filters
+- Check query performance: response time should be <500ms for typical queries
+- Show me the database schema: `\d resources` or equivalent
+- Show me sample API responses for list and detail endpoints
+
+[Commit/PR]
+Commit message: "feat: implement hybrid data model and type-aware resources API
+
+- Add type enum and JSONB data column to resources table
+- Create JSON path indices for common filter operations  
+- Implement filtered, paginated API with cursor-based pagination
+- Add input validation and SQL injection protection"
+
+[Stop Condition]
+PASS: API returns filtered results, pagination works, JSON queries execute quickly (<500ms)
+FAIL: If migration fails, check SQL syntax. If queries are slow, verify indices are created. If filters don't work, check JSON path syntax.

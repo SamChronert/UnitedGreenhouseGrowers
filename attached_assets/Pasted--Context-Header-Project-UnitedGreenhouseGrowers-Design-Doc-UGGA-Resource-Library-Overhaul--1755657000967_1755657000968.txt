@@ -1,0 +1,64 @@
+[Context Header]
+- Project: UnitedGreenhouseGrowers
+- Design Doc: "UGGA Resource Library Overhaul" (Doc ID: RLDD-v1)
+- Invariants: (1) Keep existing auth system, (2) Maintain current routing structure, (3) A11y WCAG AA minimum, (4) No breaking changes to other pages, (5) Preserve existing blog functionality
+
+[Goal]
+Build the client-side data fetching layer with React Query hooks (TB-04) and implement the client-side search suggester with fuzzy matching.
+
+[Actions for Replit Agent]
+1. Create `src/hooks/useResources.js` with a custom hook for fetching resources:
+   - Accept parameters: `type`, `query`, `filters`, `sort`, `enabled`
+   - Build query key: `['resources', type, query, JSON.stringify(filters), sort]`
+   - Use React Query (or equivalent) with stale-while-revalidate strategy
+   - Cache time: 5 minutes, stale time: 1 minute
+   - Return: `{data, isLoading, error, hasNextPage, fetchNextPage}`
+2. Implement infinite scroll/pagination support:
+   - Use `useInfiniteQuery` for cursor-based pagination
+   - Track `nextCursor` from API responses
+   - Merge pages into flat list for display
+3. Create `src/components/SearchBox.jsx` with client-side suggester:
+   - Debounced input (300ms)
+   - Fuzzy/prefix matching over current result set (titles, summaries)
+   - ARIA combobox pattern: role="combobox", aria-expanded, aria-controls
+   - Dropdown shows top 5 suggestions with match highlighting
+   - Keyboard navigation: up/down arrows, Enter to select, Escape to close
+   - Add curated synonyms per type (e.g., "grants" -> "funding", "universities" -> "schools")
+4. Create `src/components/FilterBar.jsx` for type-specific filters:
+   - Dynamic filter UI based on resource type
+   - Multi-select for regions, single-select for sort
+   - Store filter state in URL query params for shareable links
+   - Clear all filters button
+5. Update UniversitiesTab to use the new data layer:
+   - Replace mock data with `useResources` hook
+   - Connect SearchBox and FilterBar
+   - Show loading skeletons during fetch
+   - Display error state with retry button
+6. Add client-side analytics helper `src/lib/analytics.js`:
+   - `trackEvent(eventType, data)` function
+   - Queue events and batch send every 5 seconds or on page unload
+   - Include: tab, resourceId, timestamp, sessionId
+
+[Checks & Tests]
+- Navigate to Universities tab and verify data loads from API
+- Test search: type "Berkeley" and see suggestions appear
+- Test filters: select "West" region and verify filtered results
+- Test pagination: scroll to bottom and verify more results load
+- Check URL updates with filter/search state
+- Open Network tab: verify API calls are cached and not duplicated
+- Test error handling: temporarily break the API and verify error UI shows
+- Verify suggester keyboard navigation works properly
+- Show me the browser console for any errors
+- Show me the Network tab API calls and their query parameters
+
+[Commit/PR]
+Commit message: "feat: implement client data layer with search suggester
+
+- Add React Query hooks for resource fetching with pagination
+- Implement fuzzy search suggester with ARIA combobox
+- Create dynamic filter bar with URL state persistence
+- Add client-side analytics event tracking"
+
+[Stop Condition]
+PASS: Data loads from API, search suggestions work, filters apply correctly, pagination works
+FAIL: If API calls fail, check endpoint URLs. If suggestions don't show, verify debouncing. If filters don't work, check URL param parsing.
