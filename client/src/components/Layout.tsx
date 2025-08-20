@@ -102,35 +102,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   
                   {isAuthenticated && (
                     <>
-                      {/* Member Dashboard Dropdown */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            className={`px-3 py-2 text-sm font-medium transition-colors ${
-                              location.startsWith('/dashboard') || location === '/forum'
-                                ? "text-ugga-primary"
-                                : "text-gray-600 hover:text-ugga-primary"
-                            }`}
-                          >
-                            Dashboard
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
-                          {memberDashboardRoutes.map((route) => (
-                            <DropdownMenuItem key={route.path} asChild>
-                              <Link
-                                href={route.path}
-                                className={`w-full ${
-                                  location === route.path ? "bg-gray-100" : ""
-                                }`}
-                              >
-                                {route.label}
-                              </Link>
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      {/* Member Dashboard Link */}
+                      <Link
+                        href="/dashboard"
+                        className={`px-3 py-2 text-sm font-medium transition-colors ${
+                          location.startsWith('/dashboard') || location === '/forum'
+                            ? "text-ugga-primary"
+                            : "text-gray-600 hover:text-ugga-primary"
+                        }`}
+                      >
+                        Dashboard
+                      </Link>
                       
                       {/* Admin Dashboard Dropdown */}
                       {isAdmin && (
@@ -279,23 +261,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     </Link>
                   </div>
                   <div className="border-t pt-2">
-                    <div className="px-3 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
+                    <Link
+                      href="/dashboard"
+                      className={`block px-3 py-2 text-base font-medium transition-colors ${
+                        location.startsWith('/dashboard')
+                          ? "text-ugga-primary bg-gray-50"
+                          : "text-gray-600 hover:text-ugga-primary hover:bg-gray-50"
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       Dashboard
-                    </div>
-                    {memberDashboardRoutes.map((route) => (
-                      <Link
-                        key={route.path}
-                        href={route.path}
-                        className={`block px-3 py-2 text-base font-medium transition-colors ${
-                          location === route.path
-                            ? "text-ugga-primary bg-gray-50"
-                            : "text-gray-600 hover:text-ugga-primary hover:bg-gray-50"
-                        }`}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {route.label}
-                      </Link>
-                    ))}
+                    </Link>
                   </div>
                   
                   {isAdmin && (
