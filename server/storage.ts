@@ -32,6 +32,7 @@ import {
   type InsertForumComment,
   type AssessmentTrainingData,
   type InsertAssessmentTrainingData,
+  type ResourceType,
   Role
 } from "@shared/schema";
 import { db } from "./db";
@@ -188,7 +189,11 @@ export class DatabaseStorage implements IStorage {
   async createProfile(userId: string, profileData: InsertProfile): Promise<Profile> {
     const [profile] = await db
       .insert(profiles)
-      .values({ ...profileData, userId })
+      .values({ 
+        ...profileData, 
+        userId,
+        memberType: (profileData.memberType as "grower" | "general") || "grower"
+      })
       .returning();
     return profile;
   }
@@ -369,9 +374,9 @@ export class DatabaseStorage implements IStorage {
     return {
       ...resource,
       // Map to extended interface with defaults (same as listResources)
-      type: resource.tags?.find((tag: string) => 
-        ['university', 'organization', 'tool', 'education', 'grant', 'template'].includes(tag)
-      ) || 'education',
+      type: (resource.tags?.find((tag: string) => 
+        ['universities', 'organizations', 'tools', 'learning', 'grants', 'templates'].includes(tag)
+      ) as ResourceType) || 'learning',
       topics: resource.tags?.filter((tag: string) => 
         ['management', 'research', 'pest-management', 'automation', 'best-practices', 'climate-control', 'business', 'planning', 'plant-science'].includes(tag)
       ) || [],
@@ -387,6 +392,11 @@ export class DatabaseStorage implements IStorage {
       has_location: false,
       region: 'US',
       summary: resource.tags?.length > 0 ? `Resource about ${resource.tags.slice(0, 3).join(', ')}.` : 'Educational resource for greenhouse growers.',
+      last_verified_at: null,
+      review_interval_days: null,
+      version: null,
+      lat: null,
+      long: null,
       // Add type-specific mock data
       data: resource.tags?.includes('grant') ? {
         sponsor: resource.tags.includes('university') ? 'USDA NIFA' : 'NSF',
@@ -404,22 +414,13 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async createResource(resourceData: Partial<Resource>): Promise<Resource> {
+  async createResource(resourceData: InsertResource): Promise<Resource> {
     const [resource] = await db
       .insert(resources)
       .values({ 
+        ...resourceData,
         id: randomUUID(),
-        title: resourceData.title || '',
-        url: resourceData.url || '',
-        tags: resourceData.tags || [],
-        type: resourceData.type || undefined,
-        summary: resourceData.summary || undefined,
-        topics: resourceData.topics || [],
-        crop: resourceData.crop || [],
-        system_type: resourceData.system_type || [],
-        region: resourceData.region || undefined,
-        cost: resourceData.cost || undefined,
-        data: resourceData.data || {}
+        type: resourceData.type as ResourceType | null
       })
       .returning();
     return resource;
@@ -799,34 +800,27 @@ export class DatabaseStorage implements IStorage {
     county?: string;
     category?: string;
   }): Promise<(ForumPost & { user: User & { profile: Profile }; comments: (ForumComment & { user: User & { profile: Profile } })[]; commentCount: number })[]> {
-    let query = db
+    // Build where conditions
+    const conditions = [eq(forumPosts.isDeleted, false)];
+    
+    if (filters?.state) {
+      conditions.push(eq(profiles.state, filters.state));
+    }
+    
+    if (filters?.county) {
+      conditions.push(eq(profiles.county, filters.county));
+    }
+    
+    if (filters?.category) {
+      conditions.push(eq(forumPosts.category, filters.category));
+    }
+
+    const query = db
       .select()
       .from(forumPosts)
       .leftJoin(users, eq(forumPosts.userId, users.id))
       .leftJoin(profiles, eq(users.id, profiles.userId))
-      .where(eq(forumPosts.isDeleted, false));
-
-    // Apply filters
-    if (filters?.state) {
-      query = query.where(and(
-        eq(forumPosts.isDeleted, false),
-        eq(profiles.state, filters.state)
-      ));
-    }
-    
-    if (filters?.county) {
-      query = query.where(and(
-        eq(forumPosts.isDeleted, false),
-        eq(profiles.county, filters.county)
-      ));
-    }
-    
-    if (filters?.category) {
-      query = query.where(and(
-        eq(forumPosts.isDeleted, false),
-        eq(forumPosts.category, filters.category)
-      ));
-    }
+      .where(and(...conditions));
 
     const posts = await query.orderBy(desc(forumPosts.createdAt));
 
