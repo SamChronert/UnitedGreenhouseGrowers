@@ -1,0 +1,82 @@
+Implement an **always-on App Shell** for the **UGGA dashboard** that matches the product vision below.
+
+# Product Vision (how the website should operate)
+- **Public Website**: Marketing pages (home, about, etc.). Unchanged.
+- **Dashboard (Authenticated App)**: After login, users land on a **Dashboard Home** inside a persistent **App Shell** (left sidebar + top bar). From here they can launch “sub-apps” like Resource Library, Forum, Sales Hub, etc. The shell persists; only the content area swaps.
+- **Demo (Public Preview of Dashboard)**: A public “Demo” page reachable from the top nav that showcases the dashboard experience **without login**. It should render using the same App Shell and a safe, non-mutating demo data path. (Public, read-only, and clearly branded as demo.)
+
+# Scope
+- Apply the App Shell to **/dashboard/** (authenticated) and **/demo** (public demo) only.
+- Do **not** alter public marketing pages/styles/layout.
+- No backend/data model changes beyond what’s necessary to power a read-only demo experience (fixtures, mocks, or existing sample data is fine).
+- Keep styling in Tailwind/shadcn with existing tokens.
+
+# Information Architecture (IA)
+- **Top bar (dashboard & demo)**: space for search (future), help, profile (or demo badge), and a visible “Skip to content” link targetting `#main-content`.
+- **Left sidebar order (dashboard & demo):**
+  0) **Home** (dashboard landing page)
+  1) Resource Library
+  2) Member Forum
+  3) Sales Hub
+  4) Farm Assessment
+  5) Product Hub
+  6) Find a Grower
+  7) Profile
+- The **Demo** route should present the same shell and navigation, but with non-mutating content (no writes, no auth requirements).
+
+# Sub-Apps (Feature Modules) — important
+Treat each dashboard feature as a **self-contained sub-app**:
+- One folder per feature (e.g., `features/resources`, `features/forum`, …).
+- Each sub-app owns:
+  - Its own entry page/route (lazy-loadable).
+  - Its internal components, hooks, and data fetching.
+  - Its typings/DTOs and query keys (if applicable).
+- The **App Shell is a host**: global layout + nav only. It must not contain feature business logic.
+- Optional (preferred): a **feature registry** object/array to drive the sidebar list (path, label, enable/role gating), shared by dashboard and demo.
+
+# What to Build
+1) **App Shell layout** (header + aside + main) that:
+   - Wraps **all /dashboard/** routes.
+   - Also wraps **/demo** with a public, read-only context.
+   - Provides clear landmarks: `<header>`, `<aside>`, `<main id="main-content">`.
+   - Ensures visible focus states and keyboard navigation for sidebar links.
+2) **Dashboard Home** page:
+   - A simple landing within the shell that provides the same function as the Overview page currently does.
+3) **Route composition**:
+   - Public marketing routes unchanged.
+   - `/dashboard/*` guarded by existing auth.
+   - `/demo` is public, read-only, and renders the same shell + a subset of content that doesn’t require auth.
+4) **Lazy loading**:
+   - Convert the heaviest sub-apps to route-level lazy imports with an in-shell loading state.
+5) **Demo behavior**:
+   - Disable or stub any destructive actions (favorites, posts, edits). Show a non-blocking tooltip/toast if those controls are visible, or hide them in demo if simpler.
+6) **A11y polish**:
+   - Add a “Skip to content” link in the header; ensure `#main-content` target exists.
+   - Confirm landmark roles and keyboard order are correct.
+   - Ensure contrast and focus rings are visible in shell navigation.
+
+# Guardrails
+- Preserve existing auth/route protections.
+- Keep public pages intact.
+
+# Deliverables
+- An **App Shell** used by `/dashboard/*` (auth) and `/demo` (public).
+- A **Dashboard Home** route as the first sidebar item.
+- Sub-apps mounted as lazy routes inside the shell (at least Resources, Forum, Sales Hub).
+- A **Demo** route that renders the same shell and demonstrates non-mutating flows.
+- A minimal **feature registry** powering the sidebar (optional but preferred).
+
+# Acceptance Criteria (manual checks)
+- **AC1:** Navigating among dashboard items only swaps the main content; the shell persists.
+- **AC2:** A **Home** entry appears first in the sidebar and loads a dashboard landing.
+- **AC3:** **/demo** renders the same shell publicly and prevents/omits any write actions (no login required).
+- **AC4:** At least three sub-apps are lazy-loaded (visible loading state).
+- **AC5:** Public marketing routes are unchanged.
+- **AC6:** A11y: “Skip to content” link works; sidebar items are keyboard-navigable with visible focus.
+- **AC7:** No TypeScript/ESLint errors introduced.
+
+# Testing Notes
+- Smoke test each sidebar link in both `/dashboard` and `/demo` contexts.
+- Verify back/forward history, scroll behavior, and no layout jumps.
+- Confirm demo mode blocks writes gracefully (hide or disable actions).
+- Verify performance improvement via reduced initial JS for dashboard (due to lazy routes).
