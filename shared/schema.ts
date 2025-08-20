@@ -62,7 +62,7 @@ export const blogPosts = pgTable("blog_posts", {
 });
 
 // Resource type enum
-export type ResourceType = 'universities' | 'organizations' | 'grants' | 'tax_incentives' | 'tools' | 'templates' | 'learning' | 'blogs' | 'bulletins' | 'industry_news';
+export type ResourceType = 'universities' | 'organizations' | 'grants' | 'tools' | 'templates' | 'learning' | 'bulletins' | 'industry_news';
 
 export const resources = pgTable("resources", {
   id: varchar("id").primaryKey().notNull(),

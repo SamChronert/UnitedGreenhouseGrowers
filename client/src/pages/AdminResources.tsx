@@ -21,11 +21,9 @@ const RESOURCE_TYPES = [
   { id: 'universities', label: 'Universities', icon: <GraduationCap className="h-4 w-4" /> },
   { id: 'organizations', label: 'Organizations', icon: <Building2 className="h-4 w-4" /> },
   { id: 'grants', label: 'Grants', icon: <DollarSign className="h-4 w-4" /> },
-  { id: 'tax_incentives', label: 'Tax Incentives', icon: <Receipt className="h-4 w-4" /> },
   { id: 'tools', label: 'Tools', icon: <Wrench className="h-4 w-4" /> },
   { id: 'templates', label: 'Templates', icon: <FileDown className="h-4 w-4" /> },
   { id: 'learning', label: 'Learning', icon: <BookOpen className="h-4 w-4" /> },
-  { id: 'blogs', label: 'Blogs', icon: <Newspaper className="h-4 w-4" /> },
   { id: 'bulletins', label: 'Bulletins', icon: <Newspaper className="h-4 w-4" /> },
   { id: 'industry_news', label: 'Industry News', icon: <Radio className="h-4 w-4" /> }
 ] as const;

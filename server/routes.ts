@@ -374,7 +374,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
   }).passthrough();
   
   const ResourceQuerySchema = z.object({
-    type: z.enum(['universities', 'organizations', 'grants', 'tax_incentives', 'tools', 'templates', 'learning', 'blogs', 'bulletins', 'industry_news']).optional(),
+    type: z.enum(['universities', 'organizations', 'grants', 'tools', 'templates', 'learning', 'bulletins', 'industry_news']).optional(),
     q: z.string().optional(),
     filters: z.string().optional(),
     sort: z.enum(['relevance', 'title', 'newest', 'quality']).default('relevance'),
