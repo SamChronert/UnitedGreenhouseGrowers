@@ -45,7 +45,24 @@ export default function AdminResources() {
     queryKey: [`/api/resources?type=${selectedResourceType}&limit=1000`],
   });
   
+  // Fetch resource counts for all types
+  const { data: resourceCounts, isLoading: isLoadingCounts } = useQuery<{type: string, total: number}[]>({
+    queryKey: ['/api/admin/resources/counts'],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+  
   const resources = resourceData?.items || [];
+  
+  // Helper to get count for a resource type
+  const getResourceCount = (typeId: string) => {
+    if (typeId === selectedResourceType) {
+      // For selected type, use the actual loaded resources count
+      return resources.length;
+    }
+    // For other types, use the counts from the API
+    const countData = resourceCounts?.find(c => c.type === typeId);
+    return countData?.total || 0;
+  };
 
   // Mutations
   const createResourceMutation = useMutation({
@@ -258,11 +275,9 @@ export default function AdminResources() {
               >
                 {type.icon}
                 <span>{type.label}</span>
-                {selectedResourceType === type.id && (
-                  <Badge variant="secondary" className="ml-1">
-                    {resources.length}
-                  </Badge>
-                )}
+                <Badge variant="secondary" className="ml-1">
+                  {isLoadingCounts ? '...' : getResourceCount(type.id)}
+                </Badge>
               </Button>
             ))}
           </div>

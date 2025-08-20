@@ -590,6 +590,27 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
+  // Admin resource counts endpoint
+  app.get("/api/admin/resources/counts", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const resourceTypes = ['universities', 'organizations', 'grants', 'tools', 'templates', 'learning', 'bulletins', 'industry_news'];
+      
+      const counts = await Promise.all(
+        resourceTypes.map(async (type) => {
+          const countQuery = `SELECT COUNT(*) as count FROM resources WHERE type = '${type.replace(/'/g, "''")}'`;
+          const result = await db.execute(sql.raw(countQuery));
+          const count = parseInt(result.rows[0]?.count || '0');
+          return { type, total: count };
+        })
+      );
+
+      res.json(counts);
+    } catch (error) {
+      console.error("Resource counts error:", error);
+      res.status(500).json({ message: "Failed to fetch resource counts" });
+    }
+  });
   
   // Get resource by ID
   app.get("/api/resources/:id", async (req, res) => {
