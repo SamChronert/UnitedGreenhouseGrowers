@@ -1,0 +1,102 @@
+[Context]
+- Project: UnitedGreenhouseGrowers Resource Library
+- Issue: Admin cannot add, edit, or delete resources
+- Stack: Express + Drizzle ORM backend, React + React Hook Form frontend
+
+[Goal]
+Implement full CRUD functionality for admin resource management.
+
+[Actions for Replit Agent]
+1. Backend - Create/update `server/src/routes/admin/resources.ts`:
+   ```typescript
+   import { Router } from 'express';
+   import { requireAuth, requireAdmin } from '../middleware/auth';
+   import { db } from '../db';
+   import { resources } from '../db/schema';
+   import { eq } from 'drizzle-orm';
+   
+   const router = Router();
+   
+   // CREATE
+   router.post('/admin/resources', requireAuth, requireAdmin, async (req, res) => {
+     try {
+       const newResource = await db.insert(resources).values(req.body).returning();
+       res.json(newResource[0]);
+     } catch (error) {
+       res.status(400).json({ error: 'Failed to create resource' });
+     }
+   });
+   
+   // UPDATE
+   router.put('/admin/resources/:id', requireAuth, requireAdmin, async (req, res) => {
+     try {
+       const updated = await db.update(resources)
+         .set(req.body)
+         .where(eq(resources.id, req.params.id))
+         .returning();
+       res.json(updated[0]);
+     } catch (error) {
+       res.status(400).json({ error: 'Failed to update resource' });
+     }
+   });
+   
+   // DELETE
+   router.delete('/admin/resources/:id', requireAuth, requireAdmin, async (req, res) => {
+     try {
+       await db.delete(resources).where(eq(resources.id, req.params.id));
+       res.json({ success: true });
+     } catch (error) {
+       res.status(400).json({ error: 'Failed to delete resource' });
+     }
+   });
+   ```
+
+2. Frontend - Update `client/src/pages/admin/ResourcesAdmin.tsx`:
+   - Add Create button that opens a form modal
+   - Add Edit button on each resource row
+   - Add Delete button with confirmation dialog
+
+3. Create `client/src/components/admin/ResourceForm.tsx`:
+   ```tsx
+   import { useForm } from 'react-hook-form';
+   import { zodResolver } from '@hookform/resolvers/zod';
+   import * as z from 'zod';
+   
+   const resourceSchema = z.object({
+     title: z.string().min(1),
+     type: z.enum(['universities', 'organizations', 'grants', /* etc */]),
+     description: z.string(),
+     // Add other fields per resource type
+   });
+   ```
+
+4. Add mutation hooks using TanStack Query:
+   ```tsx
+   const createMutation = useMutation({
+     mutationFn: (data) => fetch('/api/admin/resources', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify(data)
+     }),
+     onSuccess: () => {
+       queryClient.invalidateQueries(['resources']);
+       toast.success('Resource created');
+     }
+   });
+   ```
+
+5. Add confirmation dialog for delete operations
+6. Ensure proper error handling and loading states
+
+[Checks & Tests]
+- Navigate to Admin Resources page
+- Test CREATE: Add a new resource, verify it appears in the list and main library
+- Test UPDATE: Edit a resource, verify changes persist
+- Test DELETE: Delete a resource with confirmation, verify it's removed
+- Test validation: Try submitting invalid data, verify error messages
+- Check that all operations require admin authentication
+- Verify query invalidation updates UI immediately
+
+[Stop Condition]
+PASS: Admin can perform all CRUD operations; changes reflect immediately in library
+FAIL: If auth fails, check middleware. If operations fail, verify Drizzle schema matches.
