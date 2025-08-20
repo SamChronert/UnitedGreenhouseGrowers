@@ -1,0 +1,108 @@
+[Context Header]
+- Project: UnitedGreenhouseGrowers
+- Design Doc: "UGGA Resource Library Overhaul" (Doc ID: RLDD-v1)
+- Invariants: (1) Keep existing auth system, (2) Maintain current routing structure, (3) A11y WCAG AA minimum, (4) No breaking changes to other pages, (5) Preserve existing blog functionality
+
+[Goal]
+Complete the analytics event system (TB-15) with client tracking, server ingestion, and admin dashboard visualizations.
+
+[Actions for Replit Agent]
+1. Create analytics database table:
+   ```sql
+   CREATE TABLE analytics_events (
+     id UUID PRIMARY KEY,
+     user_id UUID REFERENCES users(id),
+     session_id VARCHAR(255),
+     event_type VARCHAR(50),
+     tab VARCHAR(50),
+     resource_id UUID REFERENCES resources(id),
+     payload JSONB,
+     created_at TIMESTAMP DEFAULT NOW()
+   );
+   CREATE INDEX idx_analytics_event_type ON analytics_events(event_type);
+   CREATE INDEX idx_analytics_tab ON analytics_events(tab);
+   CREATE INDEX idx_analytics_created ON analytics_events(created_at);
+   ```
+
+2. Implement client-side tracking in `src/lib/analytics.js`:
+   - Event types: tab_view, search_submit, filter_change, resource_open, outbound_click, template_download
+   - Batch events (max 20 or 5 seconds)
+   - Send via `POST /api/analytics` 
+   - Handle page unload with `sendBeacon`
+   - Generate/retrieve session ID from sessionStorage
+   - Example event:
+     ```javascript
+     trackEvent('resource_open', {
+       tab: 'universities',
+       resourceId: 'uuid-here',
+       position: 3,
+       fromSearch: true
+     });
+     ```
+
+3. Create server endpoint `POST /api/analytics`:
+   - Accept batch of events
+   - Validate event schema
+   - Add server timestamp
+   - Queue for batch database insert
+   - Rate limit: 100 events per minute per session
+   - Return 204 No Content (fire-and-forget)
+
+4. Create `src/pages/admin/AnalyticsDashboard.jsx`:
+   - Date range picker (default: last 30 days)
+   - Key metrics cards:
+     - Total page views
+     - Unique sessions
+     - Most viewed tab
+     - Click-through rate
+     - Top resources by views
+   - Charts (use Chart.js or similar):
+     - Tab views over time (line chart)
+     - Resource opens by type (bar chart)
+     - Search terms word cloud
+     - Outbound clicks by domain (table)
+   - Filters: by tab, date range, event type
+
+5. Create analytics API endpoints:
+   - `GET /api/admin/analytics/summary` - high-level metrics
+   - `GET /api/admin/analytics/events` - raw events with filters
+   - `GET /api/admin/analytics/top-resources` - most viewed
+   - `GET /api/admin/analytics/search-terms` - popular searches
+
+6. Add tracking to existing components:
+   - TabsBar: track tab_view on change
+   - SearchBox: track search_submit on search
+   - FilterBar: track filter_change
+   - Resource cards: track resource_open
+   - External links: track outbound_click
+   - Template downloads: track template_download
+
+7. Implement privacy considerations:
+   - No PII in event payloads
+   - Anonymous session IDs
+   - Option to opt-out (respect DNT header)
+   - Data retention policy (90 days)
+
+[Checks & Tests]
+- Interact with the Resource Library and verify events in Network tab
+- Check batch sending (wait 5 seconds or trigger 20 events)
+- Navigate to Analytics Dashboard and verify metrics display
+- Test date range filtering
+- Verify charts render with real data
+- Check top resources list matches actual views
+- Test session tracking across page refreshes
+- Verify no PII in event payloads
+- Show me the analytics dashboard with last 7 days data
+- Show me raw events in the database for one session
+
+[Commit/PR]
+Commit message: "feat: implement complete analytics tracking system
+
+- Add client event tracking with batching
+- Create analytics ingestion endpoint
+- Build admin analytics dashboard with charts
+- Track all user interactions without PII"
+
+[Stop Condition]
+PASS: Events track correctly, dashboard shows accurate metrics, charts render properly
+FAIL: If events don't send, check network requests. If dashboard is empty, verify data pipeline. If charts fail, check data format.

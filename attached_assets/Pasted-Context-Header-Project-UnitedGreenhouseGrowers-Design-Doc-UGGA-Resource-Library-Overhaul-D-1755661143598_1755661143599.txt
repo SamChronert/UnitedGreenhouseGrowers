@@ -1,0 +1,78 @@
+Context Header]
+- Project: UnitedGreenhouseGrowers
+- Design Doc: "UGGA Resource Library Overhaul" (Doc ID: RLDD-v1)
+- Invariants: (1) Keep existing auth system, (2) Maintain current routing structure, (3) A11y WCAG AA minimum, (4) No breaking changes to other pages, (5) Preserve existing blog functionality
+
+[Goal]
+Replace single admin interface with per-type admin panels (TB-14) including dynamic forms and CSV import functionality.
+
+[Actions for Replit Agent]
+1. Create `src/pages/admin/ResourcesAdmin.jsx` with type selector tabs
+2. Implement `src/components/admin/ResourceTypeForm.jsx`:
+   - Dynamic form fields based on selected resource type
+   - Base fields: title, summary, tags, imageUrl
+   - Type-specific fields rendered from schema (use JSON Schema Form or similar)
+   - Field validation (required fields, format validation)
+   - Save/Cancel buttons with confirmation
+3. Create type-specific form configurations for each resource type:
+   - Universities: city, state, country, programName, website URLs
+   - Organizations: functions (multi-select), HQ location, website
+   - Grants: agency, amounts, focus areas, eligibility, dates
+   - Templates: category, file uploads, preview data
+   - (Continue for all types per Design Doc data dictionary)
+4. Implement `src/components/admin/CSVImporter.jsx`:
+   - File upload drag-and-drop zone
+   - CSV parsing with header detection
+   - Column mapping interface: map CSV columns to resource fields
+   - Preview first 5 rows after mapping
+   - Validation results display (errors and warnings)
+   - Batch import with progress bar
+   - Download template CSV for each resource type
+5. Create admin API endpoints:
+   - `GET /api/admin/resources` - list with pagination
+   - `POST /api/admin/resources` - create with validation
+   - `PUT /api/admin/resources/:id` - update
+   - `DELETE /api/admin/resources/:id` - soft delete
+   - `POST /api/admin/resources/import` - CSV batch import
+   - `GET /api/admin/resources/export` - export current filtered data
+6. Add admin table view features:
+   - Sortable columns
+   - Inline edit for simple fields
+   - Bulk actions (delete, export)
+   - Search and filter
+   - Show created/updated timestamps and user
+7. Implement validation rules:
+   - Required fields per type
+   - Format validation (URLs, dates, numbers)
+   - Duplicate detection (by title + type)
+   - Show validation errors inline
+8. Add CSV import features:
+   - Auto-detect delimiter (comma, tab, semicolon)
+   - Handle quoted fields and special characters
+   - Skip empty rows
+   - Report import summary (X successful, Y failed)
+
+[Checks & Tests]
+- Navigate to admin resources page (ensure auth required)
+- Test creating a new university through the form
+- Test editing an existing resource
+- Test CSV import: upload a sample CSV and map columns
+- Verify validation errors display appropriately
+- Test bulk delete with confirmation
+- Export filtered data and verify CSV format
+- Test form for each resource type
+- Verify timestamps and user tracking works
+- Show me the column mapping interface with a sample CSV
+- Show me validation errors for an invalid form submission
+
+[Commit/PR]
+Commit message: "feat: implement per-type admin panels with CSV import
+
+- Add dynamic forms for each resource type
+- Implement CSV import with column mapping
+- Create admin CRUD operations with validation
+- Add bulk actions and export functionality"
+
+[Stop Condition]
+PASS: Admin can create/edit all resource types, CSV import works with mapping, validation prevents bad data
+FAIL: If auth fails, check middleware. If CSV parsing fails, verify library setup. If forms don't validate, check schema.

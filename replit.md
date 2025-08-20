@@ -39,6 +39,13 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 - **UI/UX Decisions**: Green accent theme, dark mode support, accessibility (WCAG 2.1 AA compliant), consistent component styling, and a focus on collaborative messaging.
 - **Deployment Strategy**: Optimized for Replit with specific build and start commands, and environment variable management.
 
+### Resource Library Features
+- **8 Resource Type Tabs**: Universities, Organizations, Grants, Tax Incentives, Tools & Templates, Learning, Blogs & Bulletins, Industry News
+- **Type-Aware API**: Hybrid data model with core fields plus type-specific data in JSONB
+- **Admin Management**: Per-type admin panels with dynamic forms, CSV import/export, bulk operations
+- **CSV Import**: Column mapping, validation preview, batch processing with error handling
+- **Dynamic Forms**: Type-specific fields (grants: amount/deadline, templates: format/language, etc.)
+
 ## External Dependencies
 
 ### Core Services
