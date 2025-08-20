@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Menu, X, Search, HelpCircle, Home } from "lucide-react";
+import { Menu, X, Search, HelpCircle, Home, ChevronLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import uggaLogo from "@assets/2_1750100657577.png";
@@ -32,6 +32,7 @@ export default function AppShell({ children }: AppShellProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const logoutMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/auth/logout"),
@@ -73,23 +74,38 @@ export default function AppShell({ children }: AppShellProps) {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        "fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 transform transition-all duration-300 ease-in-out lg:static lg:inset-0",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full",
+        sidebarCollapsed ? "lg:w-16" : "lg:w-64",
+        "w-64"
       )}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center h-16 px-4 border-b border-gray-200">
-            <Link href="/" className="flex items-center">
-              <img src={uggaLogo} alt="UGGA Logo" className="h-8 w-8 mr-2" />
-              <span className="font-bold text-lg text-ugga-primary truncate">
-                {isDemo ? "UGGA Demo" : "UGGA"}
-              </span>
+          <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+            <Link href="/" className="flex items-center min-w-0">
+              <img src={uggaLogo} alt="UGGA Logo" className="h-8 w-8 flex-shrink-0" />
+              {!sidebarCollapsed && (
+                <>
+                  <span className="font-bold text-lg text-ugga-primary truncate ml-2">
+                    {isDemo ? "UGGA Demo" : "UGGA"}
+                  </span>
+                  {isDemo && (
+                    <Badge className="ml-2 text-xs bg-blue-100 text-blue-800">
+                      Demo
+                    </Badge>
+                  )}
+                </>
+              )}
             </Link>
-            {isDemo && (
-              <Badge className="ml-2 text-xs bg-blue-100 text-blue-800">
-                Demo
-              </Badge>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hidden lg:flex p-1"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </Button>
           </div>
 
           {/* Navigation */}
@@ -113,11 +129,15 @@ export default function AppShell({ children }: AppShellProps) {
                       )}
                     >
                       <FeatureIcon iconName={feature.iconName} />
-                      <span className="ml-3 truncate">{feature.label}</span>
-                      {feature.inDevelopment && (
-                        <span className="ml-auto text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
-                          Dev
-                        </span>
+                      {!sidebarCollapsed && (
+                        <>
+                          <span className="ml-3 truncate">{feature.label}</span>
+                          {feature.inDevelopment && (
+                            <span className="ml-auto text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
+                              Dev
+                            </span>
+                          )}
+                        </>
                       )}
                     </button>
                   ) : (
@@ -132,11 +152,15 @@ export default function AppShell({ children }: AppShellProps) {
                       onClick={() => setSidebarOpen(false)}
                     >
                       <FeatureIcon iconName={feature.iconName} />
-                      <span className="ml-3 truncate">{feature.label}</span>
-                      {feature.inDevelopment && (
-                        <span className="ml-auto text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
-                          Dev
-                        </span>
+                      {!sidebarCollapsed && (
+                        <>
+                          <span className="ml-3 truncate">{feature.label}</span>
+                          {feature.inDevelopment && (
+                            <span className="ml-auto text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
+                              Dev
+                            </span>
+                          )}
+                        </>
                       )}
                     </Link>
                   )}
@@ -153,7 +177,9 @@ export default function AppShell({ children }: AppShellProps) {
               onClick={() => setSidebarOpen(false)}
             >
               <Home className="h-4 w-4" />
-              <span className="ml-3 truncate">Return to UGGA Website</span>
+              {!sidebarCollapsed && (
+                <span className="ml-3 truncate">Return to UGGA Website</span>
+              )}
             </Link>
           </div>
         </div>

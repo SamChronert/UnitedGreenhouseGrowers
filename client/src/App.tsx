@@ -41,11 +41,12 @@ function Router() {
   return (
     <Switch>
       {/* App Shell routes - bypass main Layout */}
-      <Route path="/demo" nest>
+      <Route path="/demo/*">
         <DashboardWrapper isDemo />
       </Route>
       
-      <Route path="/dashboard" nest>
+      {/* Dashboard routes */}
+      <Route path="/dashboard/*">
         <AuthGuard requireMember>
           <DashboardWrapper />
         </AuthGuard>

@@ -22,67 +22,70 @@ interface DashboardWrapperProps {
 
 export default function DashboardWrapper({ isDemo = false }: DashboardWrapperProps) {
   const [location] = useLocation();
+  const basePath = isDemo ? "/demo" : "/dashboard";
   
   return (
     <DemoProvider isDemo={isDemo}>
       <AppShell>
         <Switch>
-          {/* Home Route */}
-          <Route path="/" component={DashboardHome} />
-          
-          {/* Feature Routes - Lazy Loaded */}
-          <Route path="/resources">
+          {/* Feature Routes - Use absolute paths */}
+          <Route path={`${basePath}/resources`}>
             <LazyWrapper>
               <Resources />
             </LazyWrapper>
           </Route>
           
-          <Route path="/resources/saved">
+          <Route path={`${basePath}/resources/saved`}>
             <LazyWrapper>
               <SavedResources />
             </LazyWrapper>
           </Route>
           
-          <Route path="/resources/:id">
+          <Route path={`${basePath}/resources/:id`}>
             <LazyWrapper>
               <ResourceDetail />
             </LazyWrapper>
           </Route>
           
-          <Route path="/forum">
+          <Route path={`${basePath}/forum`}>
             <LazyWrapper>
               <Forum />
             </LazyWrapper>
           </Route>
           
-          <Route path="/saleshub">
+          <Route path={`${basePath}/saleshub`}>
             <LazyWrapper>
               <SalesHub />
             </LazyWrapper>
           </Route>
           
-          <Route path="/producthub">
+          <Route path={`${basePath}/producthub`}>
             <LazyWrapper>
               <ProductHub />
             </LazyWrapper>
           </Route>
           
-          <Route path="/assessment">
+          <Route path={`${basePath}/assessment`}>
             <LazyWrapper>
               <Assessment />
             </LazyWrapper>
           </Route>
           
-          <Route path="/find-grower">
+          <Route path={`${basePath}/find-grower`}>
             <LazyWrapper>
               <FindGrower />
             </LazyWrapper>
           </Route>
           
-          <Route path="/profile">
+          <Route path={`${basePath}/profile`}>
             <LazyWrapper>
               <Profile />
             </LazyWrapper>
+          </Route>
+          
+          {/* Dashboard Home Route - must be last for specificity */}
+          <Route path={basePath}>
+            <DashboardHome />
           </Route>
         </Switch>
       </AppShell>
