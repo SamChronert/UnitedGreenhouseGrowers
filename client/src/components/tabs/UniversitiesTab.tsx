@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ExternalLink, MapPin, GraduationCap, AlertCircle, RefreshCw } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ExternalLink, MapPin, GraduationCap, AlertCircle, RefreshCw, Grid3X3, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInfiniteResources, useResourcesList, Resource, ResourceFilters } from "@/hooks/useResources";
+import { useQueryParams } from "@/hooks/useQueryParams";
+import { UniversityMapWithLoading } from "@/components/LazyComponents";
 import SearchBox from "@/components/SearchBox";
 import FilterBar from "@/components/FilterBar";
 import { trackTabView, trackResourceClick } from "@/lib/analytics";
@@ -17,9 +20,13 @@ interface UniversitiesTabProps {
 }
 
 export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabProps) {
-  // URL state management
+  // URL state management with new hook
+  const { getParam, setParam } = useQueryParams();
   const [location, setLocation] = useLocation();
   const urlParams = useMemo(() => new URLSearchParams(location.split('?')[1] || ''), [location]);
+  
+  // Get view mode from URL params
+  const viewMode = getParam('view') || 'grid';
   
   // Local state
   const [searchQuery, setSearchQuery] = useState(urlParams.get('q') || '');
@@ -74,6 +81,11 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
     }
   }, [searchQuery, filters, sort, location, setLocation]);
 
+  // Handle view mode change
+  const handleViewModeChange = useCallback((mode: string) => {
+    setParam('view', mode);
+  }, [setParam]);
+
   // Handle university card click
   const handleUniversityClick = useCallback((university: Resource) => {
     setSelectedUniversity(university);
@@ -118,14 +130,30 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
     >
       {/* Search and Filters */}
       <div className="space-y-4">
-        <SearchBox
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder="Search universities by name, program, or location..."
-          resources={universities}
-          resourceType="universities"
-          className="max-w-md"
-        />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <SearchBox
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search universities by name, program, or location..."
+            resources={universities}
+            resourceType="universities"
+            className="max-w-md"
+          />
+          
+          {/* View Toggle */}
+          <Tabs value={viewMode} onValueChange={handleViewModeChange}>
+            <TabsList className="grid w-full grid-cols-2 max-w-[200px]">
+              <TabsTrigger value="grid" className="flex items-center gap-2">
+                <Grid3X3 className="h-4 w-4" />
+                Grid
+              </TabsTrigger>
+              <TabsTrigger value="map" className="flex items-center gap-2">
+                <Map className="h-4 w-4" />
+                Map
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
         
         <FilterBar
           resourceType="universities"
@@ -183,67 +211,78 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
         </div>
       )}
 
-      {/* University Cards */}
+      {/* Content - Grid or Map View */}
       {!isLoading && !error && universities.length > 0 && (
         <div className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {universities.map(university => (
-              <Card 
-                key={university.id} 
-                className="cursor-pointer transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
-                onClick={() => handleUniversityClick(university)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleUniversityClick(university);
-                  }
-                }}
-                tabIndex={0}
-                role="button"
-                aria-label={`View details for ${university.title}`}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg leading-tight">
-                      {university.title}
-                    </CardTitle>
-                    <GraduationCap className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600 mt-1">
-                    <MapPin className="h-4 w-4 mr-1" aria-hidden="true" />
-                    {university.data?.city || 'Location'}, {university.data?.state || 'State'}
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-sm text-gray-700 mb-3">
-                    {university.data?.programName || 'Academic Program'}
-                  </p>
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {university.summary}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {viewMode === 'grid' ? (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {universities.map(university => (
+                  <Card 
+                    key={university.id} 
+                    className="cursor-pointer transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+                    onClick={() => handleUniversityClick(university)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleUniversityClick(university);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`View details for ${university.title}`}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <CardTitle className="text-lg leading-tight">
+                          {university.title}
+                        </CardTitle>
+                        <GraduationCap className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                      </div>
+                      <div className="flex items-center text-sm text-gray-600 mt-1">
+                        <MapPin className="h-4 w-4 mr-1" aria-hidden="true" />
+                        {university.data?.city || 'Location'}, {university.data?.state || 'State'}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <p className="text-sm text-gray-700 mb-3">
+                        {university.data?.programName || 'Academic Program'}
+                      </p>
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {university.summary}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
 
-          {/* Load More Button */}
-          {hasNextPage && (
-            <div className="text-center">
-              <Button
-                onClick={handleLoadMore}
-                disabled={isFetchingNextPage}
-                variant="outline"
-                className="w-auto"
-              >
-                {isFetchingNextPage ? (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    Loading more...
-                  </>
-                ) : (
-                  'Load More Universities'
-                )}
-              </Button>
+              {/* Load More Button */}
+              {hasNextPage && (
+                <div className="text-center">
+                  <Button
+                    onClick={handleLoadMore}
+                    disabled={isFetchingNextPage}
+                    variant="outline"
+                    className="w-auto"
+                  >
+                    {isFetchingNextPage ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Loading more...
+                      </>
+                    ) : (
+                      'Load More Universities'
+                    )}
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="min-h-[600px]">
+              <UniversityMapWithLoading 
+                universities={universities}
+                onUniversityClick={handleUniversityClick}
+              />
             </div>
           )}
         </div>
