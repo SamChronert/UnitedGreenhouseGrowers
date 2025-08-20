@@ -97,7 +97,8 @@ export default function AppShell({ children }: AppShellProps) {
             {availableFeatures.map((feature) => {
               const isActive = location === feature.path || 
                 (feature.path === "/dashboard" && location === "/dashboard") ||
-                (feature.path === "/demo" && location === "/demo");
+                (feature.path === "/demo" && location === "/demo") ||
+                (feature.path !== "/dashboard" && feature.path !== "/demo" && location.startsWith(feature.path));
               
               return (
                 <div key={feature.id}>
