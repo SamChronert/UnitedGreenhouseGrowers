@@ -19,20 +19,13 @@ import ResourceDetail from "@/pages/ResourceDetail";
 import SavedResources from "@/pages/SavedResources";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
-import Dashboard from "@/pages/Dashboard";
-import Profile from "@/pages/Profile";
-import FindGrower from "@/pages/FindGrower";
-import Assessment from "@/pages/Assessment";
+import DashboardWrapper from "@/features/dashboard/DashboardWrapper";
 import AdminResources from "@/pages/AdminResources";
 import AdminBlog from "@/pages/AdminBlog";
 import AdminMembers from "@/pages/AdminMembers";
 import AdminChallenges from "@/pages/AdminChallenges";
 import AdminAssessmentTrainer from "@/pages/AdminAssessmentTrainer";
 import AdminAnalytics from "@/pages/AdminAnalytics";
-import Forum from "@/pages/Forum";
-import SalesHub from "@/pages/SalesHub";
-import ProductHub from "@/pages/ProductHub";
-import DemoDashboard from "@/pages/DemoDashboard";
 
 function Router() {
   return (
@@ -44,74 +37,17 @@ function Router() {
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/resources" component={Resources} />
-      <Route path="/demo" component={DemoDashboard} />
+      <Route path="/demo" nest>
+        <DashboardWrapper isDemo />
+      </Route>
       <Route path="/register" component={Register} />
       <Route path="/login" component={Login} />
 
-      {/* Protected member routes */}
-      <Route path="/dashboard">
+      {/* Protected dashboard routes - using App Shell */}
+      <Route path="/dashboard" nest>
         <AuthGuard requireMember>
-          <Dashboard />
+          <DashboardWrapper />
         </AuthGuard>
-      </Route>
-      <Route path="/dashboard/profile">
-        <AuthGuard requireMember>
-          <Profile />
-        </AuthGuard>
-      </Route>
-      <Route path="/dashboard/find-grower">
-        <AuthGuard requireMember>
-          <FindGrower />
-        </AuthGuard>
-      </Route>
-      <Route path="/dashboard/assessment">
-        <AuthGuard requireMember>
-          <Assessment />
-        </AuthGuard>
-      </Route>
-      <Route path="/dashboard/resources">
-        <AuthGuard requireMember>
-          <Resources />
-        </AuthGuard>
-      </Route>
-      <Route path="/dashboard/resources/saved">
-        <AuthGuard requireMember>
-          <SavedResources />
-        </AuthGuard>
-      </Route>
-      <Route path="/dashboard/resources/:id">
-        <AuthGuard requireMember>
-          <ResourceDetail />
-        </AuthGuard>
-      </Route>
-      <Route path="/dashboard/forum">
-        <AuthGuard requireMember>
-          <Forum />
-        </AuthGuard>
-      </Route>
-      <Route path="/dashboard/saleshub">
-        <AuthGuard requireMember>
-          <SalesHub />
-        </AuthGuard>
-      </Route>
-      <Route path="/dashboard/producthub">
-        <AuthGuard requireMember>
-          <ProductHub />
-        </AuthGuard>
-      </Route>
-      <Route path="/forum">
-        {() => {
-          // Redirect to dashboard forum
-          window.location.href = '/dashboard/forum';
-          return null;
-        }}
-      </Route>
-      <Route path="/resources">
-        {() => {
-          // Redirect to dashboard resources
-          window.location.href = '/dashboard/resources';
-          return null;
-        }}
       </Route>
 
       {/* Admin routes */}
