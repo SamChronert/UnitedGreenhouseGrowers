@@ -1,0 +1,92 @@
+[Context]
+- Project: UnitedGreenhouseGrowers Resource Library
+- Issue: Grants tab not showing any data; filter UI too prominent
+- Stack: React, TanStack Query, Express API
+
+[Goal]
+Make the Grants tab functional with data display and a de-emphasized, collapsible filter UI.
+
+[Actions for Replit Agent]
+1. Open or create `client/src/components/tabs/GrantsTab.tsx`
+2. Set up the basic component structure:
+   ```tsx
+   import { useQuery } from '@tanstack/react-query';
+   import { useState } from 'react';
+   import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+   import { Button } from '@/components/ui/button';
+   import { Filter } from 'lucide-react';
+   
+   export function GrantsTab() {
+     const [filtersOpen, setFiltersOpen] = useState(false);
+     const [filters, setFilters] = useState({
+       state: '',
+       eligibility: '',
+       deadline: ''
+     });
+   }
+   ```
+
+3. Add data fetching:
+   ```tsx
+   const { data, isLoading, error } = useQuery({
+     queryKey: ['resources', 'grants', filters],
+     queryFn: async () => {
+       const params = new URLSearchParams({
+         type: 'grants',
+         ...filters
+       });
+       const response = await fetch(`/api/resources?${params}`);
+       return response.json();
+     }
+   });
+   ```
+
+4. Create the UI with collapsible filters:
+   ```tsx
+   return (
+     <div>
+       <div className="flex justify-between items-center mb-4">
+         <h2>{data?.total || 0} grants found</h2>
+         <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+           <SheetTrigger asChild>
+             <Button variant="outline" size="sm">
+               <Filter className="w-4 h-4 mr-2" />
+               Filters
+             </Button>
+           </SheetTrigger>
+           <SheetContent>
+             {/* Filter controls here - keep minimal */}
+           </SheetContent>
+         </Sheet>
+       </div>
+       
+       {/* Grants list/grid */}
+       {isLoading && <div>Loading grants...</div>}
+       {error && <div>Error loading grants</div>}
+       {data?.items?.length === 0 && <div>No grants available</div>}
+       
+       <div className="grid gap-4">
+         {data?.items?.map(grant => (
+           <GrantCard key={grant.id} grant={grant} />
+         ))}
+       </div>
+     </div>
+   );
+   ```
+
+5. Create a simple GrantCard component within the file
+6. Ensure the tab is properly imported and rendered in the main Resources page
+
+[Checks & Tests]
+- Navigate to Grants tab
+- Verify grants data loads and displays
+- Check that filter button is small and unobtrusive
+- Test opening filter sheet - should slide in from side
+- Verify filters are hidden by default
+- Test that applying filters updates the results
+- Check empty state message when no grants
+- Verify loading state shows while fetching
+
+[Stop Condition]
+PASS: Grants display with data; filters collapsible and de-emphasized
+FAIL: If no data, check API endpoint. If filters don't work, verify query params.
