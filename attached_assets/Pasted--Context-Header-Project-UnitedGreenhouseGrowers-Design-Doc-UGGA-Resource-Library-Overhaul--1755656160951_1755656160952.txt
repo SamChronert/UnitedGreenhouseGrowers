@@ -1,0 +1,44 @@
+[Context Header]
+- Project: UnitedGreenhouseGrowers  
+- Design Doc: "UGGA Resource Library Overhaul" (Doc ID: RLDD-v1)
+- Invariants: (1) Keep existing auth system, (2) Maintain current routing structure, (3) A11y WCAG AA minimum, (4) No breaking changes to other pages, (5) Preserve existing blog functionality
+
+[Goal]
+Implement the tabbed navigation shell (TB-01) and create a working Universities tab (TB-05) with list view, region filter, and details modal as our vertical slice pilot.
+
+[Actions for Replit Agent]
+1. Locate the existing Resource Library page component (likely `ResourceLibrary.jsx` or similar)
+2. Create a new component `src/components/TabsBar.jsx` with these tabs: Universities, Organizations, Grants, Tax Incentives, Tools & Templates, Learning, Blogs & Bulletins, Industry News
+3. Implement accessible tab navigation: role="tablist", role="tab", roving tabindex, keyboard navigation (arrow keys, Enter/Space activation)
+4. Add URL state management: sync active tab to URL query param `?tab=universities` (default to universities if no param)
+5. Create `src/components/TabIntro.jsx` to display 2-3 sentence descriptions per tab
+6. Remove any "In Development" banner, old intro text, and "UGGA Verified" sort option from the existing page
+7. Create `src/components/tabs/UniversitiesTab.jsx` with:
+   - List view of university cards
+   - Multi-select region filter (US regions: Northeast, Southeast, Midwest, Southwest, West)
+   - University card showing: name, program name, city/state, website link
+   - Details modal on card click with full information
+8. Add mock data for 5-10 universities with structure: `{id, type: 'universities', title, summary, data: {city, state, country, programName, urls: {site, extension}}}`
+9. Implement basic analytics event firing: `tab_view` when switching tabs, `resource_open` when opening modal
+10. Style with existing design system classes or create minimal CSS for tab bar and cards
+
+[Checks & Tests]
+- Run the dev server and navigate to the Resource Library page
+- Verify all 8 tabs are visible and keyboard navigable
+- Confirm URL updates when switching tabs
+- Test Universities tab: filter by region works, cards display, modal opens/closes with Escape key
+- Check console for analytics events being logged
+- Run accessibility check: tab navigation works with keyboard only
+- Show me the git diff for all changed files
+
+[Commit/PR]
+Commit message: "feat: add tabbed navigation and Universities pilot implementation
+
+- Add accessible tab bar with 8 resource type tabs
+- Implement Universities tab with list, filters, and modal
+- Remove legacy UI elements (dev banner, old intro, UGGA Verified sort)
+- Add basic analytics event tracking"
+
+[Stop Condition]
+PASS: Tabs switch correctly, Universities list displays with working filter and modal, keyboard navigation works
+FAIL: If tabs don't render or accessibility fails, fix before proceeding. If modal won't open, check event handlers.
