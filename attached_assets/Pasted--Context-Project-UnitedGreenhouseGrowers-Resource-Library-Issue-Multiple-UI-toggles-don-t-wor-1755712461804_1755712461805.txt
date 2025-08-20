@@ -1,0 +1,43 @@
+[Context]
+- Project: UnitedGreenhouseGrowers Resource Library
+- Issue: Multiple UI toggles don't work (Tools/Templates, Learning Grid/List, Blogs/Bulletins sections)
+- Root cause: Wouter's `useLocation()` often returns path-only without query params
+
+[Goal]
+Create a robust query parameter helper and fix all broken toggle states across tabs.
+
+[Actions for Replit Agent]
+1. Create a new utility file `client/src/hooks/useQueryParams.ts`:
+   ```typescript
+   export function useQueryParams() {
+     // Read params from window.location.search or URL API
+     // Return get/set functions that work reliably
+   }
+   ```
+2. Make the helper:
+   - Read: Parse `window.location.search` directly (not Wouter's location)
+   - Write: Use Wouter's `setLocation` to update URL with new params
+   - Preserve existing params when updating one
+3. Fix `client/src/components/tabs/ToolsTemplatesTab.tsx`:
+   - Replace `location.split('?')` pattern with `useQueryParams()`
+   - Ensure `sub` parameter syncs with Tabs value
+   - Test sub=tools and sub=templates
+4. Fix `client/src/components/tabs/LearningTab.tsx`:
+   - Replace manual query parsing with `useQueryParams()`
+   - Ensure `view` parameter syncs (grid/list)
+5. Fix `client/src/components/tabs/BlogsBulletinsTab.tsx`:
+   - Replace query parsing with helper
+   - Ensure `section` parameter syncs (ugga-blogs/industry-bulletins)
+6. Update any other tabs using similar patterns
+
+[Checks & Tests]
+- Tools & Templates: Click toggle, verify URL changes to `?sub=templates`, content switches
+- Learning: Toggle to list view, verify URL shows `?view=list`, layout changes
+- Blogs & Bulletins: Switch sections, verify URL and content update
+- Test browser back/forward navigation preserves toggle states
+- Test direct URL access with query params loads correct state
+- Verify keyboard navigation still works for all toggles
+
+[Stop Condition]
+PASS: All toggles work via click and URL; back/forward navigation preserves state
+FAIL: If toggles still stuck, check Wouter navigation. If URL doesn't update, verify setLocation usage.

@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect, useCallback } from "react";
+import { useQueryParams } from "@/hooks/useQueryParams";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,12 +49,11 @@ const TEMPLATE_CATEGORIES = [
 ];
 
 export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTabProps) {
-  const [location, setLocation] = useLocation();
+  const { getParam, setParam } = useQueryParams();
   const { toast } = useToast();
   
-  // Parse URL params
-  const urlParams = useMemo(() => new URLSearchParams(location.split('?')[1] || ''), [location]);
-  const activeSubTab = urlParams.get('sub') || 'tools';
+  // Get active sub-tab from URL params
+  const activeSubTab = getParam('sub') || 'tools';
   
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,12 +95,8 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
 
   // Handle sub-tab change
   const handleSubTabChange = useCallback((subTab: string) => {
-    const params = new URLSearchParams(location.split('?')[1] || '');
-    params.set('sub', subTab);
-    const newSearch = params.toString();
-    const basePath = location.split('?')[0];
-    setLocation(`${basePath}?${newSearch}`);
-  }, [location, setLocation]);
+    setParam('sub', subTab);
+  }, [setParam]);
 
   // Handle tool click
   const handleToolClick = useCallback((tool: Resource) => {

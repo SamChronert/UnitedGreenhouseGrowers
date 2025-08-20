@@ -1,10 +1,10 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useLocation } from 'wouter';
+import { useQueryParams } from '@/hooks/useQueryParams';
 import { useResources } from '@/hooks/useResources';
 import SearchBox from '@/components/SearchBox';
 import { type Resource, type ResourceFilters } from '@shared/schema';
@@ -61,11 +61,10 @@ const LANGUAGES = [
 ];
 
 export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
-  const [location, setLocation] = useLocation();
+  const { getParam, setParam } = useQueryParams();
   
-  // Parse URL params
-  const urlParams = useMemo(() => new URLSearchParams(location.split('?')[1] || ''), [location]);
-  const viewMode = urlParams.get('view') || 'grid';
+  // Get view mode from URL params
+  const viewMode = getParam('view') || 'grid';
   
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -94,12 +93,8 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
 
   // Handle view mode change
   const handleViewModeChange = useCallback((mode: string) => {
-    const params = new URLSearchParams(location.split('?')[1] || '');
-    params.set('view', mode);
-    const newSearch = params.toString();
-    const basePath = location.split('?')[0];
-    setLocation(`${basePath}?${newSearch}`);
-  }, [location, setLocation]);
+    setParam('view', mode);
+  }, [setParam]);
 
   // Handle course click
   const handleCourseClick = useCallback((course: Resource) => {

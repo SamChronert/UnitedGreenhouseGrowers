@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
+import { useQueryParams } from '@/hooks/useQueryParams';
 import { useResources } from '@/hooks/useResources';
 import { type Resource, type ResourceFilters, type BlogPost } from '@shared/schema';
 import { trackTabView, trackResourceClick } from '@/lib/analytics';
@@ -47,11 +47,10 @@ const TOPIC_TAGS = [
 ];
 
 export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTabProps) {
-  const [location, setLocation] = useLocation();
+  const { getParam, setParam } = useQueryParams();
   
-  // Parse URL params
-  const urlParams = useMemo(() => new URLSearchParams(location.split('?')[1] || ''), [location]);
-  const activeSection = urlParams.get('section') || 'blogs';
+  // Get active section from URL params
+  const activeSection = getParam('section') || 'blogs';
   
   // State
   const [bulletinSearch, setBulletinSearch] = useState('');
@@ -83,12 +82,8 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
 
   // Handle section change
   const handleSectionChange = useCallback((section: string) => {
-    const params = new URLSearchParams(location.split('?')[1] || '');
-    params.set('section', section);
-    const newSearch = params.toString();
-    const basePath = location.split('?')[0];
-    setLocation(`${basePath}?${newSearch}`);
-  }, [location, setLocation]);
+    setParam('section', section);
+  }, [setParam]);
 
   // Handle blog click
   const handleBlogClick = useCallback((blog: BlogPost) => {
