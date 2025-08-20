@@ -54,11 +54,6 @@ const FORMATS = [
   'Hybrid'
 ];
 
-const LANGUAGES = [
-  'English',
-  'Spanish',
-  'French'
-];
 
 export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
   const { getParam, setParam } = useQueryParams();
@@ -72,8 +67,7 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
     category: 'all',
     costType: 'all',
     level: 'all',
-    format: 'all',
-    language: 'all'
+    format: 'all'
   });
 
   // Track tab view on mount
@@ -235,20 +229,6 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
             </SelectContent>
           </Select>
           
-          <Select
-            value={filters.language}
-            onValueChange={(value) => setFilters(prev => ({ ...prev, language: value }))}
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Language" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Languages</SelectItem>
-              {LANGUAGES.map(lang => (
-                <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
