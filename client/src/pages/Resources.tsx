@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,14 +22,18 @@ const recordAnalyticsEvent = (eventName: string, payload: any) => {
 
 export default function Resources() {
   const [location] = useLocation();
+  const [activeTab, setActiveTab] = useState('universities');
   
-  // URL state management for tabs - parse directly without useMemo to ensure updates
-  const urlParams = new URLSearchParams(location.split('?')[1] || '');
-  const activeTab = urlParams.get('tab') || 'universities';
+  // Update activeTab when location changes
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.split('?')[1] || '');
+    const tabFromUrl = urlParams.get('tab') || 'universities';
+    setActiveTab(tabFromUrl);
+  }, [location]);
   
   // Tab change handler
   const handleTabChange = useCallback((tabId: string) => {
-    // Tab state is managed by TabsBar component via URL
+    setActiveTab(tabId);
   }, []);
   
   // Analytics event handler
