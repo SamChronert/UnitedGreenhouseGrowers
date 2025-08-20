@@ -1,0 +1,65 @@
+[Context]
+- Project: UnitedGreenhouseGrowers Resource Library
+- Issue: Multiple tabs have broken toggles (Tools & Templates, Universities, Learning, Blogs & Bulletins)
+- Stack: React with Wouter routing, shadcn/ui components
+- Dependencies: useQueryParams hook from previous prompt
+
+[Goal]
+Update all broken tab components to use the centralized query parameter handler and enforce proper defaults.
+
+[Actions for Replit Agent]
+1. Fix `client/src/components/tabs/ToolsTemplatesTab.tsx`:
+   - Import `useParamState` from the new hook
+   - Replace any `location.split('?')` or manual parsing
+   - Use: `const [sub, setSub] = useParamState('sub', 'tools');`
+   - Add default enforcement: `const [view, setView] = useParamState('view', 'list');` // Default to LIST
+   - Update Tabs component: `<Tabs value={sub} onValueChange={setSub}>`
+   - Ensure both sub-toggle (tools/templates) and view toggle (list/grid) work
+
+2. Fix `client/src/components/tabs/UniversitiesTab.tsx`:
+   - Import `useParamState`
+   - Add: `const [view, setView] = useParamState('view', 'map');` // Default to MAP
+   - Create toggle UI if missing:
+     ```tsx
+     <Tabs value={view} onValueChange={setView}>
+       <TabsList>
+         <TabsTrigger value="grid">Grid</TabsTrigger>
+         <TabsTrigger value="map">Map</TabsTrigger>
+       </TabsList>
+     </Tabs>
+     ```
+   - Conditionally render grid or map based on view value
+
+3. Fix `client/src/components/tabs/LearningTab.tsx`:
+   - Import `useParamState`
+   - Replace manual parsing with: `const [view, setView] = useParamState('view', 'grid');`
+   - Connect to existing Tabs component
+
+4. Fix `client/src/components/tabs/BlogsBulletinsTab.tsx`:
+   - Import `useParamState`
+   - Use: `const [section, setSection] = useParamState('section', 'blogs');`
+   - Wire to toggle UI
+
+5. Fix `client/src/components/tabs/IndustryNewsTab.tsx`:
+   - Import `useParamState`
+   - Use: `const [view, setView] = useParamState('view', 'list');` // Default to LIST
+   - Ensure list view renders when view='list'
+
+6. For each component, ensure:
+   - Remove all `location.split('?')` patterns
+   - ARIA attributes preserved (role="tab", aria-selected)
+   - Keyboard navigation still works
+
+[Checks & Tests]
+- Tools & Templates: Toggle between tools/templates AND between list/grid views
+- Universities: Toggle between map/grid, verify MAP is default
+- Learning: Toggle between grid/list views
+- Blogs & Bulletins: Toggle between blogs/bulletins sections
+- Industry News: Verify LIST is default view
+- Test URL updates for each toggle
+- Test browser back/forward preserves all states
+- Verify page refresh maintains toggle positions
+
+[Stop Condition]
+PASS: All toggles work via click and URL; correct defaults enforced; navigation preserved
+FAIL: If toggle stuck, check hook integration. If defaults wrong, verify defaultValue parameter.

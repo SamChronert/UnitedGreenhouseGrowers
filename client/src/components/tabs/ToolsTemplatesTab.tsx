@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
-import { useQueryParams } from "@/hooks/useQueryParams";
+import { useParamState } from "@/hooks/useQueryParams";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ExternalLink, Download, Eye, Copy, FileSpreadsheet, DollarSign, Monitor, Smartphone, Globe, Wrench, FileText, Calculator } from "lucide-react";
+import { ExternalLink, Download, Eye, Copy, FileSpreadsheet, DollarSign, Monitor, Smartphone, Globe, Wrench, FileText, Calculator, Grid3X3, List } from "lucide-react";
 import { useResources, Resource, ResourceFilters } from "@/hooks/useResources";
 import SearchBox from "@/components/SearchBox";
 import TemplatePreviewModal from "../TemplatePreviewModal";
@@ -49,11 +49,11 @@ const TEMPLATE_CATEGORIES = [
 ];
 
 export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTabProps) {
-  const { getParam, setParam } = useQueryParams();
   const { toast } = useToast();
   
-  // Get active sub-tab from URL params
-  const activeSubTab = getParam('sub') || 'tools';
+  // URL state management
+  const [activeSubTab, setActiveSubTab] = useParamState('sub', 'tools');
+  const [viewMode, setViewMode] = useParamState('view', 'list');
   
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,8 +95,13 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
 
   // Handle sub-tab change
   const handleSubTabChange = useCallback((subTab: string) => {
-    setParam('sub', subTab);
-  }, [setParam]);
+    setActiveSubTab(subTab);
+  }, [setActiveSubTab]);
+  
+  // Handle view mode change
+  const handleViewModeChange = useCallback((mode: string) => {
+    setViewMode(mode);
+  }, [setViewMode]);
 
   // Handle tool click
   const handleToolClick = useCallback((tool: Resource) => {
@@ -226,14 +231,30 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
         <TabsContent value="tools" className="space-y-6">
           {/* Search and Filters */}
           <div className="space-y-4">
-            <SearchBox
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search tools by name or description..."
-              resources={tools}
-              resourceType="tools"
-              className="max-w-md"
-            />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <SearchBox
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search tools by name or description..."
+                resources={tools}
+                resourceType="tools"
+                className="max-w-md"
+              />
+              
+              {/* View Toggle */}
+              <Tabs value={viewMode} onValueChange={handleViewModeChange}>
+                <TabsList className="grid w-full grid-cols-2 max-w-[200px]">
+                  <TabsTrigger value="list" className="flex items-center gap-2">
+                    <List className="h-4 w-4" />
+                    List
+                  </TabsTrigger>
+                  <TabsTrigger value="grid" className="flex items-center gap-2">
+                    <Grid3X3 className="h-4 w-4" />
+                    Grid
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
             
             <div className="flex flex-wrap gap-4">
               <Select
@@ -347,14 +368,30 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
         <TabsContent value="templates" className="space-y-6">
           {/* Search and Filters */}
           <div className="space-y-4">
-            <SearchBox
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search templates by name or description..."
-              resources={templates}
-              resourceType="templates"
-              className="max-w-md"
-            />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <SearchBox
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search templates by name or description..."
+                resources={templates}
+                resourceType="templates"
+                className="max-w-md"
+              />
+              
+              {/* View Toggle */}
+              <Tabs value={viewMode} onValueChange={handleViewModeChange}>
+                <TabsList className="grid w-full grid-cols-2 max-w-[200px]">
+                  <TabsTrigger value="list" className="flex items-center gap-2">
+                    <List className="h-4 w-4" />
+                    List
+                  </TabsTrigger>
+                  <TabsTrigger value="grid" className="flex items-center gap-2">
+                    <Grid3X3 className="h-4 w-4" />
+                    Grid
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
             
             <Select
               value={templateFilters.category}

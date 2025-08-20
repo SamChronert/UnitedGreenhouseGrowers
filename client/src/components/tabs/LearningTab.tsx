@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useQueryParams } from '@/hooks/useQueryParams';
+import { useParamState } from '@/hooks/useQueryParams';
 import { useResources } from '@/hooks/useResources';
 import SearchBox from '@/components/SearchBox';
 import { type Resource, type ResourceFilters } from '@shared/schema';
@@ -56,10 +56,8 @@ const FORMATS = [
 
 
 export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
-  const { getParam, setParam } = useQueryParams();
-  
-  // Get view mode from URL params
-  const viewMode = getParam('view') || 'grid';
+  // URL state management
+  const [viewMode, setViewMode] = useParamState('view', 'grid');
   
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,8 +85,8 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
 
   // Handle view mode change
   const handleViewModeChange = useCallback((mode: string) => {
-    setParam('view', mode);
-  }, [setParam]);
+    setViewMode(mode);
+  }, [setViewMode]);
 
   // Handle course click
   const handleCourseClick = useCallback((course: Resource) => {

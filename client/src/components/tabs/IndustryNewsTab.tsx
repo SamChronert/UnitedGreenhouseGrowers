@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useLocation } from 'wouter';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useParamState } from '@/hooks/useQueryParams';
 import { useResources } from '@/hooks/useResources';
 import SearchBox from '@/components/SearchBox';
 import { type Resource, type ResourceFilters } from '@shared/schema';
@@ -16,7 +17,9 @@ import {
   Users,
   Mail,
   BookOpen,
-  Loader2
+  Loader2,
+  Grid3X3,
+  List
 } from 'lucide-react';
 
 interface IndustryNewsTabProps {
@@ -31,13 +34,19 @@ const FREQUENCIES = [
 ];
 
 export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabProps) {
-  const [location] = useLocation();
+  // URL state management
+  const [viewMode, setViewMode] = useParamState('view', 'list');
   
   // State
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     frequency: 'all'
   });
+  
+  // Handle view mode change
+  const handleViewModeChange = useCallback((mode: string) => {
+    setViewMode(mode);
+  }, [setViewMode]);
 
   // Track tab view on mount
   useEffect(() => {
@@ -116,7 +125,7 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
 
       {/* Search and Filters */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <SearchBox
             value={searchQuery}
             onChange={setSearchQuery}
@@ -125,6 +134,23 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
             resourceType="industry_news"
             className="max-w-md"
           />
+          
+          {/* View Toggle */}
+          <Tabs value={viewMode} onValueChange={handleViewModeChange}>
+            <TabsList className="grid w-full grid-cols-2 max-w-[200px]">
+              <TabsTrigger value="list" className="flex items-center gap-2">
+                <List className="h-4 w-4" />
+                List
+              </TabsTrigger>
+              <TabsTrigger value="grid" className="flex items-center gap-2">
+                <Grid3X3 className="h-4 w-4" />
+                Grid
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        
+        <div className="flex items-center gap-4">
           
           <Select
             value={filters.frequency}

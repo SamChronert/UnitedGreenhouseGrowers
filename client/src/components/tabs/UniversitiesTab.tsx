@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -9,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink, MapPin, GraduationCap, AlertCircle, RefreshCw, Grid3X3, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInfiniteResources, useResourcesList, Resource, ResourceFilters } from "@/hooks/useResources";
-import { useQueryParams } from "@/hooks/useQueryParams";
+import { useParamState } from "@/hooks/useQueryParams";
 import { UniversityMapWithLoading } from "@/components/LazyComponents";
 import SearchBox from "@/components/SearchBox";
 import FilterBar from "@/components/FilterBar";
@@ -20,21 +19,22 @@ interface UniversitiesTabProps {
 }
 
 export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabProps) {
-  // URL state management with new hook
-  const { getParam, setParam } = useQueryParams();
-  const [location, setLocation] = useLocation();
-  const urlParams = useMemo(() => new URLSearchParams(location.split('?')[1] || ''), [location]);
+  // URL state management with useParamState
+  const [viewMode, setViewMode] = useParamState('view', 'map');
+  const [searchQuery, setSearchQuery] = useParamState('q', '');
+  const [filtersParam, setFiltersParam] = useParamState('filters', '{}');
+  const [sort, setSort] = useParamState('sort', 'relevance');
   
-  // Get view mode from URL params
-  const viewMode = getParam('view') || 'grid';
+  // Parse filters from URL param
+  const filters = useMemo(() => {
+    try {
+      return JSON.parse(filtersParam) as ResourceFilters;
+    } catch {
+      return {} as ResourceFilters;
+    }
+  }, [filtersParam]);
   
   // Local state
-  const [searchQuery, setSearchQuery] = useState(urlParams.get('q') || '');
-  const [filters, setFilters] = useState<ResourceFilters>(() => {
-    const filtersParam = urlParams.get('filters');
-    return filtersParam ? JSON.parse(filtersParam) : {};
-  });
-  const [sort, setSort] = useState(urlParams.get('sort') || 'relevance');
   const [selectedUniversity, setSelectedUniversity] = useState<Resource | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -56,35 +56,15 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
   const universities = useResourcesList(infiniteQuery);
   const { data, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage } = infiniteQuery;
 
-  // Update URL when filters/search change
-  useEffect(() => {
-    const params = new URLSearchParams();
-    
-    if (searchQuery.trim()) {
-      params.set('q', searchQuery.trim());
-    }
-    
-    if (Object.keys(filters).length > 0) {
-      params.set('filters', JSON.stringify(filters));
-    }
-    
-    if (sort !== 'relevance') {
-      params.set('sort', sort);
-    }
-    
-    const newSearch = params.toString();
-    const basePath = location.split('?')[0];
-    const newLocation = newSearch ? `${basePath}?${newSearch}` : basePath;
-    
-    if (newLocation !== location) {
-      setLocation(newLocation);
-    }
-  }, [searchQuery, filters, sort, location, setLocation]);
+  // Update URL when filters change
+  const handleFiltersChange = useCallback((newFilters: ResourceFilters) => {
+    setFiltersParam(JSON.stringify(newFilters));
+  }, [setFiltersParam]);
 
   // Handle view mode change
   const handleViewModeChange = useCallback((mode: string) => {
-    setParam('view', mode);
-  }, [setParam]);
+    setViewMode(mode);
+  }, [setViewMode]);
 
   // Handle university card click
   const handleUniversityClick = useCallback((university: Resource) => {
@@ -158,7 +138,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
         <FilterBar
           resourceType="universities"
           filters={filters}
-          onFiltersChange={setFilters}
+          onFiltersChange={handleFiltersChange}
           sort={sort}
           onSortChange={setSort}
         />

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
-import { useQueryParams } from '@/hooks/useQueryParams';
+import { useParamState } from '@/hooks/useQueryParams';
 import { useResources } from '@/hooks/useResources';
 import { type Resource, type ResourceFilters, type BlogPost } from '@shared/schema';
 import { trackTabView, trackResourceClick } from '@/lib/analytics';
@@ -47,10 +47,8 @@ const TOPIC_TAGS = [
 ];
 
 export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTabProps) {
-  const { getParam, setParam } = useQueryParams();
-  
-  // Get active section from URL params
-  const activeSection = getParam('section') || 'blogs';
+  // URL state management
+  const [activeSection, setActiveSection] = useParamState('section', 'blogs');
   
   // State
   const [bulletinSearch, setBulletinSearch] = useState('');
@@ -82,8 +80,8 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
 
   // Handle section change
   const handleSectionChange = useCallback((section: string) => {
-    setParam('section', section);
-  }, [setParam]);
+    setActiveSection(section);
+  }, [setActiveSection]);
 
   // Handle blog click
   const handleBlogClick = useCallback((blog: BlogPost) => {
