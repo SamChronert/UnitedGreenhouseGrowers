@@ -41,6 +41,10 @@ function Router() {
   return (
     <Switch>
       {/* App Shell routes - bypass main Layout */}
+      <Route path="/demo">
+        <DashboardWrapper isDemo />
+      </Route>
+      
       <Route path="/demo/*">
         <DashboardWrapper isDemo />
       </Route>
