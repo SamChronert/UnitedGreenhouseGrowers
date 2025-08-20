@@ -539,7 +539,6 @@ export class DatabaseStorage implements IStorage {
   async recordAnalyticsEvents(events: any[], userId?: string | null): Promise<void> {
     try {
       const analyticsData = events.map(event => ({
-        id: randomUUID(),
         user_id: userId,
         session_id: event.sessionId,
         event_type: event.eventType,
