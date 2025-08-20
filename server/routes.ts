@@ -370,14 +370,31 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     country: z.string().optional(),
     programName: z.string().optional(),
     rfpDueDate: z.string().optional(),
-    eligibility: z.string().optional()
+    eligibility: z.string().optional(),
+    // Grants-specific filters
+    agency: z.string().optional(),
+    amountMin: z.string().optional(),
+    amountMax: z.string().optional(),
+    focusAreas: z.string().optional(),
+    orgTypes: z.string().optional(),
+    regions: z.string().optional(),
+    hideExpired: z.string().optional(),
+    eligibilityType: z.string().optional(),
+    // Organization-specific filters
+    functions: z.string().optional(),
+    // Learning-specific filters
+    category: z.string().optional(),
+    costType: z.string().optional(),
+    level: z.string().optional(),
+    format: z.string().optional(),
+    language: z.string().optional()
   }).passthrough();
   
   const ResourceQuerySchema = z.object({
     type: z.enum(['universities', 'organizations', 'grants', 'tools', 'templates', 'learning', 'bulletins', 'industry_news']).optional(),
     q: z.string().optional(),
     filters: z.string().optional(),
-    sort: z.enum(['relevance', 'title', 'newest', 'quality']).default('relevance'),
+    sort: z.enum(['relevance', 'title', 'newest', 'quality', 'dueDate', 'agency', 'amount', 'provider', 'cost']).default('relevance'),
     cursor: z.string().optional(),
     limit: z.coerce.number().min(1).max(100).default(20)
   });
@@ -459,6 +476,21 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
           break;
         case 'quality':
           orderBy = "COALESCE((data->>'qualityScore')::int, 0) DESC, id";
+          break;
+        case 'dueDate':
+          orderBy = "COALESCE(data->>'applicationDeadline', data->>'rfpDueDate', '9999-12-31') ASC, id";
+          break;
+        case 'agency':
+          orderBy = "COALESCE(data->>'agency', 'ZZZ') ASC, id";
+          break;
+        case 'amount':
+          orderBy = "COALESCE((data->>'grantAmountMax')::int, (data->>'grantAmountMin')::int, 0) DESC, id";
+          break;
+        case 'provider':
+          orderBy = "COALESCE(data->>'provider', 'ZZZ') ASC, id";
+          break;
+        case 'cost':
+          orderBy = "COALESCE(data->>'costType', 'ZZZ') ASC, id";
           break;
         default:
           orderBy = 'id';
