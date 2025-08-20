@@ -16,7 +16,7 @@ class Analytics {
   private maxQueueSize = 20;
   private flushInterval = 5000; // 5 seconds
   private flushTimer: NodeJS.Timeout | null = null;
-  private isEnabled = true;
+  private isEnabled = false; // Temporarily disabled
   
   constructor() {
     this.sessionId = this.getOrCreateSessionId();
@@ -35,7 +35,7 @@ class Analytics {
 
   private checkDNTHeader(): void {
     // Respect Do Not Track header
-    if (navigator.doNotTrack === '1' || window.doNotTrack === '1') {
+    if (navigator.doNotTrack === '1' || (window as any).doNotTrack === '1') {
       this.isEnabled = false;
     }
   }
