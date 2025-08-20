@@ -45,7 +45,7 @@ function Router() {
         <DashboardWrapper isDemo />
       </Route>
       
-      <Route path="/dashboard" nest>
+      <Route path="/dashboard*">
         <AuthGuard requireMember>
           <DashboardWrapper />
         </AuthGuard>
