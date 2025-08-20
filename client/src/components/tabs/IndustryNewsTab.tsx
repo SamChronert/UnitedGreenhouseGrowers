@@ -203,7 +203,7 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
           <h3 className="text-lg font-medium text-gray-900 mb-2">No news sources found</h3>
           <p className="text-gray-600">Try adjusting your search to find industry publications.</p>
         </div>
-      ) : (
+      ) : viewMode === 'list' ? (
         <div className="space-y-8">
           {Object.entries(groupedSources)
             .filter(([_, sources]) => sources.length > 0)
@@ -282,6 +282,67 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
               </div>
             ))
           }
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {newsSources.map(source => (
+            <Card key={source.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-orange-100 rounded-lg flex-shrink-0">
+                    <Newspaper className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-lg line-clamp-2">{source.title}</CardTitle>
+                    {source.data?.sourceName && source.data.sourceName !== source.title && (
+                      <p className="text-sm text-gray-600 mt-1">{source.data.sourceName}</p>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                  {source.summary || source.data?.description || 'Industry publication providing news and insights.'}
+                </p>
+                
+                <div className="space-y-3">
+                  {source.data?.frequency && (
+                    <div className="flex items-center gap-2">
+                      <Badge variant={getFrequencyBadgeVariant(source.data.frequency)}>
+                        <Clock className="h-3 w-3 mr-1" />
+                        {source.data.frequency}
+                      </Badge>
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1"
+                      onClick={() => handleNewsSourceClick(source, 'visit')}
+                    >
+                      <Globe className="h-4 w-4 mr-2" />
+                      Visit
+                    </Button>
+                    
+                    {source.data?.subscribeUrl && (
+                      <Button 
+                        variant="default" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleNewsSourceClick(source, 'subscribe')}
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Subscribe
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
     </div>

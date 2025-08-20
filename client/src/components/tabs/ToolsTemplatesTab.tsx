@@ -320,39 +320,73 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tools.map(tool => (
-                <Card key={tool.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleToolClick(tool)}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <Calculator className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">{tool.title}</CardTitle>
-                          <div className="flex items-center gap-2 mt-1">
-                            {getPlatformIcon(tool.data?.platform || 'Web')}
-                            <span className="text-sm text-gray-600">{tool.data?.platform || 'Web'}</span>
+            viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tools.map(tool => (
+                  <Card key={tool.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleToolClick(tool)}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <Calculator className="h-6 w-6 text-blue-600" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg">{tool.title}</CardTitle>
+                            <div className="flex items-center gap-2 mt-1">
+                              {getPlatformIcon(tool.data?.platform || 'Web')}
+                              <span className="text-sm text-gray-600">{tool.data?.platform || 'Web'}</span>
+                            </div>
                           </div>
                         </div>
+                        <ExternalLink className="h-4 w-4 text-gray-400" />
                       </div>
-                      <ExternalLink className="h-4 w-4 text-gray-400" />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 mb-4 line-clamp-3">{tool.summary}</p>
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline">{tool.data?.category || 'General'}</Badge>
-                      <Badge variant={getCostBadgeVariant(tool.data?.costType)}>
-                        <DollarSign className="h-3 w-3 mr-1" />
-                        {tool.data?.costType || 'Unknown'}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 line-clamp-3">{tool.summary}</p>
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline">{tool.data?.category || 'General'}</Badge>
+                        <Badge variant={getCostBadgeVariant(tool.data?.costType)}>
+                          <DollarSign className="h-3 w-3 mr-1" />
+                          {tool.data?.costType || 'Unknown'}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {tools.map(tool => (
+                  <Card key={tool.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleToolClick(tool)}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                            <Calculator className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-900 truncate">{tool.title}</h3>
+                            <p className="text-sm text-gray-600 line-clamp-1 mt-1">{tool.summary}</p>
+                            <div className="flex items-center gap-3 mt-2">
+                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                {getPlatformIcon(tool.data?.platform || 'Web')}
+                                <span>{tool.data?.platform || 'Web'}</span>
+                              </div>
+                              <Badge variant="outline" className="text-xs">{tool.data?.category || 'General'}</Badge>
+                              <Badge variant={getCostBadgeVariant(tool.data?.costType)} className="text-xs">
+                                <DollarSign className="h-3 w-3 mr-1" />
+                                {tool.data?.costType || 'Unknown'}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )
           )}
           
           {!toolsLoading && tools.length === 0 && (
@@ -424,7 +458,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                 </Card>
               ))}
             </div>
-          ) : (
+          ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {templates.map(template => (
                 <Card key={template.id} className="hover:shadow-lg transition-shadow">
@@ -490,6 +524,60 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                           >
                             <Download className="h-3 w-3 mr-1" />
                             XLSX
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {templates.map(template => (
+                <Card key={template.id} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
+                          <FileSpreadsheet className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 truncate">{template.title}</h3>
+                          <p className="text-sm text-gray-600 line-clamp-1 mt-1">{template.summary}</p>
+                          <div className="flex items-center gap-3 mt-2">
+                            <Badge variant="outline" className="text-xs">
+                              {template.data?.category || 'General'}
+                            </Badge>
+                            {template.data?.language && (
+                              <span className="text-xs text-gray-500">
+                                Language: {template.data.language}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTemplatePreview(template);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {template.data?.fileRefs?.csv && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTemplateDownload(template, 'csv');
+                            }}
+                          >
+                            <Download className="h-4 w-4" />
                           </Button>
                         )}
                       </div>
