@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { apiRequest } from "@/lib/queryClient";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Menu, X, Search, HelpCircle } from "lucide-react";
+import { Menu, X, Search, HelpCircle, Home } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import uggaLogo from "@assets/2_1750100657577.png";
@@ -143,6 +143,18 @@ export default function AppShell({ children }: AppShellProps) {
               );
             })}
           </nav>
+          
+          {/* Return to Website Button */}
+          <div className="px-4 pb-4 border-t border-gray-200 pt-4 flex-shrink-0">
+            <Link
+              href="/"
+              className="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <Home className="h-4 w-4" />
+              <span className="ml-3 truncate">Return to UGGA Website</span>
+            </Link>
+          </div>
         </div>
       </aside>
 
