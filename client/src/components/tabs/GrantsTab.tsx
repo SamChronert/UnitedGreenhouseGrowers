@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Calendar, ExternalLink, Download, AlertCircle, RefreshCw, DollarSign, Clock, Building } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Calendar, ExternalLink, Download, AlertCircle, RefreshCw, DollarSign, Clock, Building, Filter } from "lucide-react";
 import { useResources, Resource, ResourceFilters } from "@/hooks/useResources";
 import SearchBox from "@/components/SearchBox";
 import { trackTabView, trackResourceClick } from "@/lib/analytics";
@@ -68,10 +69,11 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
   const [selectedFocusAreas, setSelectedFocusAreas] = useState<string[]>([]);
   const [selectedOrgTypes, setSelectedOrgTypes] = useState<string[]>([]);
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // Track tab view on mount
   useEffect(() => {
-    trackTabView('grants', 'Grants');
+    trackTabView('grants', { tabLabel: 'Grants' });
     onAnalyticsEvent?.('tab_view', { tab: 'grants' });
   }, [onAnalyticsEvent]);
 
@@ -230,134 +232,169 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
         </p>
       </div>
 
-      {/* Search */}
-      <SearchBox
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder="Search grants by name, agency, or focus area..."
-        resources={grants}
-        resourceType="grants"
-        className="max-w-md"
-      />
-
-      {/* Comprehensive Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filter Grants</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Amount Range */}
-          <div>
-            <label className="text-sm font-medium mb-2 block">Amount Range</label>
-            <div className="px-3">
-              <Slider
-                value={amountRange}
-                onValueChange={setAmountRange}
-                min={0}
-                max={10000000}
-                step={50000}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>$0</span>
-                <span className="font-medium">
-                  ${(amountRange[0]/1000).toFixed(0)}K - ${amountRange[1] >= 1000000 ? (amountRange[1]/1000000).toFixed(1) + 'M' : (amountRange[1]/1000).toFixed(0) + 'K'}
-                </span>
-                <span>$10M+</span>
+      {/* Search and Filters Row */}
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
+        <SearchBox
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search grants by name, agency, or focus area..."
+          resources={grants}
+          resourceType="grants"
+          className="max-w-md flex-1"
+        />
+        
+        {/* Collapsible Filters */}
+        <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              Filters
+              {(Object.keys(grantsFilters).length > 0 || selectedFocusAreas.length > 0 || selectedOrgTypes.length > 0 || selectedStates.length > 0) && (
+                <Badge variant="secondary" className="ml-1 h-5 min-w-5 text-xs">
+                  {Object.keys(grantsFilters).length + selectedFocusAreas.length + selectedOrgTypes.length + selectedStates.length}
+                </Badge>
+              )}
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="w-[400px] sm:max-w-[400px] overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Filter Grants</SheetTitle>
+            </SheetHeader>
+            <div className="mt-6 space-y-6">
+              {/* Amount Range */}
+              <div>
+                <label className="text-sm font-medium mb-3 block">Amount Range</label>
+                <div className="px-2">
+                  <Slider
+                    value={amountRange}
+                    onValueChange={setAmountRange}
+                    min={0}
+                    max={10000000}
+                    step={50000}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>$0</span>
+                    <span className="font-medium">
+                      ${(amountRange[0]/1000).toFixed(0)}K - ${amountRange[1] >= 1000000 ? (amountRange[1]/1000000).toFixed(1) + 'M' : (amountRange[1]/1000).toFixed(0) + 'K'}
+                    </span>
+                    <span>$10M+</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Focus Areas */}
-          <div>
-            <label className="text-sm font-medium mb-2 block">Focus Areas</label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {FOCUS_AREAS.map(area => (
-                <div key={area} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={area}
-                    checked={selectedFocusAreas.includes(area)}
-                    onCheckedChange={(checked) => {
-                      setSelectedFocusAreas(prev => 
-                        checked 
-                          ? [...prev, area]
-                          : prev.filter(a => a !== area)
-                      );
-                    }}
-                  />
-                  <label htmlFor={area} className="text-sm">{area}</label>
+              {/* Focus Areas */}
+              <div>
+                <label className="text-sm font-medium mb-3 block">Focus Areas</label>
+                <div className="grid grid-cols-1 gap-3">
+                  {FOCUS_AREAS.map(area => (
+                    <div key={area} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`filter-${area}`}
+                        checked={selectedFocusAreas.includes(area)}
+                        onCheckedChange={(checked) => {
+                          setSelectedFocusAreas(prev => 
+                            checked 
+                              ? [...prev, area]
+                              : prev.filter(a => a !== area)
+                          );
+                        }}
+                      />
+                      <label htmlFor={`filter-${area}`} className="text-sm">{area}</label>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Organization Types */}
-          <div>
-            <label className="text-sm font-medium mb-2 block">Organization Type Eligibility</label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {ORG_TYPES.map(type => (
-                <div key={type} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={type}
-                    checked={selectedOrgTypes.includes(type)}
-                    onCheckedChange={(checked) => {
-                      setSelectedOrgTypes(prev => 
-                        checked 
-                          ? [...prev, type]
-                          : prev.filter(t => t !== type)
-                      );
-                    }}
-                  />
-                  <label htmlFor={type} className="text-sm">{type}</label>
+              {/* Organization Types */}
+              <div>
+                <label className="text-sm font-medium mb-3 block">Organization Type Eligibility</label>
+                <div className="grid grid-cols-1 gap-3">
+                  {ORG_TYPES.map(type => (
+                    <div key={type} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`org-${type}`}
+                        checked={selectedOrgTypes.includes(type)}
+                        onCheckedChange={(checked) => {
+                          setSelectedOrgTypes(prev => 
+                            checked 
+                              ? [...prev, type]
+                              : prev.filter(t => t !== type)
+                          );
+                        }}
+                      />
+                      <label htmlFor={`org-${type}`} className="text-sm">{type}</label>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* States/Regions */}
+              <div>
+                <label className="text-sm font-medium mb-3 block">Eligible Regions/States</label>
+                <Select
+                  value={selectedStates[0] || ''}
+                  onValueChange={(value) => {
+                    if (value) {
+                      setSelectedStates([value]);
+                    } else {
+                      setSelectedStates([]);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select state..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {US_STATES.map(state => (
+                      <SelectItem key={state} value={state}>{state}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Hide Expired Toggle */}
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="filter-hide-expired"
+                  checked={hideExpired}
+                  onCheckedChange={setHideExpired}
+                />
+                <label htmlFor="filter-hide-expired" className="text-sm font-medium">Hide expired grants</label>
+              </div>
+              
+              {/* Clear Filters */}
+              {(Object.keys(grantsFilters).length > 0 || selectedFocusAreas.length > 0 || selectedOrgTypes.length > 0 || selectedStates.length > 0) && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setSearchQuery('');
+                    setFilters({});
+                    setSelectedFocusAreas([]);
+                    setSelectedOrgTypes([]);
+                    setSelectedStates([]);
+                    setAmountRange([0, 10000000]);
+                    setHideExpired(true);
+                  }}
+                  className="w-full"
+                >
+                  Clear All Filters
+                </Button>
+              )}
             </div>
-          </div>
-
-          {/* States/Regions */}
-          <div>
-            <label className="text-sm font-medium mb-2 block">Eligible Regions/States</label>
-            <Select
-              value={selectedStates[0] || ''}
-              onValueChange={(value) => {
-                if (value) {
-                  setSelectedStates([value]);
-                } else {
-                  setSelectedStates([]);
-                }
-              }}
-            >
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Select state..." />
-              </SelectTrigger>
-              <SelectContent>
-                {US_STATES.map(state => (
-                  <SelectItem key={state} value={state}>{state}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Hide Expired Toggle */}
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="hide-expired"
-              checked={hideExpired}
-              onCheckedChange={setHideExpired}
-            />
-            <label htmlFor="hide-expired" className="text-sm font-medium">Hide expired grants</label>
-          </div>
-        </CardContent>
-      </Card>
+          </SheetContent>
+        </Sheet>
+      </div>
 
       {/* Results Summary and Export */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-600">
-          {totalCount} {totalCount === 1 ? 'grant' : 'grants'} found
-          {Object.keys(grantsFilters).length > 0 || searchQuery.trim() ? ' (filtered)' : ''}
+          <strong>{totalCount}</strong> {totalCount === 1 ? 'grant' : 'grants'} found
+          {(Object.keys(grantsFilters).length > 0 || selectedFocusAreas.length > 0 || selectedOrgTypes.length > 0 || selectedStates.length > 0 || searchQuery.trim()) ? ' (filtered)' : ''}
         </div>
         <Button
           variant="outline"
+          size="sm"
           onClick={handleExportCSV}
           disabled={grants.length === 0}
           className="flex items-center gap-2"
