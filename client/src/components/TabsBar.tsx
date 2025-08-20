@@ -103,10 +103,10 @@ export default function TabsBar({ activeTab, onTabChange, onAnalyticsEvent }: Ta
       <nav aria-label="Resource type navigation">
         <div 
           ref={tabsRef}
-          className="flex flex-wrap gap-x-8 gap-y-4 sm:overflow-x-auto sm:flex-nowrap scrollbar-hide"
+          className="flex flex-wrap gap-x-8 gap-y-4"
           role="tablist"
         >
-          <div className="flex flex-wrap gap-x-8 gap-y-4 sm:flex-nowrap sm:space-x-8 sm:min-w-max px-1">
+          <div className="flex flex-wrap gap-x-8 gap-y-4 px-1">
             {TABS.map((tab, index) => {
               const isActive = tab.id === activeTab;
               const tabIndex = isActive ? 0 : -1;
