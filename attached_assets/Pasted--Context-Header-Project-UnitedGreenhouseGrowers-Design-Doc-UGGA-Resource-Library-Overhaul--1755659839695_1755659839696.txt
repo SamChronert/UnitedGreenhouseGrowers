@@ -1,0 +1,109 @@
+[Context Header]
+- Project: UnitedGreenhouseGrowers
+- Design Doc: "UGGA Resource Library Overhaul" (Doc ID: RLDD-v1)
+- Invariants: (1) Keep existing auth system, (2) Maintain current routing structure, (3) A11y WCAG AA minimum, (4) No breaking changes to other pages, (5) Preserve existing blog functionality
+
+[Goal]
+Implement the remaining content tabs: Learning (TB-11), Blogs & Bulletins (TB-12), and Industry News (TB-13).
+
+[Actions for Replit Agent]
+1. Create `src/components/tabs/LearningTab.jsx`:
+   - Grid/list toggle for course cards
+   - Course card shows: title, provider, format (Online/In-person/Hybrid), level (Beginner/Intermediate/Advanced), cost, language, duration
+   - Filters: category (Technical, Business, Certification), cost type (Free/Paid), level, format, language
+   - Add 15-20 seed learning resources (courses, video series, workshops)
+   - Structure:
+     ```
+     {
+       type: 'learning',
+       title: 'Greenhouse Management Fundamentals',
+       data: {
+         provider: 'Cornell University',
+         format: 'Online',
+         level: 'Beginner',
+         languages: ['English', 'Spanish'],
+         costType: 'Paid',
+         priceTypical: '$299',
+         credential: 'Certificate',
+         duration: '6 weeks',
+         url: 'https://...'
+       }
+     }
+     ```
+
+2. Create `src/components/tabs/BlogsBulletinsTab.jsx`:
+   - Two sections: "UGGA Blogs" and "Industry Bulletins"
+   - Blogs section: reuse existing blog data/component if available
+   - Bulletins section: searchable list of industry publications
+   - Bulletin structure:
+     ```
+     {
+       type: 'bulletins',
+       title: 'IPM Guidelines for Greenhouse Crops',
+       data: {
+         source: 'University Extension',
+         topicTags: ['Pest Management', 'Best Practices'],
+         publishedAt: '2024-01-15',
+         url: 'https://...'
+       }
+     }
+     ```
+   - Add search with highlighting
+   - Filter by topic tags and source
+   - Sort by date or relevance
+
+3. Create `src/components/tabs/IndustryNewsTab.jsx`:
+   - Curated list of newsletter/news sources
+   - Card layout with source logo, name, description, frequency
+   - Categories: Daily, Weekly, Monthly, Quarterly
+   - Subscribe/Visit buttons for each source
+   - Add 10-15 news sources:
+     ```
+     {
+       type: 'industry_news',
+       title: 'Greenhouse Grower Magazine',
+       data: {
+         sourceName: 'Greenhouse Grower',
+         frequency: 'Monthly',
+         description: 'Leading trade publication...',
+         url: 'https://www.greenhousegrower.com',
+         subscribeUrl: 'https://www.greenhousegrower.com/subscribe'
+       }
+     }
+     ```
+
+4. Implement common features across tabs:
+   - Loading skeletons
+   - Empty states with helpful messages
+   - Error boundaries with retry
+   - Analytics tracking for all interactions
+
+5. Add intro descriptions for each tab:
+   - Learning: "Expand your greenhouse expertise with courses, certifications, and training resources from leading institutions."
+   - Blogs & Bulletins: "Stay informed with UGGA insights and curated industry research bulletins."
+   - Industry News: "Connect with trusted greenhouse industry news sources and publications."
+
+[Checks & Tests]
+- Navigate through all three new tabs
+- Test Learning: toggle grid/list, filter by cost and level
+- Test Blogs & Bulletins: search for specific terms, filter by tags
+- Test Industry News: verify external links work
+- Check loading states and error handling
+- Verify intro text displays for each tab
+- Test mobile responsiveness for all layouts
+- Confirm analytics events fire for interactions
+- Show me search results in Bulletins for "pest"
+- Show me Learning filtered to "Free" and "Beginner"
+
+[Commit/PR]
+Commit message: "feat: implement Learning, Blogs & Bulletins, and Industry News tabs
+
+- Add Learning catalog with course filters
+- Integrate Blogs with new Bulletins section
+- Create Industry News source directory
+- Include search and filtering for all content types"
+
+[Stop Condition]
+PASS: All three tabs load with appropriate content, filters work, external links tracked
+FAIL: If blog integration fails, create placeholder. If search is slow, add debouncing.
+```

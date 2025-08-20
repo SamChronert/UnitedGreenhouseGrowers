@@ -9,6 +9,9 @@ import TabsBar from "@/components/TabsBar";
 import TabIntro from "@/components/TabIntro";
 import UniversitiesTab from "@/components/tabs/UniversitiesTab";
 import ToolsTemplatesTab from "@/components/tabs/ToolsTemplatesTab";
+import LearningTab from "@/components/tabs/LearningTab";
+import BlogsBulletinsTab from "@/components/tabs/BlogsBulletinsTab";
+import IndustryNewsTab from "@/components/tabs/IndustryNewsTab";
 import { SuggestDialog } from "@/components/resources/SuggestDialog";
 
 // Analytics helper
@@ -105,21 +108,15 @@ export default function Resources() {
             )}
             
             {activeTab === 'learning' && (
-              <div className="text-center py-12 text-gray-500">
-                Learning tab coming soon...
-              </div>
+              <LearningTab onAnalyticsEvent={handleAnalyticsEvent} />
             )}
             
             {activeTab === 'blogs-bulletins' && (
-              <div className="text-center py-12 text-gray-500">
-                Blogs & Bulletins tab coming soon...
-              </div>
+              <BlogsBulletinsTab onAnalyticsEvent={handleAnalyticsEvent} />
             )}
             
             {activeTab === 'industry-news' && (
-              <div className="text-center py-12 text-gray-500">
-                Industry News tab coming soon...
-              </div>
+              <IndustryNewsTab onAnalyticsEvent={handleAnalyticsEvent} />
             )}
           </main>
         </div>
