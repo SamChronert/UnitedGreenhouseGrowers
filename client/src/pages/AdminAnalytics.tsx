@@ -79,7 +79,9 @@ export default function AdminAnalytics() {
   });
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    // Convert "all" values back to empty strings for API filtering
+    const filterValue = value === "all" ? "" : value;
+    setFilters(prev => ({ ...prev, [key]: filterValue }));
   };
 
   const resetFilters = () => {
@@ -195,12 +197,12 @@ export default function AdminAnalytics() {
               </div>
               <div>
                 <Label htmlFor="eventType">Event Type</Label>
-                <Select value={filters.eventType} onValueChange={(value) => handleFilterChange('eventType', value)}>
+                <Select value={filters.eventType || "all"} onValueChange={(value) => handleFilterChange('eventType', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="All events" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All events</SelectItem>
+                    <SelectItem value="all">All events</SelectItem>
                     <SelectItem value="tab_view">Tab Views</SelectItem>
                     <SelectItem value="search_submit">Searches</SelectItem>
                     <SelectItem value="filter_change">Filter Changes</SelectItem>
@@ -212,12 +214,12 @@ export default function AdminAnalytics() {
               </div>
               <div>
                 <Label htmlFor="tab">Resource Tab</Label>
-                <Select value={filters.tab} onValueChange={(value) => handleFilterChange('tab', value)}>
+                <Select value={filters.tab || "all"} onValueChange={(value) => handleFilterChange('tab', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="All tabs" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All tabs</SelectItem>
+                    <SelectItem value="all">All tabs</SelectItem>
                     <SelectItem value="universities">Universities</SelectItem>
                     <SelectItem value="organizations">Organizations</SelectItem>
                     <SelectItem value="grants">Grants</SelectItem>
