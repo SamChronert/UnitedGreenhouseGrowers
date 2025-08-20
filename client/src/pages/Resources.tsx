@@ -78,10 +78,7 @@ export default function Resources() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Development Banner */}
-      <div style={{backgroundColor: '#e6f2e6'}} className="text-gray-800 py-2 text-center text-sm">
-        🚧 UGGA is a nonprofit in its early stages. <Link href="/register" className="underline hover:no-underline font-medium">Join the pilot group</Link> and help us develop a community that supports you and your operation.
-      </div>
+      
       
       <div className="p-8">
         <div className="max-w-6xl mx-auto">
