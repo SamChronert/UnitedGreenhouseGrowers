@@ -59,12 +59,12 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
   // State
   const [searchQuery, setSearchQuery] = useState('');
   const [toolFilters, setToolFilters] = useState({
-    category: '',
-    platform: '',
-    costType: ''
+    category: 'all',
+    platform: 'all',
+    costType: 'all'
   });
   const [templateFilters, setTemplateFilters] = useState({
-    category: ''
+    category: 'all'
   });
   const [selectedTemplate, setSelectedTemplate] = useState<Resource | null>(null);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
@@ -79,7 +79,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
   const { data: toolsData, isLoading: toolsLoading, error: toolsError } = useResources({
     type: 'tools',
     query: searchQuery,
-    filters: Object.fromEntries(Object.entries(toolFilters).filter(([_, v]) => v)) as ResourceFilters,
+    filters: Object.fromEntries(Object.entries(toolFilters).filter(([_, v]) => v && v !== 'all')) as ResourceFilters,
     enabled: activeSubTab === 'tools'
   });
 
@@ -87,7 +87,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
   const { data: templatesData, isLoading: templatesLoading, error: templatesError } = useResources({
     type: 'templates',
     query: searchQuery,
-    filters: Object.fromEntries(Object.entries(templateFilters).filter(([_, v]) => v)) as ResourceFilters,
+    filters: Object.fromEntries(Object.entries(templateFilters).filter(([_, v]) => v && v !== 'all')) as ResourceFilters,
     enabled: activeSubTab === 'templates'
   });
 
@@ -249,7 +249,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {TOOL_CATEGORIES.map(cat => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
@@ -264,7 +264,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                   <SelectValue placeholder="Platform" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Platforms</SelectItem>
+                  <SelectItem value="all">All Platforms</SelectItem>
                   {PLATFORMS.map(platform => (
                     <SelectItem key={platform} value={platform}>{platform}</SelectItem>
                   ))}
@@ -279,7 +279,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                   <SelectValue placeholder="Cost Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Cost Types</SelectItem>
+                  <SelectItem value="all">All Cost Types</SelectItem>
                   {COST_TYPES.map(cost => (
                     <SelectItem key={cost} value={cost}>{cost}</SelectItem>
                   ))}
@@ -369,7 +369,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {TEMPLATE_CATEGORIES.map(cat => (
                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                 ))}

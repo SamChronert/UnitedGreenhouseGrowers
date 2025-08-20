@@ -158,14 +158,14 @@ export default function FilterBar({
         {Object.entries(availableFilters).map(([filterKey, config]: [string, any]) => (
           <Select
             key={filterKey}
-            value={filters[filterKey] || ''}
-            onValueChange={(value) => handleFilterChange(filterKey, value || undefined)}
+            value={filters[filterKey] || 'all'}
+            onValueChange={(value) => handleFilterChange(filterKey, value === 'all' ? undefined : value)}
           >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder={config.label} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">
+              <SelectItem value="all">
                 All {config.label}
               </SelectItem>
               {config.options.map((option: any) => (
