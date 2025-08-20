@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import TabsBar from "@/components/TabsBar";
 import TabIntro from "@/components/TabIntro";
 import UniversitiesTab from "@/components/tabs/UniversitiesTab";
+import OrganizationsTab from "@/components/tabs/OrganizationsTab";
 import ToolsTemplatesTab from "@/components/tabs/ToolsTemplatesTab";
 import LearningTab from "@/components/tabs/LearningTab";
 import BlogsBulletinsTab from "@/components/tabs/BlogsBulletinsTab";
@@ -123,9 +124,7 @@ export default function Resources() {
             )}
             
             {activeTab === 'organizations' && (
-              <div className="text-center py-12 text-gray-500">
-                Organizations tab coming soon...
-              </div>
+              <OrganizationsTab onAnalyticsEvent={handleAnalyticsEvent} />
             )}
             
             {activeTab === 'grants' && (
