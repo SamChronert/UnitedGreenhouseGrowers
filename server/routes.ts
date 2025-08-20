@@ -470,7 +470,33 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
           orderBy = 'id';
       }
       
-      // Special handling for organization function filters
+      // Handle grants-specific filters
+      if (type === 'grants') {
+        for (const [key, value] of Object.entries(filters)) {
+          if (key === 'amountMin' && value && typeof value === 'string') {
+            whereConditions.push(`COALESCE((data->>'amountMin')::int, 0) >= ${parseInt(value)}`);
+          } else if (key === 'amountMax' && value && typeof value === 'string') {
+            whereConditions.push(`COALESCE((data->>'amountMax')::int, 999999999) <= ${parseInt(value)}`);
+          } else if (key === 'focusAreas' && value && typeof value === 'string') {
+            const areas = value.split(',').map(area => `'${area.replace(/'/g, "''")}'`);
+            const areaConditions = areas.map(area => `data->'focusAreas' ? ${area}`);
+            whereConditions.push(`(${areaConditions.join(' OR ')})`);
+          } else if (key === 'orgTypes' && value && typeof value === 'string') {
+            const types = value.split(',').map(type => `'${type.replace(/'/g, "''")}'`);
+            const typeConditions = types.map(type => `data->'eligibility'->'orgTypes' ? ${type}`);
+            whereConditions.push(`(${typeConditions.join(' OR ')})`);
+          } else if (key === 'regions' && value && typeof value === 'string') {
+            const regions = value.split(',').map(region => `'${region.replace(/'/g, "''")}'`);
+            const regionConditions = regions.map(region => `(data->'eligibility'->'regions' ? ${region} OR data->'eligibility'->'regions' ? 'All US States')`);
+            whereConditions.push(`(${regionConditions.join(' OR ')})`);
+          } else if (key === 'hideExpired' && value === 'true') {
+            const today = new Date().toISOString().split('T')[0];
+            whereConditions.push(`(data->>'rfpDueDate' >= '${today}' OR data->>'status' = 'Rolling')`);
+          }
+        }
+      }
+      
+      // Handle organization function filters  
       if (type === 'organizations') {
         for (const [key, value] of Object.entries(filters)) {
           if (key === 'functions' && value && typeof value === 'string') {
@@ -493,13 +519,12 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
         FROM resources 
         ${whereClause}
         ORDER BY ${orderBy}
-        LIMIT $${paramIndex}
+        LIMIT ${limit + 1}
       `;
-      params.push(limit + 1);
       
       // Execute query
-      const result = await db.execute(sql.raw(baseQuery, ...params));
-      const items = result.rows;
+      const result = await db.execute(sql.raw(baseQuery));
+      const items = result.rows as any[];
       
       // Prepare response
       const hasNext = items.length > limit;
@@ -525,7 +550,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
         ${countWhereClause}
       `;
       
-      const countResult = await db.execute(sql.raw(countQuery, ...params.slice(0, -1)));
+      const countResult = await db.execute(sql.raw(countQuery));
       const total = Number(countResult.rows[0]?.count) || 0;
       
       res.json({

@@ -1,0 +1,85 @@
+[Context Header]
+- Project: UnitedGreenhouseGrowers
+- Design Doc: "UGGA Resource Library Overhaul" (Doc ID: RLDD-v1)
+- Invariants: (1) Keep existing auth system, (2) Maintain current routing structure, (3) A11y WCAG AA minimum, (4) No breaking changes to other pages, (5) Preserve existing blog functionality
+
+[Goal]
+Build the Grants tab (TB-08) with comprehensive filters and table view, and scaffold the Tax Incentives tab (TB-09) marked as "Under Development".
+
+[Actions for Replit Agent]
+1. Create `src/components/tabs/GrantsTab.jsx`:
+   - Add intro text: "Federal and state grant opportunities for greenhouse operations, infrastructure, and research. New to grants? Read our Grants 101 Guide."
+   - Link "Grants 101 Guide" to `/blog/grants-101` or appropriate blog post
+2. Implement grants table/list view with columns:
+   - Grant Name (linked)
+   - Agency
+   - Amount Range ($min - $max)
+   - Focus Areas (as tags)
+   - Due Date (highlight if <30 days)
+   - Status (Open/Closed/Rolling)
+3. Create comprehensive filter panel:
+   - Region/State multi-select
+   - Organization type eligibility checkboxes
+   - Focus area multi-select (Energy, Water, Technology, Research, etc.)
+   - Amount range slider ($0 - $10M+)
+   - Due date range picker
+   - "Hide expired" toggle
+4. Add seed data for 15-20 grants:
+   ```
+   {
+     type: 'grants',
+     title: 'USDA Specialty Crop Block Grant',
+     data: {
+       agency: 'USDA',
+       amountMin: 50000,
+       amountMax: 500000,
+       focusAreas: ['Research', 'Marketing', 'Food Safety'],
+       eligibility: {
+         orgTypes: ['Non-profit', 'University', 'Government'],
+         regions: ['All US States']
+       },
+       rfpDueDate: '2024-03-15',
+       applyUrls: {
+         grantsGov: 'https://grants.gov/...',
+         program: 'https://usda.gov/...'
+       }
+     }
+   }
+   ```
+5. Create `src/components/tabs/TaxIncentivesTab.jsx`:
+   - Display "Under Development" banner with icon
+   - Add placeholder text: "We're currently gathering and verifying tax incentive information for greenhouse operations. Check back soon!"
+   - Include empty table structure for future use
+   - Add "Notify me when available" email signup (if email service exists)
+6. Implement table features:
+   - Sortable columns (click header to sort)
+   - Sticky header on scroll
+   - Row hover highlighting
+   - Mobile-responsive (cards on small screens)
+7. Add export functionality:
+   - "Export to CSV" button for current filtered results
+   - Include all visible columns in export
+
+[Checks & Tests]
+- Navigate to Grants tab and verify table loads with data
+- Test all filters and combinations (region + amount + focus area)
+- Verify due date highlighting for upcoming deadlines
+- Test sorting by clicking column headers
+- Check Grants 101 link navigates correctly
+- Test CSV export with filtered data
+- Navigate to Tax Incentives tab and verify "Under Development" message
+- Test mobile view: table should convert to cards
+- Show me filtered results with amount range $100k-$1M
+- Show me the exported CSV content for 3 grants
+
+[Commit/PR]
+Commit message: "feat: implement Grants and Tax Incentives tabs
+
+- Add Grants table with comprehensive filtering
+- Include amount ranges, due dates, and eligibility
+- Add CSV export for filtered results
+- Scaffold Tax Incentives with 'Under Development' flag"
+
+[Stop Condition]
+PASS: Grants table displays with working filters, sorting, and export. Tax Incentives shows placeholder.
+FAIL: If filters don't combine properly, check query logic. If export fails, verify CSV generation.
