@@ -31,55 +31,55 @@ export default function DashboardWrapper({ isDemo = false }: DashboardWrapperPro
           <Route path="/" component={DashboardHome} />
           
           {/* Feature Routes - Lazy Loaded */}
-          <Route path="/resources">
+          <Route path="resources">
             <LazyWrapper>
               <Resources />
             </LazyWrapper>
           </Route>
           
-          <Route path="/resources/saved">
+          <Route path="resources/saved">
             <LazyWrapper>
               <SavedResources />
             </LazyWrapper>
           </Route>
           
-          <Route path="/resources/:id">
+          <Route path="resources/:id">
             <LazyWrapper>
               <ResourceDetail />
             </LazyWrapper>
           </Route>
           
-          <Route path="/forum">
+          <Route path="forum">
             <LazyWrapper>
               <Forum />
             </LazyWrapper>
           </Route>
           
-          <Route path="/saleshub">
+          <Route path="saleshub">
             <LazyWrapper>
               <SalesHub />
             </LazyWrapper>
           </Route>
           
-          <Route path="/producthub">
+          <Route path="producthub">
             <LazyWrapper>
               <ProductHub />
             </LazyWrapper>
           </Route>
           
-          <Route path="/assessment">
+          <Route path="assessment">
             <LazyWrapper>
               <Assessment />
             </LazyWrapper>
           </Route>
           
-          <Route path="/find-grower">
+          <Route path="find-grower">
             <LazyWrapper>
               <FindGrower />
             </LazyWrapper>
           </Route>
           
-          <Route path="/profile">
+          <Route path="profile">
             <LazyWrapper>
               <Profile />
             </LazyWrapper>
