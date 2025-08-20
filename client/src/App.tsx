@@ -46,6 +46,12 @@ function Router() {
       </Route>
       
       {/* Dashboard routes */}
+      <Route path="/dashboard">
+        <AuthGuard requireMember>
+          <DashboardWrapper />
+        </AuthGuard>
+      </Route>
+      
       <Route path="/dashboard/*">
         <AuthGuard requireMember>
           <DashboardWrapper />
