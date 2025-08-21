@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 
 interface BlogsBulletinsTabProps {
+  viewMode: 'grid' | 'list';
   onAnalyticsEvent?: (eventName: string, payload: any) => void;
 }
 
@@ -58,10 +59,9 @@ const TOPIC_TAGS = [
   'Economics'
 ];
 
-export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTabProps) {
-  // URL state management
+export default function BlogsBulletinsTab({ viewMode, onAnalyticsEvent }: BlogsBulletinsTabProps) {
+  // URL state management for section (keeping this for now)
   const [activeSection, setActiveSection] = useParamState('section', 'blogs');
-  const [viewMode, setViewMode] = useParamState('view', 'grid');
   
   // Debug current viewMode
   console.log('BlogsBulletinsTab render - activeSection:', activeSection, 'viewMode:', viewMode);
@@ -262,33 +262,7 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
                 />
               </div>
               
-              {/* View Toggle */}
-              <div className="flex gap-2">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    console.log('Bulletins switching to grid view, current viewMode:', viewMode);
-                    setViewMode('grid');
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                  Grid
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    console.log('Bulletins switching to list view, current viewMode:', viewMode);
-                    setViewMode('list');
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <List className="h-4 w-4" />
-                  List
-                </Button>
-              </div>
+              {/* View toggles are now handled by the ResourcesRouter */}
             </div>
             
             <div className="flex flex-wrap gap-4">

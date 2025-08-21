@@ -17,12 +17,12 @@ import { useToggleView } from "@/hooks/useToggleView";
 import { ToggleGroup } from "@/features/resources/components/ToggleGroup";
 
 interface UniversitiesTabProps {
+  viewMode: 'grid' | 'map';
   onAnalyticsEvent?: (eventName: string, payload: any) => void;
 }
 
-export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabProps) {
-  // URL state management with useParamState
-  const [viewMode, setViewMode] = useParamState('view', 'map');
+export default function UniversitiesTab({ viewMode, onAnalyticsEvent }: UniversitiesTabProps) {
+  // URL state management with useParamState (keeping search and filters)
   const [searchQuery, setSearchQuery] = useParamState('q', '');
   const [filtersParam, setFiltersParam] = useParamState('filters', '{}');
   const [sort, setSort] = useParamState('sort', 'relevance');
@@ -66,10 +66,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
     setFiltersParam(JSON.stringify(newFilters));
   }, [setFiltersParam]);
 
-  // Handle view mode change
-  const handleViewModeChange = useCallback((mode: string) => {
-    setViewMode(mode);
-  }, [setViewMode]);
+  // View mode is now controlled by routing, no need for handler
 
   // Handle university card click
   const handleUniversityClick = useCallback((university: Resource) => {
@@ -125,33 +122,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
             className="max-w-md"
           />
           
-          {/* View Toggle */}
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                console.log('Switching to grid view, current viewMode:', viewMode);
-                setViewMode('grid');
-              }}
-              className="flex items-center gap-2"
-            >
-              <Grid3X3 className="h-4 w-4" />
-              Grid
-            </Button>
-            <Button
-              variant={viewMode === 'map' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                console.log('Switching to map view, current viewMode:', viewMode);
-                setViewMode('map');
-              }}
-              className="flex items-center gap-2"
-            >
-              <Map className="h-4 w-4" />
-              Map
-            </Button>
-          </div>
+          {/* View toggles are now handled by the ResourcesRouter */}
         </div>
         
         <FilterBar

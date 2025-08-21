@@ -14,7 +14,7 @@ import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
-import Resources from "@/pages/Resources";
+import ResourcesRouter from "@/pages/ResourcesRouter";
 import ResourceDetail from "@/pages/ResourceDetail";
 import SavedResources from "@/pages/SavedResources";
 import Register from "@/pages/Register";
@@ -95,7 +95,7 @@ function Router() {
       
       <Route path="/library">
         <LayoutWrapper>
-          <Resources />
+          <ResourcesRouter />
         </LayoutWrapper>
       </Route>
       

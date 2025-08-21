@@ -16,6 +16,8 @@ import { ToggleGroup } from "@/features/resources/components/ToggleGroup";
 import { useToast } from "@/hooks/use-toast";
 
 interface ToolsTemplatesTabProps {
+  viewMode: 'list' | 'grid';
+  subTab: 'tools' | 'templates';
   onAnalyticsEvent?: (eventName: string, payload: any) => void;
 }
 
@@ -50,12 +52,11 @@ const TEMPLATE_CATEGORIES = [
   'Marketing'
 ];
 
-export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTabProps) {
+export default function ToolsTemplatesTab({ viewMode, subTab, onAnalyticsEvent }: ToolsTemplatesTabProps) {
   const { toast } = useToast();
   
-  // URL state management
-  const [activeSubTab, setActiveSubTab] = useParamState('sub', 'tools');
-  const [viewMode, setViewMode] = useParamState('view', 'list');
+  // Active sub tab is now passed as prop
+  const activeSubTab = subTab;
   
   // Debug current viewMode
   console.log('ToolsTemplatesTab render - activeSubTab:', activeSubTab, 'viewMode:', viewMode);
@@ -98,15 +99,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
   const tools = toolsData?.items || [];
   const templates = templatesData?.items || [];
 
-  // Handle sub-tab change
-  const handleSubTabChange = useCallback((subTab: string) => {
-    setActiveSubTab(subTab);
-  }, [setActiveSubTab]);
-  
-  // Handle view mode change
-  const handleViewModeChange = useCallback((mode: string) => {
-    setViewMode(mode);
-  }, [setViewMode]);
+  // Sub-tab and view mode changes are now handled by routing
 
   // Handle tool click
   const handleToolClick = useCallback((tool: Resource) => {
@@ -246,33 +239,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                 className="max-w-md"
               />
               
-              {/* View Toggle */}
-              <div className="flex gap-2">
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    console.log('Switching to list view, current viewMode:', viewMode);
-                    setViewMode('list');
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <List className="h-4 w-4" />
-                  List
-                </Button>
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    console.log('Switching to grid view, current viewMode:', viewMode);
-                    setViewMode('grid');
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                  Grid
-                </Button>
-              </div>
+              {/* View toggles are now handled by the ResourcesRouter */}
             </div>
             
             <div className="flex flex-wrap gap-4">
@@ -431,33 +398,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                 className="max-w-md"
               />
               
-              {/* View Toggle */}
-              <div className="flex gap-2">
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    console.log('Templates switching to list view, current viewMode:', viewMode);
-                    setViewMode('list');
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <List className="h-4 w-4" />
-                  List
-                </Button>
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => {
-                    console.log('Templates switching to grid view, current viewMode:', viewMode);
-                    setViewMode('grid');
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                  Grid
-                </Button>
-              </div>
+              {/* View toggles are now handled by the ResourcesRouter */}
             </div>
             
             <Select

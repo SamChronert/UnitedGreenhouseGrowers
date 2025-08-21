@@ -1,0 +1,256 @@
+The URL is updating but the view isn't changing, which means we have a
+  React re-rendering issue. The Tools/Templates toggle also isn't working.
+  Let's fix this with a simpler, more reliable approach.
+
+  Solution: Restructure to use separate routes for each view
+
+  Instead of URL parameters that aren't triggering re-renders, let's use
+  actual routes which will force React to re-render properly.
+
+  Step 1: Update the routing structure
+
+  Change from:
+  - /dashboard/resources?tab=tools-templates&view=grid
+
+  To:
+  - /dashboard/resources/tools-templates/grid
+  - /dashboard/resources/tools-templates/list
+  - /dashboard/resources/universities/grid
+  - /dashboard/resources/universities/map
+
+  Step 2: Create a new ResourcesRouter component
+
+  Create client/src/pages/ResourcesRouter.tsx:
+
+  import { Route, Switch, useLocation, Link } from "wouter";
+  import { useState, useEffect } from "react";
+  import ToolsTemplatesTab from "@/components/tabs/ToolsTemplatesTab";
+  import UniversitiesTab from "@/components/tabs/UniversitiesTab";
+  import OrganizationsTab from "@/components/tabs/OrganizationsTab";
+  import LearningTab from "@/components/tabs/LearningTab";
+  import GrantsTab from "@/components/tabs/GrantsTab";
+  import BlogsBulletinsTab from "@/components/tabs/BlogsBulletinsTab";
+  import IndustryNewsTab from "@/components/tabs/IndustryNewsTab";
+  import { Button } from "@/components/ui/button";
+  import { Grid3X3, List, Map, Wrench, FileText } from "lucide-react";
+
+  export default function ResourcesRouter() {
+    const [location, navigate] = useLocation();
+
+    // Extract current tab and view from URL
+    const pathParts = location.split('/');
+    const currentTab = pathParts[3] || 'tools-templates';
+    const currentView = pathParts[4] || 'list';
+    const currentSubTab = pathParts[5]; // For tools vs templates
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="p-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Header */}
+            <header className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Resource
+  Library</h1>
+              <p className="text-gray-700 mb-6">Expert-curated resources for
+  greenhouse growers.</p>
+
+              {/* Tab Navigation */}
+              <div className="flex flex-wrap gap-2 mb-6 pb-4 border-b">
+                <Link href="/dashboard/resources/tools-templates/list">
+                  <Button variant={currentTab === 'tools-templates' ? 
+  'default' : 'outline'}>
+                    Tools & Templates
+                  </Button>
+                </Link>
+                <Link href="/dashboard/resources/universities/grid">
+                  <Button variant={currentTab === 'universities' ? 'default' 
+  : 'outline'}>
+                    Universities
+                  </Button>
+                </Link>
+                <Link href="/dashboard/resources/organizations/list">
+                  <Button variant={currentTab === 'organizations' ? 'default'
+   : 'outline'}>
+                    Organizations
+                  </Button>
+                </Link>
+                <Link href="/dashboard/resources/learning/grid">
+                  <Button variant={currentTab === 'learning' ? 'default' : 
+  'outline'}>
+                    Learning
+                  </Button>
+                </Link>
+                <Link href="/dashboard/resources/grants/list">
+                  <Button variant={currentTab === 'grants' ? 'default' : 
+  'outline'}>
+                    Grants
+                  </Button>
+                </Link>
+                <Link href="/dashboard/resources/blogs-bulletins/grid">
+                  <Button variant={currentTab === 'blogs-bulletins' ? 
+  'default' : 'outline'}>
+                    Extension & Articles
+                  </Button>
+                </Link>
+                <Link href="/dashboard/resources/industry-news/list">
+                  <Button variant={currentTab === 'industry-news' ? 'default'
+   : 'outline'}>
+                    Industry News
+                  </Button>
+                </Link>
+              </div>
+            </header>
+
+            {/* View Controls - Show different controls based on current tab
+  */}
+            <div className="mb-6 flex justify-between items-center">
+              {/* Tools & Templates sub-navigation */}
+              {currentTab === 'tools-templates' && (
+                <div className="flex gap-2">
+                  <Link 
+  href="/dashboard/resources/tools-templates/list/tools">
+                    <Button variant={currentSubTab === 'tools' || 
+  !currentSubTab ? 'default' : 'outline'} size="sm">
+                      <Wrench className="h-4 w-4 mr-2" />
+                      Tools
+                    </Button>
+                  </Link>
+                  <Link 
+  href="/dashboard/resources/tools-templates/list/templates">
+                    <Button variant={currentSubTab === 'templates' ? 
+  'default' : 'outline'} size="sm">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Templates
+                    </Button>
+                  </Link>
+                </div>
+              )}
+
+              {/* View Toggle Buttons */}
+              <div className="flex gap-2 ml-auto">
+                {currentTab === 'universities' && (
+                  <>
+                    <Link href="/dashboard/resources/universities/grid">
+                      <Button variant={currentView === 'grid' ? 'default' : 
+  'outline'} size="sm">
+                        <Grid3X3 className="h-4 w-4 mr-2" />
+                        Grid
+                      </Button>
+                    </Link>
+                    <Link href="/dashboard/resources/universities/map">
+                      <Button variant={currentView === 'map' ? 'default' : 
+  'outline'} size="sm">
+                        <Map className="h-4 w-4 mr-2" />
+                        Map
+                      </Button>
+                    </Link>
+                  </>
+                )}
+
+                {(currentTab === 'tools-templates' || currentTab ===
+  'learning' || currentTab === 'blogs-bulletins') && (
+                  <>
+                    <Link 
+  href={`/dashboard/resources/${currentTab}/list${currentSubTab ? '/' + 
+  currentSubTab : ''}`}>
+                      <Button variant={currentView === 'list' ? 'default' : 
+  'outline'} size="sm">
+                        <List className="h-4 w-4 mr-2" />
+                        List
+                      </Button>
+                    </Link>
+                    <Link 
+  href={`/dashboard/resources/${currentTab}/grid${currentSubTab ? '/' + 
+  currentSubTab : ''}`}>
+                      <Button variant={currentView === 'grid' ? 'default' : 
+  'outline'} size="sm">
+                        <Grid3X3 className="h-4 w-4 mr-2" />
+                        Grid
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Content */}
+            <main>
+              <Switch>
+                <Route 
+  path="/dashboard/resources/tools-templates/:view/:subTab?">
+                  {(params) => <ToolsTemplatesTab viewMode={params.view} 
+  subTab={params.subTab || 'tools'} />}
+                </Route>
+                <Route path="/dashboard/resources/universities/:view">
+                  {(params) => <UniversitiesTab viewMode={params.view} />}
+                </Route>
+                <Route path="/dashboard/resources/organizations/:view?">
+                  <OrganizationsTab />
+                </Route>
+                <Route path="/dashboard/resources/learning/:view">
+                  {(params) => <LearningTab viewMode={params.view} />}
+                </Route>
+                <Route path="/dashboard/resources/grants/:view?">
+                  <GrantsTab />
+                </Route>
+                <Route path="/dashboard/resources/blogs-bulletins/:view">
+                  {(params) => <BlogsBulletinsTab viewMode={params.view} />}
+                </Route>
+                <Route path="/dashboard/resources/industry-news/:view?">
+                  <IndustryNewsTab />
+                </Route>
+                {/* Default redirect */}
+                <Route>
+                  {() => {
+                    navigate('/dashboard/resources/tools-templates/list');
+                    return null;
+                  }}
+                </Route>
+              </Switch>
+            </main>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  Step 3: Update tab components to accept props
+
+  Update each tab component to accept viewMode as a prop instead of using
+  useParamState. For example, in UniversitiesTab.tsx:
+
+  interface UniversitiesTabProps {
+    viewMode: 'grid' | 'map';
+    onAnalyticsEvent?: (eventName: string, payload: any) => void;
+  }
+
+  export default function UniversitiesTab({ viewMode, onAnalyticsEvent }: 
+  UniversitiesTabProps) {
+    // Remove this line:
+    // const [viewMode, setViewMode] = useParamState('view', 'map');
+
+    // The viewMode is now passed as a prop
+    // Rest of the component stays the same
+
+  Step 4: Update the main route
+
+  In your main router, change:
+  <Route path="/dashboard/resources" component={Resources} />
+
+  To:
+  <Route path="/dashboard/resources/:path*" component={ResourcesRouter} />
+
+  Why this will work:
+
+  1. Forced re-renders: When the route changes, React will definitely
+  re-render the component
+  2. No state sync issues: The view mode comes directly from the URL path
+  3. Simpler state management: No need for complex URL parameter parsing
+  4. Tools/Templates will work: The sub-tab is now part of the route too
+
+  This approach is more reliable because route changes always trigger
+  component re-renders in React router libraries. The current approach with
+  URL parameters requires careful state synchronization which isn't working
+  properly.
+
+  Try this restructured approach - it's cleaner and will definitely work!

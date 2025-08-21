@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 
 interface LearningTabProps {
+  viewMode: 'grid' | 'list';
   onAnalyticsEvent?: (eventName: string, payload: any) => void;
 }
 
@@ -57,10 +58,7 @@ const FORMATS = [
 ];
 
 
-export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
-  // URL state management
-  const [viewMode, setViewMode] = useParamState('view', 'grid');
-  
+export default function LearningTab({ viewMode, onAnalyticsEvent }: LearningTabProps) {
   // Debug current viewMode
   console.log('LearningTab render - current viewMode:', viewMode);
   
@@ -88,10 +86,7 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
 
   const courses = data?.items || [];
 
-  // Handle view mode change
-  const handleViewModeChange = useCallback((mode: string) => {
-    setViewMode(mode);
-  }, [setViewMode]);
+  // View mode changes are now handled by routing
 
   // Handle course click
   const handleCourseClick = useCallback((course: Resource) => {
@@ -156,33 +151,7 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
             className="max-w-md"
           />
           
-          {/* View Toggle */}
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                console.log('Learning switching to grid view, current viewMode:', viewMode);
-                setViewMode('grid');
-              }}
-              className="flex items-center gap-2"
-            >
-              <Grid3X3 className="h-4 w-4" />
-              Grid
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                console.log('Learning switching to list view, current viewMode:', viewMode);
-                setViewMode('list');
-              }}
-              className="flex items-center gap-2"
-            >
-              <List className="h-4 w-4" />
-              List
-            </Button>
-          </div>
+          {/* View toggles are now handled by the ResourcesRouter */}
         </div>
         
         <div className="flex flex-wrap gap-4">
