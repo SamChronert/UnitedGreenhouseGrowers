@@ -448,9 +448,10 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
         filterConditions.push(`(title ILIKE '%${searchTerm}%' OR summary ILIKE '%${searchTerm}%' OR array_to_string(tags, ' ') ILIKE '%${searchTerm}%')`);
       }
       
-      // JSON path filters
+      // JSON path filters - skip type-specific keys that will be handled later
+      const typeSpecificKeys = new Set(['amountMin', 'amountMax', 'focusAreas', 'orgTypes', 'regions', 'hideExpired', 'functions', 'country']);
       for (const [key, value] of Object.entries(filters)) {
-        if (value && typeof value === 'string') {
+        if (value && typeof value === 'string' && !typeSpecificKeys.has(key)) {
           filterConditions.push(`data->>'${key}' = '${value.replace(/'/g, "''")}'`);
         }
       }
@@ -498,11 +499,16 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       
       // Handle grants-specific filters
       if (type === 'grants') {
+        const processedKeys = new Set();
         for (const [key, value] of Object.entries(filters)) {
           if (key === 'amountMin' && value && typeof value === 'string') {
-            filterConditions.push(`COALESCE((data->>'amountMin')::int, 0) >= ${parseInt(value)}`);
+            // Show grants where the max award is at least the user's minimum
+            filterConditions.push(`COALESCE((data->>'award_max')::int, 0) >= ${parseInt(value)}`);
+            processedKeys.add(key);
           } else if (key === 'amountMax' && value && typeof value === 'string') {
-            filterConditions.push(`COALESCE((data->>'amountMax')::int, 999999999) <= ${parseInt(value)}`);
+            // Show grants where the min award is at most the user's maximum
+            filterConditions.push(`COALESCE((data->>'award_min')::int, 0) <= ${parseInt(value)}`);
+            processedKeys.add(key);
           } else if (key === 'focusAreas' && value && typeof value === 'string') {
             const areas = value.split(',').map(area => `'${area.replace(/'/g, "''")}'`);
             const areaConditions = areas.map(area => `data->'focusAreas' ? ${area}`);
@@ -517,7 +523,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
             filterConditions.push(`(${regionConditions.join(' OR ')})`);
           } else if (key === 'hideExpired' && value === 'true') {
             const today = new Date().toISOString().split('T')[0];
-            filterConditions.push(`(data->>'rfpDueDate' >= '${today}' OR data->>'status' = 'Rolling')`);
+            filterConditions.push(`(data->>'due_date' >= '${today}' OR data->>'status' = 'Rolling' OR data->>'status' = 'recurring')`);
           }
         }
       }

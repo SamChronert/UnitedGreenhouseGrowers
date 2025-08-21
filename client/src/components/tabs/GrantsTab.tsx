@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Calendar, ExternalLink, Download, AlertCircle, RefreshCw, DollarSign, Clock, Building, Filter } from "lucide-react";
@@ -64,7 +64,8 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
   });
   const [sort, setSort] = useState(urlParams.get('sort') || 'dueDate');
   const [hideExpired, setHideExpired] = useState(true);
-  const [amountRange, setAmountRange] = useState([0, 10000000]); // $0 - $10M
+  const [minAmount, setMinAmount] = useState<string>('');
+  const [maxAmount, setMaxAmount] = useState<string>('');
   const [selectedFocusAreas, setSelectedFocusAreas] = useState<string[]>([]);
   const [selectedOrgTypes, setSelectedOrgTypes] = useState<string[]>([]);
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
@@ -85,9 +86,11 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
       combinedFilters.hideExpired = 'true';
     }
     
-    if (amountRange[0] > 0 || amountRange[1] < 10000000) {
-      combinedFilters.amountMin = amountRange[0].toString();
-      combinedFilters.amountMax = amountRange[1].toString();
+    if (minAmount) {
+      combinedFilters.amountMin = minAmount;
+    }
+    if (maxAmount) {
+      combinedFilters.amountMax = maxAmount;
     }
     
     if (selectedFocusAreas.length > 0) {
@@ -103,7 +106,7 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
     }
     
     return combinedFilters;
-  }, [filters, hideExpired, amountRange, selectedFocusAreas, selectedOrgTypes, selectedStates]);
+  }, [filters, hideExpired, minAmount, maxAmount, selectedFocusAreas, selectedOrgTypes, selectedStates]);
 
   // Data fetching
   const { data, isLoading, error, refetch } = useResources({
@@ -165,9 +168,9 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
     const csvData = grants.map(grant => [
       grant.title,
       grant.data?.agency || '',
-      formatAmountRange(grant.data?.amountMin, grant.data?.amountMax),
+      formatAmountRange(grant.data?.award_min, grant.data?.award_max),
       (grant.data?.focusAreas || []).join('; '),
-      grant.data?.rfpDueDate || '',
+      grant.data?.due_date || '',
       grant.data?.status || '',
       grant.data?.applyUrls?.grantsGov || grant.url
     ]);
@@ -243,9 +246,9 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
               Filters
-              {(Object.keys(grantsFilters).length > 0 || selectedFocusAreas.length > 0 || selectedOrgTypes.length > 0 || selectedStates.length > 0) && (
+              {(Object.keys(grantsFilters).length > 0 || selectedFocusAreas.length > 0 || selectedOrgTypes.length > 0 || selectedStates.length > 0 || minAmount || maxAmount) && (
                 <Badge variant="secondary" className="ml-1 h-5 min-w-5 text-xs">
-                  {Object.keys(grantsFilters).length + selectedFocusAreas.length + selectedOrgTypes.length + selectedStates.length}
+                  {Object.keys(grantsFilters).length + selectedFocusAreas.length + selectedOrgTypes.length + selectedStates.length + (minAmount ? 1 : 0) + (maxAmount ? 1 : 0)}
                 </Badge>
               )}
             </Button>
@@ -258,21 +261,31 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
               {/* Amount Range */}
               <div>
                 <label className="text-sm font-medium mb-3 block">Amount Range</label>
-                <div className="px-2">
-                  <Slider
-                    value={amountRange}
-                    onValueChange={setAmountRange}
-                    min={0}
-                    max={10000000}
-                    step={50000}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-2">
-                    <span>$0</span>
-                    <span className="font-medium">
-                      ${(amountRange[0]/1000).toFixed(0)}K - ${amountRange[1] >= 1000000 ? (amountRange[1]/1000000).toFixed(1) + 'M' : (amountRange[1]/1000).toFixed(0) + 'K'}
-                    </span>
-                    <span>$10M+</span>
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="min-amount" className="text-xs text-gray-600 mb-1 block">Minimum Amount</label>
+                    <Input
+                      id="min-amount"
+                      type="number"
+                      placeholder="e.g., 50000"
+                      value={minAmount}
+                      onChange={(e) => setMinAmount(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="max-amount" className="text-xs text-gray-600 mb-1 block">Maximum Amount</label>
+                    <Input
+                      id="max-amount"
+                      type="number"
+                      placeholder="e.g., 500000"
+                      value={maxAmount}
+                      onChange={(e) => setMaxAmount(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Enter amounts in dollars (e.g., 50000 for $50,000)
                   </div>
                 </div>
               </div>
@@ -358,23 +371,22 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
               </div>
               
               {/* Clear Filters */}
-              {(Object.keys(grantsFilters).length > 0 || selectedFocusAreas.length > 0 || selectedOrgTypes.length > 0 || selectedStates.length > 0) && (
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setSearchQuery('');
-                    setFilters({});
-                    setSelectedFocusAreas([]);
-                    setSelectedOrgTypes([]);
-                    setSelectedStates([]);
-                    setAmountRange([0, 10000000]);
-                    setHideExpired(true);
-                  }}
-                  className="w-full"
-                >
-                  Clear All Filters
-                </Button>
-              )}
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilters({});
+                  setSelectedFocusAreas([]);
+                  setSelectedOrgTypes([]);
+                  setSelectedStates([]);
+                  setMinAmount('');
+                  setMaxAmount('');
+                  setHideExpired(true);
+                }}
+                className="w-full"
+              >
+                Clear All Filters
+              </Button>
             </div>
           </SheetContent>
         </Sheet>
@@ -384,7 +396,7 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-600">
           <strong>{totalCount}</strong> {totalCount === 1 ? 'grant' : 'grants'} found
-          {(Object.keys(grantsFilters).length > 0 || selectedFocusAreas.length > 0 || selectedOrgTypes.length > 0 || selectedStates.length > 0 || searchQuery.trim()) ? ' (filtered)' : ''}
+          {(Object.keys(grantsFilters).length > 0 || selectedFocusAreas.length > 0 || selectedOrgTypes.length > 0 || selectedStates.length > 0 || searchQuery.trim() || minAmount || maxAmount) ? ' (filtered)' : ''}
         </div>
         <Button
           variant="outline"
@@ -479,7 +491,7 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-green-600" />
-                        {formatAmountRange(grant.data?.amountMin, grant.data?.amountMax)}
+                        {formatAmountRange(grant.data?.award_min, grant.data?.award_max)}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -499,10 +511,10 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Clock className={`h-4 w-4 ${
-                          isUpcoming(grant.data?.rfpDueDate) ? 'text-orange-500' : 'text-gray-400'
+                          isUpcoming(grant.data?.due_date) ? 'text-orange-500' : 'text-gray-400'
                         }`} />
-                        <span className={isUpcoming(grant.data?.rfpDueDate) ? 'text-orange-700 font-medium' : ''}>
-                          {grant.data?.rfpDueDate || 'Rolling'}
+                        <span className={isUpcoming(grant.data?.due_date) ? 'text-orange-700 font-medium' : ''}>
+                          {grant.data?.due_date || 'Rolling'}
                         </span>
                       </div>
                     </TableCell>
@@ -577,7 +589,8 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
                 setSelectedFocusAreas([]);
                 setSelectedOrgTypes([]);
                 setSelectedStates([]);
-                setAmountRange([0, 10000000]);
+                setMinAmount('');
+                setMaxAmount('');
                 setHideExpired(true);
               }}
             >
