@@ -1,0 +1,90 @@
+The Resource Library has tabs (Tools & Templates, Universities, Organizations, etc.) and within each tab there are view toggles (Grid/List, Grid/Map, etc.) that aren't working. Let's fix this with a clearer state management approach.
+
+CURRENT STRUCTURE:
+- Main Resource Library page with tab navigation
+- Each tab has its own view toggle options (some have Grid/List, some have Grid/Map, etc.)
+- The toggles exist but don't actually change the displayed view
+
+SOLUTION APPROACH:
+Instead of complex nested state, let's use URL parameters to track both tab and view state. This makes it explicit and debuggable.
+
+1. **URL Structure**:
+   - `/dashboard/resources?tab=universities&view=grid`
+   - `/dashboard/resources?tab=universities&view=map`
+   - `/dashboard/resources?tab=tools&view=list&filter=templates`
+
+2. **Implementation**:
+   Create a new file `client/src/features/resources/ResourceLibrary.tsx` that:
+   - Reads URL params for current tab and view
+   - Renders the appropriate tab component
+   - Passes view mode to child components
+   
+3. **View Toggle Component**:
+   ```typescript
+   // client/src/components/ViewToggle.tsx
+   import { useSearchParams } from 'react-router-dom'; // or wouter equivalent
+   
+   export function ViewToggle({ options }: { options: string[] }) {
+     const [searchParams, setSearchParams] = useSearchParams();
+     const currentView = searchParams.get('view') || options[0];
+     
+     const handleViewChange = (newView: string) => {
+       setSearchParams(prev => {
+         prev.set('view', newView);
+         return prev;
+       });
+     };
+     
+     return (
+       <div className="flex gap-2">
+         {options.map(option => (
+           <button
+             key={option}
+             onClick={() => handleViewChange(option)}
+             className={currentView === option ? 'bg-blue-500 text-white' : 'bg-gray-200'}
+           >
+             {option}
+           </button>
+         ))}
+       </div>
+     );
+   }
+   ```
+
+4. **Tab Components Structure**:
+   Each tab component should accept a `view` prop and render accordingly:
+   ```typescript
+   // Example: Universities.tsx
+   export function Universities({ view }: { view: 'grid' | 'map' }) {
+     return (
+       <div>
+         <ViewToggle options={['grid', 'map']} />
+         {view === 'grid' ? <UniversitiesGrid /> : <UniversitiesMap />}
+       </div>
+     );
+   }
+   ```
+
+5. **Tab Configuration**:
+   Create a config object that defines which views are available for each tab:
+   ```typescript
+   const TAB_CONFIG = {
+     'tools': { views: ['list', 'grid'], filters: ['tools', 'templates'] },
+     'universities': { views: ['grid', 'map'] },
+     'organizations': { views: ['list', 'grid'] },
+     'learning': { views: ['list', 'grid'] },
+     'grants': { views: ['list'] },
+     'articles': { views: ['list', 'grid'] },
+     'news': { views: ['list'] },
+   };
+   ```
+
+6. **Testing**:
+   - Click each tab and verify it loads
+   - Click view toggles and verify URL updates
+   - Verify the correct view renders
+   - Refresh page and verify state persists from URL
+
+This approach is much simpler than managing nested state and makes debugging easier. The URL acts as the single source of truth.
+
+IMPORTANT: If using Wouter instead of React Router, adapt the useSearchParams to Wouter's equivalent hook for query parameters.
