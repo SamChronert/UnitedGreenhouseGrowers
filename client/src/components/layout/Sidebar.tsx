@@ -343,7 +343,8 @@ export default function Sidebar({ className }: SidebarProps) {
                     href="https://www.greenhousegrowers.org/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-700 focus:ring-offset-2 bg-green-700 text-white hover:bg-green-800"
+                    className="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 text-white hover:opacity-90"
+                    style={{ backgroundColor: '#36533C', focusRingColor: '#36533C' }}
                   >
                     <ExternalLink className="h-4 w-4 flex-shrink-0" />
                     {!isCollapsed && (

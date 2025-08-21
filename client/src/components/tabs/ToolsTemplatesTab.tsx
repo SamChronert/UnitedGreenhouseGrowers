@@ -206,7 +206,8 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full p-4 justify-between text-lg font-semibold bg-sage text-white hover:bg-sage/90 border rounded-lg"
+            style={{ backgroundColor: '#36533C' }}
+            className="w-full p-4 justify-between text-lg font-semibold text-white hover:opacity-90 border rounded-lg"
           >
             <div className="flex items-center gap-3">
               <Wrench className="h-5 w-5" />
@@ -316,7 +317,8 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full p-4 justify-between text-lg font-semibold hover:bg-gray-50 border rounded-lg"
+            style={{ backgroundColor: '#36533C' }}
+            className="w-full p-4 justify-between text-lg font-semibold text-white hover:opacity-90 border rounded-lg"
           >
             <div className="flex items-center gap-3">
               <FileText className="h-5 w-5" />
