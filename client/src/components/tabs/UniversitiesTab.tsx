@@ -156,41 +156,71 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
         </div>
 
         {/* Universities List */}
-        {!isLoading && !error && universities.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" />
-              Universities on Map ({universities.filter(u => u.lat && u.long).length})
-            </h3>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {universities
-                .filter(university => university.lat && university.long)
-                .map((university) => (
-                  <Card 
-                    key={university.id} 
-                    className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => handleUniversityClick(university)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-900 line-clamp-2">
-                          {university.title}
-                        </h4>
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
-                          <MapPin className="h-3 w-3" />
-                          {university.data?.city}, {university.data?.state}
-                          {university.data?.country !== 'USA' && `, ${university.data?.country}`}
-                        </div>
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                          {university.summary}
-                        </p>
+        {!isLoading && !error && universities.length > 0 && (() => {
+          const universitiesWithCoords = universities.filter(u => u.lat && u.long);
+          
+          // Group universities by region
+          const regions = {
+            'Western US': universitiesWithCoords.filter(u => ['AZ', 'CO', 'WY'].includes(u.data?.state)),
+            'Southern US': universitiesWithCoords.filter(u => ['TX', 'FL', 'TN'].includes(u.data?.state)),
+            'Midwest US': universitiesWithCoords.filter(u => ['MI', 'OH'].includes(u.data?.state)),
+            'Eastern US': universitiesWithCoords.filter(u => ['NY', 'DE', 'KY'].includes(u.data?.state)),
+            'International': universitiesWithCoords.filter(u => u.data?.country !== 'USA')
+          };
+
+          return (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                <GraduationCap className="h-5 w-5" />
+                Universities on Map ({universitiesWithCoords.length})
+              </h3>
+              
+              <div className="space-y-8">
+                {Object.entries(regions).map(([regionName, regionUniversities]) => 
+                  regionUniversities.length > 0 && (
+                    <div key={regionName}>
+                      <h4 className="text-md font-medium text-gray-800 mb-4 border-l-4 border-ugga-primary pl-3">
+                        {regionName} ({regionUniversities.length})
+                      </h4>
+                      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                        {regionUniversities.map((university) => (
+                          <Card 
+                            key={university.id} 
+                            className="cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => handleUniversityClick(university)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="space-y-3">
+                                <div className="flex items-start gap-3">
+                                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 border-2 border-dashed border-gray-300">
+                                    <GraduationCap className="h-6 w-6 text-gray-400" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h5 className="font-medium text-gray-900 line-clamp-2 text-sm">
+                                      {university.title}
+                                    </h5>
+                                    <div className="flex items-center gap-1 text-xs text-gray-600 mt-1">
+                                      <MapPin className="h-3 w-3" />
+                                      {university.data?.city}, {university.data?.state}
+                                      {university.data?.country !== 'USA' && `, ${university.data?.country}`}
+                                    </div>
+                                  </div>
+                                </div>
+                                <p className="text-xs text-gray-600 line-clamp-2">
+                                  {university.summary}
+                                </p>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                    </div>
+                  )
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
 
