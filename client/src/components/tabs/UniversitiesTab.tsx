@@ -27,6 +27,9 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
   const [filtersParam, setFiltersParam] = useParamState('filters', '{}');
   const [sort, setSort] = useParamState('sort', 'relevance');
   
+  // Debug current viewMode
+  console.log('UniversitiesTab render - current viewMode:', viewMode);
+  
   // Parse filters from URL param
   const filters = useMemo(() => {
     try {
@@ -123,16 +126,32 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
           />
           
           {/* View Toggle */}
-          <ToggleGroup
-            value={viewMode}
-            onValueChange={handleViewModeChange}
-            options={[
-              { value: 'grid', label: 'Grid', icon: <Grid3X3 className="h-4 w-4" /> },
-              { value: 'map', label: 'Map', icon: <Map className="h-4 w-4" /> }
-            ]}
-            ariaLabel="View mode for universities"
-            className="max-w-[200px]"
-          />
+          <div className="flex gap-2">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                console.log('Switching to grid view, current viewMode:', viewMode);
+                setViewMode('grid');
+              }}
+              className="flex items-center gap-2"
+            >
+              <Grid3X3 className="h-4 w-4" />
+              Grid
+            </Button>
+            <Button
+              variant={viewMode === 'map' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                console.log('Switching to map view, current viewMode:', viewMode);
+                setViewMode('map');
+              }}
+              className="flex items-center gap-2"
+            >
+              <Map className="h-4 w-4" />
+              Map
+            </Button>
+          </div>
         </div>
         
         <FilterBar

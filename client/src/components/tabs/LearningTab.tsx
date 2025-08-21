@@ -61,6 +61,9 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
   // URL state management
   const [viewMode, setViewMode] = useParamState('view', 'grid');
   
+  // Debug current viewMode
+  console.log('LearningTab render - current viewMode:', viewMode);
+  
   // State
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
@@ -154,16 +157,32 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
           />
           
           {/* View Toggle */}
-          <ToggleGroup
-            value={viewMode}
-            onValueChange={handleViewModeChange}
-            options={[
-              { value: 'grid', label: 'Grid', icon: <Grid3X3 className="h-4 w-4" /> },
-              { value: 'list', label: 'List', icon: <List className="h-4 w-4" /> }
-            ]}
-            ariaLabel="View mode for learning resources"
-            className="max-w-[200px]"
-          />
+          <div className="flex gap-2">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                console.log('Learning switching to grid view, current viewMode:', viewMode);
+                setViewMode('grid');
+              }}
+              className="flex items-center gap-2"
+            >
+              <Grid3X3 className="h-4 w-4" />
+              Grid
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                console.log('Learning switching to list view, current viewMode:', viewMode);
+                setViewMode('list');
+              }}
+              className="flex items-center gap-2"
+            >
+              <List className="h-4 w-4" />
+              List
+            </Button>
+          </div>
         </div>
         
         <div className="flex flex-wrap gap-4">

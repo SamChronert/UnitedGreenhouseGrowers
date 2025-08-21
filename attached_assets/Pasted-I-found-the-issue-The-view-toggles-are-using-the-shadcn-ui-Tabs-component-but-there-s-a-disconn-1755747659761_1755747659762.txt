@@ -1,0 +1,68 @@
+I found the issue! The view toggles are using the shadcn/ui Tabs component,
+   but there's a disconnect between the URL state and the Tabs component's
+  internal state.
+
+  The problem is in how handleViewModeChange is implemented. When you click a
+   tab trigger, it's calling setViewMode from useParamState, but the Tabs
+  component might not be re-rendering properly with the new value.
+
+  Here's the fix needed:
+
+  1. Check the useParamState hook implementation - it should trigger a
+  re-render when the URL changes. Show me the full implementation of
+  /client/src/hooks/useQueryParams.ts, particularly the useParamState
+  function.
+  2. The issue might be that the Tabs component isn't properly controlled.
+  Try this fix in UniversitiesTab.tsx (and similarly in other tabs):
+
+  Replace the current toggle implementation (around line 124-135) with:
+  {/* View Toggle */}
+  <div className="flex gap-2">
+    <Button
+      variant={viewMode === 'grid' ? 'default' : 'outline'}
+      size="sm"
+      onClick={() => setViewMode('grid')}
+      className="flex items-center gap-2"
+    >
+      <Grid3X3 className="h-4 w-4" />
+      Grid
+    </Button>
+    <Button
+      variant={viewMode === 'map' ? 'default' : 'outline'}
+      size="sm"
+      onClick={() => setViewMode('map')}
+      className="flex items-center gap-2"
+    >
+      <Map className="h-4 w-4" />
+      Map
+    </Button>
+  </div>
+
+  This uses simple buttons instead of the Tabs component, which should work
+  more reliably with URL state.
+
+  3. Alternative fix if you want to keep using Tabs: The handleViewModeChange
+   callback might not be working correctly. Try changing it to directly call
+  setViewMode:
+
+  // Instead of:
+  const handleViewModeChange = useCallback((mode: string) => {
+    setViewMode(mode);
+  }, [setViewMode]);
+
+  // Just use setViewMode directly:
+  <Tabs value={viewMode} onValueChange={setViewMode}>
+
+  4. Debug logging: Add console.log to verify the state is changing:
+  console.log('Current viewMode:', viewMode);
+
+  Can you:
+  1. Show me the useParamState implementation
+  2. Try the button approach instead of Tabs
+  3. Add debug logging to see if viewMode is actually changing when you click
+   the toggles
+
+  The core issue is that the Tabs component isn't properly syncing with the
+  URL parameter state. The conditional rendering logic is correct (I can see
+  it in lines 197-257 of UniversitiesTab and lines 323-389 of
+  ToolsTemplatesTab), but the toggle UI isn't updating the state properly.
