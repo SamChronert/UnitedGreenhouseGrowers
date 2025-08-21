@@ -57,7 +57,6 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
   const [searchQuery, setSearchQuery] = useState('');
   const [toolFilters, setToolFilters] = useState({
     category: 'all',
-    platform: 'all',
     costType: 'all'
   });
   const [templateFilters, setTemplateFilters] = useState({
@@ -207,7 +206,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="w-full p-4 justify-between text-lg font-semibold hover:bg-gray-50 border rounded-lg"
+            className="w-full p-4 justify-between text-lg font-semibold bg-sage text-white hover:bg-sage/90 border rounded-lg"
           >
             <div className="flex items-center gap-3">
               <Wrench className="h-5 w-5" />
@@ -231,21 +230,6 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                 <SelectItem value="all">All Categories</SelectItem>
                 {TOOL_CATEGORIES.map(cat => (
                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Select
-              value={toolFilters.platform}
-              onValueChange={(value) => setToolFilters(prev => ({ ...prev, platform: value }))}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Platform" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Platforms</SelectItem>
-                {PLATFORMS.map(platform => (
-                  <SelectItem key={platform} value={platform}>{platform}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
