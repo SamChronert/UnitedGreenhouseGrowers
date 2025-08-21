@@ -77,43 +77,43 @@ export default function DashboardHome() {
       icon: <MapPin className="h-8 w-8" />,
       title: "Find a Grower",
       description: "Connect with growers by location and expertise",
-      href: "/dashboard/find-grower",
+      href: isDemo ? "/demo/find-grower" : "/dashboard/find-grower",
       inDevelopment: true
     },
     {
       icon: <MessageCircle className="h-8 w-8" />,
       title: "Member Forum",
       description: "Connect with fellow growers, share knowledge, organize bulk ordering.",
-      href: "/dashboard/forum",
+      href: isDemo ? "/demo/forum" : "/dashboard/forum",
       inDevelopment: false
     },
     {
       icon: <FolderOpen className="h-8 w-8" />,
       title: "Resource Library",
       description: "Browse curated grower resources — find relevant research, organizations near you, tax incentives and rebates, upcoming events, and more.",
-      href: "/dashboard/resources",
+      href: isDemo ? "/demo/resources" : "/dashboard/resources",
       inDevelopment: true
     },
-    // Row 2: Farm Assessment, Sales Hub, Product Hub, Member Profile
+    // Row 2: Farm Roadmap, Sales Hub, Product Hub, Member Profile
     {
       icon: <ClipboardList className="h-8 w-8" />,
-      title: "Farm Assessment",
+      title: "Farm Roadmap",
       description: "Respond to the prompts to determine which areas of your farm to work on to improve yield and profitability for your operation.",
-      href: "/dashboard/assessment",
+      href: isDemo ? "/demo/assessment" : "/dashboard/assessment",
       inDevelopment: true
     },
     {
       icon: <Store className="h-8 w-8" />,
       title: "Sales Hub",
       description: "Find buyers and distributors for your products",
-      href: "/dashboard/saleshub",
+      href: isDemo ? "/demo/saleshub" : "/dashboard/saleshub",
       inDevelopment: true
     },
     {
       icon: <ShoppingBag className="h-8 w-8" />,
       title: "Product Hub",
       description: "Browse vetted products and services",
-      href: "/dashboard/producthub",
+      href: isDemo ? "/demo/producthub" : "/dashboard/producthub",
       inDevelopment: true
     },
     {
@@ -126,9 +126,11 @@ export default function DashboardHome() {
   ];
 
   const handleToolClick = (href: string) => {
-    if (isDemo && href !== "/dashboard/profile") {
+    // For profile link in demo mode, show the demo action since profile requires authentication
+    if (isDemo && href === "/dashboard/profile") {
       showDemoAction();
     }
+    // All other links work normally (demo links go to demo pages, dashboard links go to dashboard pages)
   };
 
   return (
@@ -213,7 +215,7 @@ export default function DashboardHome() {
         <div className="grid md:grid-cols-3 gap-6">
           {memberTools.slice(0, 3).map((tool, index) => (
             <div key={index} onClick={() => handleToolClick(tool.href)}>
-              {isDemo && tool.href !== "/dashboard/profile" ? (
+              {isDemo && tool.href === "/dashboard/profile" ? (
                 <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full relative group focus:outline-none focus:ring-2 focus:ring-green-500">
                   {tool.inDevelopment && (
                     <div className="absolute top-3 right-3 z-10">
@@ -256,7 +258,7 @@ export default function DashboardHome() {
         <div className="grid md:grid-cols-4 gap-6 mt-6">
           {memberTools.slice(3, 7).map((tool, index) => (
             <div key={index + 3} onClick={() => handleToolClick(tool.href)}>
-              {isDemo && tool.href !== "/dashboard/profile" ? (
+              {isDemo && tool.href === "/dashboard/profile" ? (
                 <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full relative group focus:outline-none focus:ring-2 focus:ring-green-500">
                   {tool.inDevelopment && (
                     <div className="absolute top-3 right-3 z-10">
