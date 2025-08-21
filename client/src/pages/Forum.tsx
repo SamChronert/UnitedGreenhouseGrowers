@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -15,7 +16,8 @@ import {
   Edit,
   Trash2,
   Share,
-  Bookmark
+  Bookmark,
+  Send
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
@@ -50,6 +52,7 @@ export default function Forum() {
   const [editingPost, setEditingPost] = useState<PostWithDetails | null>(null);
   const [filters, setFilters] = useState({ region: "", category: "" });
   const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
+  const [replyContent, setReplyContent] = useState("");
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -147,6 +150,27 @@ export default function Forum() {
     },
   });
 
+  // Create comment mutation
+  const createCommentMutation = useMutation({
+    mutationFn: ({ postId, content }: { postId: string; content: string }) =>
+      apiRequest("POST", `/api/forum/posts/${postId}/comments`, { content }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/forum/posts"] });
+      setReplyContent("");
+      toast({
+        title: "Success",
+        description: "Your reply has been posted!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreatePost = (postData: { title: string; content: string; category: string; attachments: string[] }) => {
     createPostMutation.mutate(postData);
   };
@@ -197,6 +221,23 @@ export default function Forum() {
   const handleSavePost = (postId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     savePostMutation.mutate(postId);
+  };
+
+  const handleCreateReply = () => {
+    if (!replyContent.trim()) {
+      toast({
+        title: "Error",
+        description: "Reply content cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (!selectedPost) return;
+    
+    createCommentMutation.mutate({
+      postId: selectedPost.id,
+      content: replyContent.trim(),
+    });
   };
 
   if (isLoading) {
@@ -327,6 +368,47 @@ export default function Forum() {
                   
                   <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <h3 className="font-semibold mb-4">{selectedPost.commentCount} Comments</h3>
+                    
+                    {/* Reply Form */}
+                    {user && (
+                      <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <Avatar className="h-8 w-8 flex-shrink-0">
+                            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.profile?.name || user.username}`} />
+                            <AvatarFallback>{user.profile?.name?.[0] || user.username?.[0] || "U"}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <Textarea
+                              placeholder="Write a reply..."
+                              value={replyContent}
+                              onChange={(e) => setReplyContent(e.target.value)}
+                              className="mb-2 min-h-[80px] resize-none"
+                              maxLength={2000}
+                            />
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs text-gray-500">
+                                {replyContent.length}/2000 characters
+                              </span>
+                              <Button
+                                onClick={handleCreateReply}
+                                disabled={createCommentMutation.isPending || !replyContent.trim()}
+                                size="sm"
+                              >
+                                {createCommentMutation.isPending ? (
+                                  <>Posting...</>
+                                ) : (
+                                  <>
+                                    <Send className="h-4 w-4 mr-1" />
+                                    Reply
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="space-y-4">
                       {selectedPost.comments.map(comment => (
                         <Comment key={comment.id} comment={comment} postId={selectedPost.id} />
