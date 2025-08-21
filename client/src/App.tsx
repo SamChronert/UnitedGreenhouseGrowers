@@ -81,7 +81,7 @@ function Router() {
         </LayoutWrapper>
       </Route>
       
-      <Route path="/blog" component={BlogPost}>
+      <Route path="/blog">
         <LayoutWrapper>
           <Blog />
         </LayoutWrapper>
