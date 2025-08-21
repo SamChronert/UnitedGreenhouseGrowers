@@ -56,7 +56,7 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
 
   // Track tab view on mount
   useEffect(() => {
-    trackTabView('organizations', 'Organizations');
+    trackTabView('organizations');
     onAnalyticsEvent?.('tab_view', { tab: 'organizations' });
   }, [onAnalyticsEvent]);
 
