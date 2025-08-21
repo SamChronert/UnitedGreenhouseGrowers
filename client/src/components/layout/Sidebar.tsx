@@ -267,7 +267,7 @@ export default function Sidebar({ className }: SidebarProps) {
           {/* Logo */}
           <div className="flex items-center h-16 px-4 border-b border-gray-200">
             <a 
-              href="https://ugga.org" 
+              href="https://www.greenhousegrowers.org/" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="flex items-center min-w-0"
@@ -340,13 +340,10 @@ export default function Sidebar({ className }: SidebarProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <a
-                    href="https://ugga.org"
+                    href="https://www.greenhousegrowers.org/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={cn(
-                      "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2",
-                      "bg-ugga-primary text-white hover:bg-ugga-primary/90"
-                    )}
+                    className="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-700 focus:ring-offset-2 bg-green-700 text-white hover:bg-green-800"
                   >
                     <ExternalLink className="h-4 w-4 flex-shrink-0" />
                     {!isCollapsed && (
@@ -375,7 +372,7 @@ export default function Sidebar({ className }: SidebarProps) {
           {/* Logo */}
           <div className="flex items-center h-16 px-4 border-b border-gray-200">
             <a 
-              href="https://ugga.org" 
+              href="https://www.greenhousegrowers.org/" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="flex items-center min-w-0"
@@ -419,13 +416,10 @@ export default function Sidebar({ className }: SidebarProps) {
           {/* Return to Website Button */}
           <div className="px-4 pb-4 border-t border-gray-200 pt-4 flex-shrink-0">
             <a
-              href="https://ugga.org"
+              href="https://www.greenhousegrowers.org/"
               target="_blank"
               rel="noopener noreferrer"
-              className={cn(
-                "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ugga-primary focus:ring-offset-2",
-                "bg-ugga-primary text-white hover:bg-ugga-primary/90"
-              )}
+              className="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-green-700 focus:ring-offset-2 bg-green-700 text-white hover:bg-green-800"
               onClick={() => setIsMobileOpen(false)}
             >
               <ExternalLink className="h-4 w-4 flex-shrink-0" />
