@@ -74,21 +74,27 @@ export default function Dashboard() {
       title: "Find a Grower",
       description: "Connect with growers by location and expertise",
       href: "/dashboard/find-grower",
-      inDevelopment: true
+      inDevelopment: true,
+      iconBg: "bg-blue-600/10",
+      iconColor: "text-blue-700"
     },
     {
       icon: <MessageCircle className="h-8 w-8" />,
       title: "Member Forum",
       description: "Connect with fellow growers, share knowledge, organize bulk ordering.",
       href: "/dashboard/forum",
-      inDevelopment: false
+      inDevelopment: false,
+      iconBg: "bg-purple-600/10",
+      iconColor: "text-purple-700"
     },
     {
       icon: <FolderOpen className="h-8 w-8" />,
       title: "Resource Library",
       description: "Browse curated grower resources — find relevant research, organizations near you, tax incentives and rebates, upcoming events, and more.",
       href: "/dashboard/resources",
-      inDevelopment: true
+      inDevelopment: true,
+      iconBg: "bg-orange-600/10",
+      iconColor: "text-orange-700"
     },
     // Row 2: Farm Assessment, Sales Hub, Product Hub, Member Profile
     {
@@ -96,28 +102,36 @@ export default function Dashboard() {
       title: "Farm Assessment",
       description: "Respond to the prompts to determine which areas of your farm to work on to improve yield and profitability for your operation.",
       href: "/dashboard/assessment",
-      inDevelopment: true
+      inDevelopment: true,
+      iconBg: "bg-red-600/10",
+      iconColor: "text-red-700"
     },
     {
       icon: <Store className="h-8 w-8" />,
       title: "Sales Hub",
       description: "Find buyers and distributors for your products",
       href: "/dashboard/saleshub",
-      inDevelopment: true
+      inDevelopment: true,
+      iconBg: "bg-green-600/10",
+      iconColor: "text-green-700"
     },
     {
       icon: <ShoppingBag className="h-8 w-8" />,
       title: "Product Hub",
       description: "Browse vetted products and services",
       href: "/dashboard/producthub",
-      inDevelopment: true
+      inDevelopment: true,
+      iconBg: "bg-pink-600/10",
+      iconColor: "text-pink-700"
     },
     {
       icon: <UserCircle className="h-8 w-8" />,
       title: "Member Profile",
       description: "Update your information and preferences",
       href: "/dashboard/profile",
-      inDevelopment: false
+      inDevelopment: false,
+      iconBg: "bg-indigo-600/10",
+      iconColor: "text-indigo-700"
     }
   ];
 
@@ -165,8 +179,8 @@ export default function Dashboard() {
                     </div>
                   )}
                   <CardContent className="p-6 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600/10 rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200">
-                      <span className="text-green-700">{tool.icon}</span>
+                    <div className={`inline-flex items-center justify-center w-16 h-16 ${tool.iconBg} rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200`}>
+                      <span className={tool.iconColor}>{tool.icon}</span>
                     </div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{tool.title}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{tool.description}</p>
@@ -187,8 +201,8 @@ export default function Dashboard() {
                     </div>
                   )}
                   <CardContent className="p-6 text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600/10 rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200">
-                      <span className="text-green-700">{tool.icon}</span>
+                    <div className={`inline-flex items-center justify-center w-16 h-16 ${tool.iconBg} rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200`}>
+                      <span className={tool.iconColor}>{tool.icon}</span>
                     </div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{tool.title}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{tool.description}</p>
