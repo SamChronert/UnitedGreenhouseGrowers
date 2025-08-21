@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ExternalLink, MapPin, GraduationCap, AlertCircle, RefreshCw, List, Map, ChevronDown, ChevronRight } from "lucide-react";
+import { ExternalLink, MapPin, GraduationCap, AlertCircle, RefreshCw, Map, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInfiniteResources, useResourcesList, Resource, ResourceFilters } from "@/hooks/useResources";
 import { useParamState } from "@/hooks/useQueryParams";
@@ -19,14 +19,11 @@ interface UniversitiesTabProps {
 
 export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabProps) {
   // State for collapsible sections
-  const [listExpanded, setListExpanded] = useState(true);
   const [mapExpanded, setMapExpanded] = useState(true);
   
-  // URL state management with useParamState
-  const [searchQuery, setSearchQuery] = useParamState('q', '');
-  
-  // Use empty filters since user said overall filter doesn't need to be there
+  // Use empty filters and search since user said overall filter doesn't need to be there
   const filters = useMemo(() => ({} as ResourceFilters), []);
+  const searchQuery = '';
   const sort = 'relevance';
   
   // Local state
@@ -42,7 +39,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
   // Data fetching with infinite query
   const infiniteQuery = useInfiniteResources({
     type: 'universities',
-    query: searchQuery,
+    query: '',
     filters,
     sort: sort as any,
     enabled: true
@@ -94,18 +91,6 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
       aria-labelledby="universities-tab"
       className="space-y-6"
     >
-      {/* Search Bar */}
-      <SearchBox
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder="Search universities by name, program, or location..."
-        resources={universities}
-        resourceType="universities"
-        className="max-w-md"
-      />
-
-
-
       {/* Error State */}
       {error && (
         <Alert variant="destructive">
@@ -168,134 +153,13 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
               <Map className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No universities to display on map</h3>
               <p className="text-gray-600">
-                {searchQuery.trim() ? "Try adjusting your search to find universities with location data." : "No universities with location data are currently available."}
+                No universities with location data are currently available.
               </p>
             </div>
           )}
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Universities List Section */}
-      <Collapsible open={listExpanded} onOpenChange={setListExpanded}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            style={{ backgroundColor: '#36533C' }}
-            className="w-full p-4 justify-between text-lg font-semibold text-white hover:opacity-90 border rounded-lg"
-          >
-            <div className="flex items-center gap-3">
-              <List className="h-5 w-5" />
-              Universities List
-            </div>
-            {listExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </Button>
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent className="space-y-4 mt-4">
-          {/* Loading Skeletons */}
-          {isLoading && (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i}>
-                  <CardHeader className="pb-3">
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <Skeleton className="h-4 w-full mb-2" />
-                    <Skeleton className="h-4 w-2/3" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {/* Universities Grid */}
-          {!isLoading && !error && universities.length > 0 && (
-            <>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {universities.map(university => (
-                  <Card 
-                    key={university.id} 
-                    className="cursor-pointer transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
-                    onClick={() => handleUniversityClick(university)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleUniversityClick(university);
-                      }
-                    }}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`View details for ${university.title}`}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-lg leading-tight">
-                          {university.title}
-                        </CardTitle>
-                        <GraduationCap className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
-                      </div>
-                      <div className="flex items-center text-sm text-gray-600 mt-1">
-                        <MapPin className="h-4 w-4 mr-1" aria-hidden="true" />
-                        {university.data?.city || 'Location'}, {university.data?.state || 'State'}
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <p className="text-sm text-gray-700 mb-3">
-                        {university.data?.programName || 'Academic Program'}
-                      </p>
-                      <p className="text-sm text-gray-600 line-clamp-2">
-                        {university.summary}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-
-              {/* Load More Button */}
-              {hasNextPage && (
-                <div className="text-center">
-                  <Button
-                    onClick={handleLoadMore}
-                    disabled={isFetchingNextPage}
-                    variant="outline"
-                    className="w-auto"
-                  >
-                    {isFetchingNextPage ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Loading more...
-                      </>
-                    ) : (
-                      'Load More Universities'
-                    )}
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-          
-          {/* Empty State */}
-          {!isLoading && !error && universities.length === 0 && (
-            <div className="text-center py-12">
-              <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No universities found</h3>
-              <p className="text-gray-600 mb-4">
-                {searchQuery.trim() ? "Try adjusting your search to find more results." : "No universities are currently available."}
-              </p>
-              {searchQuery.trim() && (
-                <Button 
-                  variant="outline" 
-                  onClick={() => setSearchQuery('')}
-                >
-                  Clear Search
-                </Button>
-              )}
-            </div>
-          )}
-        </CollapsibleContent>
-      </Collapsible>
 
       {/* University Details Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
