@@ -81,7 +81,6 @@ export default function Resources() {
       
       
       <div className="p-8">
-        <div className="max-w-6xl mx-auto">
           {/* Header */}
           <header className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -151,7 +150,6 @@ export default function Resources() {
               <IndustryNewsTab onAnalyticsEvent={handleAnalyticsEvent} />
             )}
           </main>
-        </div>
       </div>
     </div>
   );

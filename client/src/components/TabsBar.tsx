@@ -99,43 +99,32 @@ export default function TabsBar({ activeTab, onTabChange, onAnalyticsEvent }: Ta
   }, [handleTabSelect]);
 
   return (
-    <div className="border-b border-gray-200 mb-6">
-      <nav aria-label="Resource type navigation">
-        <div 
-          ref={tabsRef}
-          className="flex flex-wrap gap-x-8 gap-y-4"
-          role="tablist"
-        >
-          <div className="flex flex-wrap gap-x-8 gap-y-4 px-1">
-            {TABS.map((tab, index) => {
-              const isActive = tab.id === activeTab;
-              const tabIndex = isActive ? 0 : -1;
-              
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabSelect(tab, index)}
-                  onKeyDown={(e) => handleKeyDown(e, index)}
-                  className={cn(
-                    "relative whitespace-nowrap pb-4 px-4 py-3 transition-all duration-200 ease-in-out cursor-pointer",
-                    "focus:outline-none focus:ring-3 focus:ring-blue-600 focus:ring-offset-2 focus:bg-white",
-                    "rounded-t-lg border-b-4",
-                    isActive
-                      ? "border-blue-600 text-blue-700 bg-blue-50 font-bold text-base shadow-sm"
-                      : "border-transparent text-gray-600 font-medium text-sm hover:text-gray-900 hover:border-gray-400 hover:bg-gray-100 hover:shadow-sm"
-                  )}
-                  role="tab"
-                  aria-selected={isActive}
-                  aria-controls={`${tab.id}-panel`}
-                  id={`${tab.id}-tab`}
-                  tabIndex={tabIndex}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+    <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+      <nav className="-mb-px flex space-x-8">
+        {TABS.map((tab, index) => {
+          const isActive = tab.id === activeTab;
+          const tabIndex = isActive ? 0 : -1;
+          
+          return (
+            <button
+              key={tab.id}
+              onClick={() => handleTabSelect(tab, index)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                isActive
+                  ? "border-ugga-primary text-ugga-primary"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+              }`}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`${tab.id}-panel`}
+              id={`${tab.id}-tab`}
+              tabIndex={tabIndex}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
       </nav>
     </div>
   );
