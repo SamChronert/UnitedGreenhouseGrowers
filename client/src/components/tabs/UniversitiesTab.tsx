@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ExternalLink, MapPin, GraduationCap, AlertCircle, RefreshCw, Map, ChevronDown, ChevronRight } from "lucide-react";
+import { ExternalLink, MapPin, GraduationCap, AlertCircle, RefreshCw, Map } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInfiniteResources, useResourcesList, Resource, ResourceFilters } from "@/hooks/useResources";
 import { useParamState } from "@/hooks/useQueryParams";
@@ -18,8 +17,7 @@ interface UniversitiesTabProps {
 }
 
 export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabProps) {
-  // State for collapsible sections
-  const [mapExpanded, setMapExpanded] = useState(true);
+  // Map is now always visible (no collapsible state needed)
   
   // Use empty filters and search since user said overall filter doesn't need to be there
   const filters = useMemo(() => ({} as ResourceFilters), []);
@@ -111,22 +109,20 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
       )}
 
       {/* Universities Map Section */}
-      <Collapsible open={mapExpanded} onOpenChange={setMapExpanded}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            style={{ backgroundColor: '#36533C' }}
-            className="w-full p-4 justify-between text-lg font-semibold text-white hover:opacity-90 border rounded-lg"
-          >
-            <div className="flex items-center gap-3">
-              <Map className="h-5 w-5" />
-              Universities Map
-            </div>
-            {mapExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </Button>
-        </CollapsibleTrigger>
+      <div className="space-y-4">
+        {/* Static Header */}
+        <div
+          style={{ backgroundColor: '#36533C' }}
+          className="w-full p-4 text-lg font-semibold text-white border rounded-lg"
+        >
+          <div className="flex items-center gap-3">
+            <Map className="h-5 w-5" />
+            Universities Map
+          </div>
+        </div>
         
-        <CollapsibleContent className="space-y-4 mt-4">
+        {/* Map Content */}
+        <div className="space-y-4">
           {/* Map Loading State */}
           {isLoading && (
             <div className="min-h-[600px] flex items-center justify-center">
@@ -157,8 +153,8 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
               </p>
             </div>
           )}
-        </CollapsibleContent>
-      </Collapsible>
+        </div>
+      </div>
 
 
       {/* University Details Modal */}
