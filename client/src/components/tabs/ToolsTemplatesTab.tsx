@@ -213,7 +213,7 @@ export default function ToolsTemplatesTab({ viewMode, subTab, onAnalyticsEvent }
       </div>
 
       {/* Sub-tabs */}
-      <Tabs value={activeSubTab} onValueChange={handleSubTabChange}>
+      <Tabs value={activeSubTab}>
         <TabsList className="grid w-full grid-cols-2 max-w-md">
           <TabsTrigger value="tools" className="flex items-center gap-2">
             <Wrench className="h-4 w-4" />
