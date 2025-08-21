@@ -26,6 +26,10 @@ export interface Resource {
   summary: string;
   data: Record<string, any>;
   tags: string[];
+  lat?: number | null;
+  long?: number | null;
+  ugga_verified?: boolean;
+  quality_score?: number;
 }
 
 export interface ResourcesResponse {

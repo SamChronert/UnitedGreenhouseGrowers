@@ -548,7 +548,7 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       const whereClause = allConditions.length > 0 ? `WHERE ${allConditions.join(' AND ')}` : '';
       
       const baseQuery = `
-        SELECT id, title, url, type, summary, data, tags 
+        SELECT id, title, url, type, summary, data, tags, lat, long, ugga_verified, quality_score 
         FROM resources 
         ${whereClause}
         ORDER BY ${orderBy}

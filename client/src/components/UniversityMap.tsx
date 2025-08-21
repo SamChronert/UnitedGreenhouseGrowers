@@ -149,9 +149,9 @@ const UniversityMap = memo(function UniversityMap({
                             </Badge>
                           )}
                           
-                          {university.region && (
+                          {university.data?.state && (
                             <Badge variant="outline" className="text-xs">
-                              {university.region}
+                              {university.data.state}
                             </Badge>
                           )}
                         </div>
