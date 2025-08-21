@@ -70,68 +70,61 @@ export default function Dashboard() {
   const memberTools = [
     // Row 1: Find a Grower, Member Forum, Resource Library
     {
-      icon: <MapPin className="h-8 w-8" />,
+      icon: <MapPin className="h-8 w-8" style={{ color: "#1d4ed8" }} />,
       title: "Find a Grower",
       description: "Connect with growers by location and expertise",
       href: "/dashboard/find-grower",
       inDevelopment: true,
-      iconBgColor: "#dbeafe",
-      iconColor: "#1d4ed8"
+      iconBgColor: "#dbeafe"
     },
     {
-      icon: <MessageCircle className="h-8 w-8" />,
+      icon: <MessageCircle className="h-8 w-8" style={{ color: "#7c3aed" }} />,
       title: "Member Forum",
       description: "Connect with fellow growers, share knowledge, organize bulk ordering.",
       href: "/dashboard/forum",
       inDevelopment: false,
-      iconBgColor: "#e9d5ff",
-      iconColor: "#7c3aed"
+      iconBgColor: "#e9d5ff"
     },
     {
-      icon: <FolderOpen className="h-8 w-8" />,
+      icon: <FolderOpen className="h-8 w-8" style={{ color: "#c2410c" }} />,
       title: "Resource Library",
       description: "Browse curated grower resources — find relevant research, organizations near you, tax incentives and rebates, upcoming events, and more.",
       href: "/dashboard/resources",
       inDevelopment: true,
-      iconBgColor: "#fed7aa",
-      iconColor: "#c2410c"
+      iconBgColor: "#fed7aa"
     },
     // Row 2: Farm Assessment, Sales Hub, Product Hub, Member Profile
     {
-      icon: <ClipboardList className="h-8 w-8" />,
+      icon: <ClipboardList className="h-8 w-8" style={{ color: "#dc2626" }} />,
       title: "Farm Assessment",
       description: "Respond to the prompts to determine which areas of your farm to work on to improve yield and profitability for your operation.",
       href: "/dashboard/assessment",
       inDevelopment: true,
-      iconBgColor: "#fecaca",
-      iconColor: "#dc2626"
+      iconBgColor: "#fecaca"
     },
     {
-      icon: <Store className="h-8 w-8" />,
+      icon: <Store className="h-8 w-8" style={{ color: "#16a34a" }} />,
       title: "Sales Hub",
       description: "Find buyers and distributors for your products",
       href: "/dashboard/saleshub",
       inDevelopment: true,
-      iconBgColor: "#bbf7d0",
-      iconColor: "#16a34a"
+      iconBgColor: "#bbf7d0"
     },
     {
-      icon: <ShoppingBag className="h-8 w-8" />,
+      icon: <ShoppingBag className="h-8 w-8" style={{ color: "#db2777" }} />,
       title: "Product Hub",
       description: "Browse vetted products and services",
       href: "/dashboard/producthub",
       inDevelopment: true,
-      iconBgColor: "#fce7f3",
-      iconColor: "#db2777"
+      iconBgColor: "#fce7f3"
     },
     {
-      icon: <UserCircle className="h-8 w-8" />,
+      icon: <UserCircle className="h-8 w-8" style={{ color: "#4f46e5" }} />,
       title: "Member Profile",
       description: "Update your information and preferences",
       href: "/dashboard/profile",
       inDevelopment: false,
-      iconBgColor: "#e0e7ff",
-      iconColor: "#4f46e5"
+      iconBgColor: "#e0e7ff"
     }
   ];
 
@@ -183,7 +176,7 @@ export default function Dashboard() {
                       className="inline-flex items-center justify-center w-16 h-16 rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200"
                       style={{ backgroundColor: tool.iconBgColor }}
                     >
-                      <span style={{ color: tool.iconColor }}>{tool.icon}</span>
+                      {tool.icon}
                     </div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{tool.title}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{tool.description}</p>
@@ -208,7 +201,7 @@ export default function Dashboard() {
                       className="inline-flex items-center justify-center w-16 h-16 rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200"
                       style={{ backgroundColor: tool.iconBgColor }}
                     >
-                      <span style={{ color: tool.iconColor }}>{tool.icon}</span>
+                      {tool.icon}
                     </div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{tool.title}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{tool.description}</p>
