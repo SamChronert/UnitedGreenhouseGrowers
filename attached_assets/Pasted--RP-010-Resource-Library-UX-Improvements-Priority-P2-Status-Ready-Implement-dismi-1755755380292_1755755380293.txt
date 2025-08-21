@@ -1,0 +1,59 @@
+### RP-010: Resource Library UX Improvements
+**Priority: P2**
+**Status: Ready**
+
+```
+Implement dismissible popup introductions and various UX improvements across Resource Library tabs.
+
+Requirements by tab:
+
+1. **All Tabs - Dismissible Popups**:
+   - Create reusable `DismissibleInfo` component
+   - Use sessionStorage to track dismissed state per tab
+   - Popup appears on first visit to tab each session
+   - Smooth fade in/out animations
+   - "Don't show again this session" checkbox option
+
+2. **Tools & Templates**:
+   - Intro popup: "Tools & Templates for Greenhouse Operations - Discover software tools and downloadable templates to help streamline your greenhouse business operations."
+   - Support branded icons (admin uploadable)
+
+3. **Universities**:
+   - Popup: "Research universities and extension programs providing greenhouse and controlled environment agriculture expertise."
+   - Add geocoding for map display
+   - Use Google Maps or Mapbox Geocoding API
+   - Batch geocode existing universities
+
+4. **Organizations**:
+   - Remove filter boxes
+   - Default to List view
+   - Fix text wrapping on wide screens
+   - Show: logo, name, description, website link (no tags)
+   - Support branded icons
+
+5. **Learning**:
+   - Popup: "Expand your greenhouse expertise with courses, certifications, and training resources."
+   - Remove "Levels" filter
+   - Group by format with collapsible sections:
+     - Online Courses
+     - Certifications
+     - Workshops
+     - Webinars
+
+6. **Extension & Articles** (rename from Blogs & Bulletins):
+   - Remove static intro box
+   - Support banner photos for visual appeal
+   - Rename "Industry Bulletins" to "Extension"
+
+7. **Industry News**:
+   - Popup: "Connect with trusted greenhouse industry news sources and publications."
+   - Remove all filters
+   - List view only (remove toggle)
+   - Support branded logos
+
+8. **Admin Features**:
+   - Icon upload for all resource types
+   - Image requirements: SVG or PNG, max 500KB
+   - Store in cloud storage (S3 or similar)
+
+Test all improvements for accessibility (keyboard navigation, screen readers).
