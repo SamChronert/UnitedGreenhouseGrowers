@@ -154,6 +154,43 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
             </div>
           )}
         </div>
+
+        {/* Universities List */}
+        {!isLoading && !error && universities.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <GraduationCap className="h-5 w-5" />
+              Universities on Map ({universities.filter(u => u.lat && u.long).length})
+            </h3>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {universities
+                .filter(university => university.lat && university.long)
+                .map((university) => (
+                  <Card 
+                    key={university.id} 
+                    className="cursor-pointer hover:shadow-md transition-shadow"
+                    onClick={() => handleUniversityClick(university)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-900 line-clamp-2">
+                          {university.title}
+                        </h4>
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <MapPin className="h-3 w-3" />
+                          {university.data?.city}, {university.data?.state}
+                          {university.data?.country !== 'USA' && `, ${university.data?.country}`}
+                        </div>
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {university.summary}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          </div>
+        )}
       </div>
 
 
