@@ -123,6 +123,7 @@ export const forumPosts = pgTable("forum_posts", {
   category: varchar("category").notNull(), // Bulk Ordering, Plant Health Management, etc.
   tags: text("tags").array().default([]), // AI-generated topic tags
   attachments: text("attachments").array().default([]), // file URLs for images/documents
+  score: integer("score").default(0).notNull(), // Reddit-like score (upvotes - downvotes)
   editedAt: timestamp("edited_at"), // Track when post was edited
   isDeleted: boolean("is_deleted").default(false).notNull(), // Soft deletion
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -131,14 +132,17 @@ export const forumPosts = pgTable("forum_posts", {
   userIdx: index("forum_posts_user_idx").on(table.userId),
   createdAtIdx: index("forum_posts_created_at_idx").on(table.createdAt),
   categoryIdx: index("forum_posts_category_idx").on(table.category),
+  scoreIdx: index("forum_posts_score_idx").on(table.score),
 }));
 
 export const forumComments = pgTable("forum_comments", {
   id: varchar("id").primaryKey().notNull(),
   postId: varchar("post_id").notNull(),
   userId: varchar("user_id").notNull(),
+  parentId: varchar("parent_id"), // For threaded comments (nullable for top-level comments)
   content: text("content").notNull(),
   attachments: text("attachments").array().default([]), // file URLs for images/documents
+  score: integer("score").default(0).notNull(), // Reddit-like score (upvotes - downvotes)
   editedAt: timestamp("edited_at"), // Track when comment was edited
   isDeleted: boolean("is_deleted").default(false).notNull(), // Soft deletion
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -146,7 +150,23 @@ export const forumComments = pgTable("forum_comments", {
 }, (table) => ({
   postIdx: index("forum_comments_post_idx").on(table.postId),
   userIdx: index("forum_comments_user_idx").on(table.userId),
+  parentIdx: index("forum_comments_parent_idx").on(table.parentId),
   createdAtIdx: index("forum_comments_created_at_idx").on(table.createdAt),
+  scoreIdx: index("forum_comments_score_idx").on(table.score),
+}));
+
+export const forumVotes = pgTable("forum_votes", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  entityType: varchar("entity_type").notNull(), // 'post' or 'comment'
+  entityId: varchar("entity_id").notNull(), // ID of the post or comment
+  value: integer("value").notNull(), // +1 for upvote, -1 for downvote
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userEntityIdx: unique("forum_votes_user_entity_unique").on(table.userId, table.entityType, table.entityId),
+  entityIdx: index("forum_votes_entity_idx").on(table.entityType, table.entityId),
+  userIdx: index("forum_votes_user_idx").on(table.userId),
 }));
 
 export const assessmentTrainingData = pgTable("assessment_training_data", {
@@ -297,15 +317,32 @@ export const forumPostsRelations = relations(forumPosts, ({ one, many }) => ({
     references: [users.id],
   }),
   comments: many(forumComments),
+  votes: many(forumVotes),
 }));
 
-export const forumCommentsRelations = relations(forumComments, ({ one }) => ({
+export const forumCommentsRelations = relations(forumComments, ({ one, many }) => ({
   post: one(forumPosts, {
     fields: [forumComments.postId],
     references: [forumPosts.id],
   }),
   user: one(users, {
     fields: [forumComments.userId],
+    references: [users.id],
+  }),
+  parent: one(forumComments, {
+    fields: [forumComments.parentId],
+    references: [forumComments.id],
+    relationName: "CommentParent",
+  }),
+  children: many(forumComments, {
+    relationName: "CommentParent",
+  }),
+  votes: many(forumVotes),
+}));
+
+export const forumVotesRelations = relations(forumVotes, ({ one }) => ({
+  user: one(users, {
+    fields: [forumVotes.userId],
     references: [users.id],
   }),
 }));
@@ -408,6 +445,7 @@ export const insertForumPostSchema = createInsertSchema(forumPosts).omit({
   updatedAt: true,
   editedAt: true,
   isDeleted: true,
+  score: true,
 });
 
 export const insertForumCommentSchema = createInsertSchema(forumComments).omit({
@@ -416,6 +454,13 @@ export const insertForumCommentSchema = createInsertSchema(forumComments).omit({
   updatedAt: true,
   editedAt: true,
   isDeleted: true,
+  score: true,
+});
+
+export const insertForumVoteSchema = createInsertSchema(forumVotes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertAssessmentTrainingDataSchema = createInsertSchema(assessmentTrainingData).omit({
@@ -466,6 +511,8 @@ export type ForumPost = typeof forumPosts.$inferSelect;
 export type InsertForumPost = z.infer<typeof insertForumPostSchema>;
 export type ForumComment = typeof forumComments.$inferSelect;
 export type InsertForumComment = z.infer<typeof insertForumCommentSchema>;
+export type ForumVote = typeof forumVotes.$inferSelect;
+export type InsertForumVote = z.infer<typeof insertForumVoteSchema>;
 export type AssessmentTrainingData = typeof assessmentTrainingData.$inferSelect;
 export type InsertAssessmentTrainingData = z.infer<typeof insertAssessmentTrainingDataSchema>;
 export type BuyersDistributors = typeof buyersDistributors.$inferSelect;

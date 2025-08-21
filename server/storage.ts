@@ -9,6 +9,7 @@ import {
   growerChallenges,
   forumPosts,
   forumComments,
+  forumVotes,
   assessmentTrainingData,
   farmAssessments,
   farmProfiles,
@@ -33,6 +34,8 @@ import {
   type InsertForumPost,
   type ForumComment,
   type InsertForumComment,
+  type ForumVote,
+  type InsertForumVote,
   type AssessmentTrainingData,
   type InsertAssessmentTrainingData,
   type FarmAssessment,
@@ -140,6 +143,12 @@ export interface IStorage {
   createForumComment(comment: InsertForumComment): Promise<ForumComment>;
   updateForumComment(id: string, updates: Partial<ForumComment>): Promise<ForumComment>;
   softDeleteForumComment(id: string): Promise<ForumComment>;
+  
+  // Forum voting operations
+  createOrUpdateVote(userId: string, entityType: 'post' | 'comment', entityId: string, value: 1 | -1): Promise<ForumVote>;
+  removeVote(userId: string, entityType: 'post' | 'comment', entityId: string): Promise<void>;
+  getUserVote(userId: string, entityType: 'post' | 'comment', entityId: string): Promise<ForumVote | undefined>;
+  getVotesForEntity(entityType: 'post' | 'comment', entityId: string): Promise<{ upvotes: number; downvotes: number; userVote?: 1 | -1; }>;
   
   // Assessment training data operations
   getAllAssessmentTrainingData(): Promise<AssessmentTrainingData[]>;
@@ -961,6 +970,117 @@ export class DatabaseStorage implements IStorage {
       .where(eq(forumComments.id, id))
       .returning();
     return comment;
+  }
+
+  // Forum voting operations
+  async createOrUpdateVote(userId: string, entityType: 'post' | 'comment', entityId: string, value: 1 | -1): Promise<ForumVote> {
+    // First, check if vote exists
+    const existingVote = await db
+      .select()
+      .from(forumVotes)
+      .where(and(
+        eq(forumVotes.userId, userId),
+        eq(forumVotes.entityType, entityType),
+        eq(forumVotes.entityId, entityId)
+      ))
+      .limit(1);
+
+    if (existingVote.length > 0) {
+      // Update existing vote
+      const [updatedVote] = await db
+        .update(forumVotes)
+        .set({ value, updatedAt: new Date() })
+        .where(eq(forumVotes.id, existingVote[0].id))
+        .returning();
+      
+      // Update score in the entity table
+      await this.updateEntityScore(entityType, entityId);
+      return updatedVote;
+    } else {
+      // Create new vote
+      const [newVote] = await db
+        .insert(forumVotes)
+        .values({
+          id: randomUUID(),
+          userId,
+          entityType,
+          entityId,
+          value,
+        })
+        .returning();
+      
+      // Update score in the entity table
+      await this.updateEntityScore(entityType, entityId);
+      return newVote;
+    }
+  }
+
+  async removeVote(userId: string, entityType: 'post' | 'comment', entityId: string): Promise<void> {
+    await db
+      .delete(forumVotes)
+      .where(and(
+        eq(forumVotes.userId, userId),
+        eq(forumVotes.entityType, entityType),
+        eq(forumVotes.entityId, entityId)
+      ));
+    
+    // Update score in the entity table
+    await this.updateEntityScore(entityType, entityId);
+  }
+
+  async getUserVote(userId: string, entityType: 'post' | 'comment', entityId: string): Promise<ForumVote | undefined> {
+    const votes = await db
+      .select()
+      .from(forumVotes)
+      .where(and(
+        eq(forumVotes.userId, userId),
+        eq(forumVotes.entityType, entityType),
+        eq(forumVotes.entityId, entityId)
+      ))
+      .limit(1);
+    
+    return votes[0];
+  }
+
+  async getVotesForEntity(entityType: 'post' | 'comment', entityId: string): Promise<{ upvotes: number; downvotes: number; userVote?: 1 | -1; }> {
+    const votes = await db
+      .select()
+      .from(forumVotes)
+      .where(and(
+        eq(forumVotes.entityType, entityType),
+        eq(forumVotes.entityId, entityId)
+      ));
+
+    const upvotes = votes.filter(v => v.value === 1).length;
+    const downvotes = votes.filter(v => v.value === -1).length;
+
+    return { upvotes, downvotes };
+  }
+
+  private async updateEntityScore(entityType: 'post' | 'comment', entityId: string): Promise<void> {
+    // Calculate new score based on votes
+    const votes = await db
+      .select()
+      .from(forumVotes)
+      .where(and(
+        eq(forumVotes.entityType, entityType),
+        eq(forumVotes.entityId, entityId)
+      ));
+
+    const score = votes.reduce((acc, vote) => acc + vote.value, 0);
+
+    // Update the score in the appropriate table
+    if (entityType === 'post') {
+      await db
+        .update(forumPosts)
+        .set({ score, updatedAt: new Date() })
+        .where(eq(forumPosts.id, entityId));
+    } else {
+      await db
+        .update(forumComments)
+        .set({ score, updatedAt: new Date() })
+        .where(eq(forumComments.id, entityId));
+    }
   }
 
   // Assessment training data operations

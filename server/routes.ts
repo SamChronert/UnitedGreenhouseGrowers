@@ -1330,6 +1330,106 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
+  // Forum voting routes
+  
+  // Vote on a post
+  app.post("/api/forum/posts/:id/vote", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const postId = req.params.id;
+      const { value } = req.body; // 1 for upvote, -1 for downvote
+      
+      if (value !== 1 && value !== -1) {
+        return res.status(400).json({ message: "Vote value must be 1 or -1" });
+      }
+      
+      const vote = await storage.createOrUpdateVote(req.user!.id, 'post', postId, value);
+      const voteStats = await storage.getVotesForEntity('post', postId);
+      
+      res.json({ vote, ...voteStats });
+    } catch (error) {
+      console.error("Vote on post error:", error);
+      res.status(500).json({ message: "Failed to vote on post" });
+    }
+  });
+
+  // Remove vote from a post
+  app.delete("/api/forum/posts/:id/vote", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const postId = req.params.id;
+      
+      await storage.removeVote(req.user!.id, 'post', postId);
+      const voteStats = await storage.getVotesForEntity('post', postId);
+      
+      res.json(voteStats);
+    } catch (error) {
+      console.error("Remove vote from post error:", error);
+      res.status(500).json({ message: "Failed to remove vote from post" });
+    }
+  });
+
+  // Vote on a comment
+  app.post("/api/forum/comments/:id/vote", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const commentId = req.params.id;
+      const { value } = req.body; // 1 for upvote, -1 for downvote
+      
+      if (value !== 1 && value !== -1) {
+        return res.status(400).json({ message: "Vote value must be 1 or -1" });
+      }
+      
+      const vote = await storage.createOrUpdateVote(req.user!.id, 'comment', commentId, value);
+      const voteStats = await storage.getVotesForEntity('comment', commentId);
+      
+      res.json({ vote, ...voteStats });
+    } catch (error) {
+      console.error("Vote on comment error:", error);
+      res.status(500).json({ message: "Failed to vote on comment" });
+    }
+  });
+
+  // Remove vote from a comment
+  app.delete("/api/forum/comments/:id/vote", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const commentId = req.params.id;
+      
+      await storage.removeVote(req.user!.id, 'comment', commentId);
+      const voteStats = await storage.getVotesForEntity('comment', commentId);
+      
+      res.json(voteStats);
+    } catch (error) {
+      console.error("Remove vote from comment error:", error);
+      res.status(500).json({ message: "Failed to remove vote from comment" });
+    }
+  });
+
+  // Get vote stats for a post
+  app.get("/api/forum/posts/:id/votes", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const postId = req.params.id;
+      const voteStats = await storage.getVotesForEntity('post', postId);
+      const userVote = await storage.getUserVote(req.user!.id, 'post', postId);
+      
+      res.json({ ...voteStats, userVote: userVote?.value });
+    } catch (error) {
+      console.error("Get post votes error:", error);
+      res.status(500).json({ message: "Failed to get post votes" });
+    }
+  });
+
+  // Get vote stats for a comment
+  app.get("/api/forum/comments/:id/votes", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const commentId = req.params.id;
+      const voteStats = await storage.getVotesForEntity('comment', commentId);
+      const userVote = await storage.getUserVote(req.user!.id, 'comment', commentId);
+      
+      res.json({ ...voteStats, userVote: userVote?.value });
+    } catch (error) {
+      console.error("Get comment votes error:", error);
+      res.status(500).json({ message: "Failed to get comment votes" });
+    }
+  });
+
   // File upload endpoint
   app.post("/api/forum/upload", authenticate, requireMember, upload.single('file'), async (req: AuthRequest, res) => {
     try {

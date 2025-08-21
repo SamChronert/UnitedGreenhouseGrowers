@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -12,21 +13,23 @@ import {
   MessageSquare, 
   Search, 
   Plus, 
-  Upload,
-  Calendar,
+  Clock,
   User,
-  Tag,
-  Send,
+  TrendingUp,
+  Flame,
+  MoreVertical,
   Edit,
   Trash2
 } from "lucide-react";
-import { format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 import type { ForumPost, ForumComment, User as UserType, Profile } from "@shared/schema";
-import ForumFilters from "@/components/ForumFilters";
 import PostEditor from "@/components/PostEditor";
 import Comment from "@/components/Comment";
+import VoteButtons from "@/components/VoteButtons";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 import { ForumCategory } from "@shared/schema";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 type PostWithDetails = ForumPost & { 
   user: UserType & { profile: Profile };
@@ -34,31 +37,78 @@ type PostWithDetails = ForumPost & {
   commentCount: number;
 };
 
+type SortType = 'hot' | 'new' | 'top-day' | 'top-week' | 'top-month' | 'top-all';
+
+const categoryColors: Record<string, string> = {
+  "Bulk Ordering": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  "Plant Health Management": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  "Greenhouse Systems Management": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+  "Operations": "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+  "Other": "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+};
+
 export default function Forum() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [selectedPost, setSelectedPost] = useState<PostWithDetails | null>(null);
   const [editingPost, setEditingPost] = useState<PostWithDetails | null>(null);
-  const [newComment, setNewComment] = useState("");
-  const [filters, setFilters] = useState({
-    state: "",
-    category: "",
-  });
+  const [sortBy, setSortBy] = useState<SortType>('hot');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Fetch forum posts with filters
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["/api/forum/posts", searchQuery, filters],
+    queryKey: ["/api/forum/posts", searchQuery, categoryFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
-      if (filters.state) params.append('state', filters.state);
-      if (filters.category) params.append('category', filters.category);
+      if (categoryFilter !== 'all') params.append('category', categoryFilter);
       const queryString = params.toString();
       return apiRequest("GET", `/api/forum/posts${queryString ? `?${queryString}` : ''}`);
     },
+  });
+
+  // Sort posts based on selected sort type
+  const sortedPosts = posts.sort((a: PostWithDetails, b: PostWithDetails) => {
+    switch (sortBy) {
+      case 'hot':
+        // Score with time decay (Reddit-like hot algorithm simplified)
+        const aScore = a.score / (1 + Math.pow((Date.now() - new Date(a.createdAt).getTime()) / (1000 * 60 * 60), 2));
+        const bScore = b.score / (1 + Math.pow((Date.now() - new Date(b.createdAt).getTime()) / (1000 * 60 * 60), 2));
+        return bScore - aScore;
+      case 'new':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case 'top-day':
+        const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+        const aInDay = new Date(a.createdAt).getTime() > dayAgo;
+        const bInDay = new Date(b.createdAt).getTime() > dayAgo;
+        if (aInDay && bInDay) return b.score - a.score;
+        if (aInDay) return -1;
+        if (bInDay) return 1;
+        return 0;
+      case 'top-week':
+        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        const aInWeek = new Date(a.createdAt).getTime() > weekAgo;
+        const bInWeek = new Date(b.createdAt).getTime() > weekAgo;
+        if (aInWeek && bInWeek) return b.score - a.score;
+        if (aInWeek) return -1;
+        if (bInWeek) return 1;
+        return 0;
+      case 'top-month':
+        const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        const aInMonth = new Date(a.createdAt).getTime() > monthAgo;
+        const bInMonth = new Date(b.createdAt).getTime() > monthAgo;
+        if (aInMonth && bInMonth) return b.score - a.score;
+        if (aInMonth) return -1;
+        if (bInMonth) return 1;
+        return 0;
+      case 'top-all':
+        return b.score - a.score;
+      default:
+        return 0;
+    }
   });
 
   // Create new post mutation
@@ -123,34 +173,14 @@ export default function Forum() {
     },
   });
 
-  // Create comment mutation
-  const createCommentMutation = useMutation({
-    mutationFn: ({ postId, content, attachments }: { postId: string; content: string; attachments?: string[] }) =>
-      apiRequest("POST", `/api/forum/posts/${postId}/comments`, { content, attachments }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/forum/posts"] });
-      setNewComment("");
-      toast({
-        title: "Success",
-        description: "Your comment has been added!",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
   const handleCreatePost = (postData: { title: string; content: string; category: string; attachments: string[] }) => {
     createPostMutation.mutate(postData);
   };
 
   const handleEditPost = (postData: { title: string; content: string; category: string; attachments: string[] }) => {
-    if (!editingPost) return;
-    editPostMutation.mutate({ id: editingPost.id, ...postData });
+    if (editingPost) {
+      editPostMutation.mutate({ id: editingPost.id, ...postData });
+    }
   };
 
   const handleDeletePost = (postId: string) => {
@@ -159,29 +189,22 @@ export default function Forum() {
     }
   };
 
-  const handleAddComment = (postId: string) => {
-    if (!newComment.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a comment.",
-        variant: "destructive",
-      });
-      return;
-    }
-    createCommentMutation.mutate({ postId, content: newComment, attachments: [] });
-  };
-
   if (isLoading) {
     return (
-      <div className="min-h-screen py-8 bg-gray-50">
+      <div className="min-h-screen py-6 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-300 rounded w-1/4 mb-4"></div>
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-gray-300 rounded"></div>
-              ))}
-            </div>
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-1/4 mb-6"></div>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex gap-4">
+                <div className="w-12 flex flex-col items-center space-y-1">
+                  <div className="h-8 w-8 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                  <div className="h-4 w-6 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                  <div className="h-8 w-8 bg-gray-300 dark:bg-gray-700 rounded"></div>
+                </div>
+                <div className="flex-1 bg-gray-300 dark:bg-gray-700 rounded h-32"></div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -189,41 +212,67 @@ export default function Forum() {
   }
 
   return (
-    <div className="min-h-screen py-8 bg-gray-50">
+    <div className="min-h-screen py-6 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-ugga-secondary rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
                 <MessageSquare className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Member Forum</h1>
-                <p className="text-gray-600">Connect with fellow growers, share knowledge, organize bulk ordering.</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Member Forum</h1>
+                <p className="text-gray-600 dark:text-gray-400">Connect with fellow growers and share knowledge</p>
               </div>
             </div>
-            <Button onClick={() => setShowCreatePost(true)}>
+            <Button onClick={() => setShowCreatePost(true)} className="bg-orange-500 hover:bg-orange-600">
               <Plus className="h-4 w-4 mr-2" />
-              New Post
+              Create Post
             </Button>
           </div>
 
-          {/* Search and Filters */}
+          {/* Search and Controls */}
           <div className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                placeholder="Search posts by topic, keywords, or questions..."
+                placeholder="Search posts..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
-            <ForumFilters 
-              filters={filters}
-              setFilters={setFilters}
-            />
+            
+            <div className="flex gap-4 items-center">
+              <Tabs value={sortBy} onValueChange={(value) => setSortBy(value as SortType)} className="flex-1">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="hot" className="flex items-center gap-1">
+                    <Flame className="h-3 w-3" />
+                    Hot
+                  </TabsTrigger>
+                  <TabsTrigger value="new" className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    New
+                  </TabsTrigger>
+                  <TabsTrigger value="top-day">Top Day</TabsTrigger>
+                  <TabsTrigger value="top-week">Top Week</TabsTrigger>
+                  <TabsTrigger value="top-all">Top All</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {Object.values(ForumCategory).map(category => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
@@ -245,14 +294,77 @@ export default function Forum() {
           />
         )}
 
-        {/* Forum Posts */}
-        <div className="space-y-4">
-          {!Array.isArray(posts) || posts.length === 0 ? (
+        {/* Selected Post Detail View */}
+        {selectedPost && (
+          <Card className="mb-6 border-orange-200 dark:border-orange-800">
+            <CardContent className="p-6">
+              <div className="flex gap-4">
+                <VoteButtons 
+                  entityType="post" 
+                  entityId={selectedPost.id} 
+                  score={selectedPost.score}
+                  className="pt-2"
+                />
+                
+                <div className="flex-1">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <Badge className={categoryColors[selectedPost.category] || categoryColors["Other"]} variant="secondary">
+                        {selectedPost.category}
+                      </Badge>
+                      <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mt-2">{selectedPost.title}</h1>
+                    </div>
+                    <div className="flex gap-2">
+                      {user?.id === selectedPost.userId && (
+                        <>
+                          <Button size="sm" variant="ghost" onClick={() => setEditingPost(selectedPost)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => handleDeletePost(selectedPost.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                      <Button size="sm" variant="ghost" onClick={() => setSelectedPost(null)}>
+                        ✕
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    <Avatar className="h-5 w-5">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${selectedPost.user.profile?.name || selectedPost.user.username}`} />
+                      <AvatarFallback>{selectedPost.user.profile?.name?.[0] || selectedPost.user.username?.[0] || "U"}</AvatarFallback>
+                    </Avatar>
+                    <span>u/{selectedPost.user.profile?.name || selectedPost.user.username}</span>
+                    <span>•</span>
+                    <span>{formatDistanceToNow(new Date(selectedPost.createdAt), { addSuffix: true })}</span>
+                  </div>
+                  
+                  <MarkdownRenderer content={selectedPost.content} />
+                  
+                  <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <h3 className="font-semibold mb-4">{selectedPost.commentCount} Comments</h3>
+                    <div className="space-y-4">
+                      {selectedPost.comments.map(comment => (
+                        <Comment key={comment.id} comment={comment} postId={selectedPost.id} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Forum Posts List */}
+        <div className="space-y-3">
+          {!Array.isArray(sortedPosts) || sortedPosts.length === 0 ? (
             <Card>
               <CardContent className="text-center py-12">
                 <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
-                <p className="text-gray-600 mb-4">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No posts yet</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Be the first to start a conversation in the forum!
                 </p>
                 <Button onClick={() => setShowCreatePost(true)}>
@@ -261,81 +373,64 @@ export default function Forum() {
               </CardContent>
             </Card>
           ) : (
-            Array.isArray(posts) && posts.map((post: PostWithDetails) => (
-              <Card key={post.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${post.user.profile?.name || post.user.username}`} />
-                      <AvatarFallback>
-                        {post.user.profile?.name?.[0] || post.user.username?.[0] || "U"}
-                      </AvatarFallback>
-                    </Avatar>
+            sortedPosts.map((post: PostWithDetails) => (
+              <Card key={post.id} className="hover:border-gray-300 dark:hover:border-gray-600 transition-colors cursor-pointer"
+                    onClick={() => setSelectedPost(post)}>
+                <CardContent className="p-4">
+                  <div className="flex gap-3">
+                    <VoteButtons 
+                      entityType="post" 
+                      entityId={post.id} 
+                      score={post.score}
+                    />
                     
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-lg">{post.title}</h3>
-                          {post.category && (
-                            <Badge variant="secondary" className="text-xs">
-                              {post.category}
-                            </Badge>
-                          )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-2 mb-2">
+                        <Badge className={categoryColors[post.category] || categoryColors["Other"]} variant="secondary">
+                          {post.category}
+                        </Badge>
+                        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                          <span>u/{post.user.profile?.name || post.user.username}</span>
+                          <span>•</span>
+                          <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</span>
                         </div>
                         {user?.id === post.userId && (
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => setEditingPost(post)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleDeletePost(post.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="ghost" className="h-6 w-6 p-0 ml-auto" onClick={(e) => e.stopPropagation()}>
+                                <MoreVertical className="h-3 w-3" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingPost(post); }}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDeletePost(post.id); }}>
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         )}
                       </div>
                       
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                        <span>{post.user.profile?.name || post.user.username}</span>
-                        <span>•</span>
-                        <span>{post.user.profile?.state}</span>
-                        {post.user.profile?.county && (
-                          <>
-                            <span>•</span>
-                            <span>{post.user.profile.county}</span>
-                          </>
-                        )}
-                        <span>•</span>
-                        <Calendar className="h-3 w-3" />
-                        <span>{format(new Date(post.createdAt), "MMM d, yyyy")}</span>
-                        {post.editedAt && (
-                          <>
-                            <span>•</span>
-                            <Edit className="h-3 w-3" />
-                            <span>Edited</span>
-                          </>
-                        )}
-                        <span>•</span>
-                        <MessageSquare className="h-3 w-3" />
-                        <span>{post.commentCount || 0} comments</span>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">
+                        {post.title}
+                      </h3>
+                      
+                      <div className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3 mb-2">
+                        <MarkdownRenderer content={post.content} />
                       </div>
                       
-                      <p className="text-gray-700 mb-4 line-clamp-3">{post.content}</p>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setSelectedPost(post)}
-                      >
-                        View Discussion
-                      </Button>
+                      <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <MessageSquare className="h-3 w-3" />
+                          <span>{post.commentCount} comments</span>
+                        </div>
+                        <span>Share</span>
+                        <span>Save</span>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -343,101 +438,6 @@ export default function Forum() {
             ))
           )}
         </div>
-
-        {/* Post Detail Modal */}
-        {selectedPost && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <Card className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-xl">{selectedPost.title}</CardTitle>
-                    <div className="flex items-center gap-2 mt-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${selectedPost.user.profile?.name || selectedPost.user.username}`} />
-                        <AvatarFallback>
-                          {selectedPost.user.profile?.name?.[0] || selectedPost.user.username?.[0] || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm text-gray-600">
-                        {selectedPost.user.profile?.name || selectedPost.user.username}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        • {selectedPost.user.profile?.state}
-                        {selectedPost.user.profile?.county && `, ${selectedPost.user.profile.county}`}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        • {format(new Date(selectedPost.createdAt), "MMM d, yyyy 'at' h:mm a")}
-                      </span>
-                      {selectedPost.editedAt && (
-                        <span className="text-sm text-gray-500 italic flex items-center gap-1">
-                          <Edit className="h-3 w-3" />
-                          Edited · {format(new Date(selectedPost.editedAt), "MMM d, yyyy 'at' h:mm a")}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <Button variant="ghost" onClick={() => setSelectedPost(null)}>
-                    ×
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="prose max-w-none">
-                  <p className="text-gray-700 whitespace-pre-wrap">{selectedPost.content}</p>
-                </div>
-
-                {/* Comments Section */}
-                <div className="border-t pt-6">
-                  <h4 className="font-semibold mb-4">
-                    Comments ({selectedPost.comments?.length || 0})
-                  </h4>
-                  
-                  {/* Add Comment */}
-                  <div className="flex gap-3 mb-6">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.profile?.name || user?.username}`} />
-                      <AvatarFallback>
-                        {user?.profile?.name?.[0] || user?.username?.[0] || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 flex gap-2">
-                      <Textarea
-                        placeholder="Add a comment..."
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        rows={2}
-                      />
-                      <Button 
-                        onClick={() => handleAddComment(selectedPost.id)}
-                        disabled={createCommentMutation.isPending || !newComment.trim()}
-                      >
-                        <Send className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Comments List */}
-                  <div className="space-y-0">
-                    {selectedPost.comments?.map((comment) => (
-                      <Comment 
-                        key={comment.id} 
-                        comment={comment} 
-                        postId={selectedPost.id}
-                      />
-                    ))}
-                    
-                    {(!selectedPost.comments || selectedPost.comments.length === 0) && (
-                      <p className="text-gray-500 text-center py-4">
-                        No comments yet. Be the first to share your thoughts!
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
       </div>
     </div>
   );
