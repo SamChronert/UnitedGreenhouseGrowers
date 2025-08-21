@@ -1,4 +1,4 @@
-import { Route, Switch, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { Link } from "wouter";
 import ToolsTemplatesTab from "@/components/tabs/ToolsTemplatesTab";
 import UniversitiesTab from "@/components/tabs/UniversitiesTab";
@@ -12,15 +12,18 @@ import { Button } from "@/components/ui/button";
 import { Heart, Grid3X3, List, Map, Wrench, FileText } from "lucide-react";
 
 export default function ResourcesRouter() {
+  console.log('🔍 ResourcesRouter is rendering');
   const [location, navigate] = useLocation();
+  console.log('🔍 Current location:', location);
 
   // Extract current tab and view from URL
   const pathParts = location.split('/').filter(Boolean);
+  console.log('🔍 Path parts:', pathParts);
   const currentTab = pathParts[2] || 'tools-templates';
   const currentView = pathParts[3] || 'list';
   const currentSubTab = pathParts[4]; // For tools vs templates
 
-  console.log('ResourcesRouter - currentTab:', currentTab, 'currentView:', currentView, 'currentSubTab:', currentSubTab);
+  console.log('🔍 ResourcesRouter - currentTab:', currentTab, 'currentView:', currentView, 'currentSubTab:', currentSubTab);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -152,41 +155,55 @@ export default function ResourcesRouter() {
 
           {/* Content */}
           <main>
-            <Switch>
-              <Route path="/dashboard/resources/tools-templates/:view/:subTab?">
-                {(params) => <ToolsTemplatesTab viewMode={params.view} subTab={params.subTab || 'tools'} />}
-              </Route>
-              <Route path="/dashboard/resources/universities/:view">
-                {(params) => <UniversitiesTab viewMode={params.view} />}
-              </Route>
-              <Route path="/dashboard/resources/organizations/:view?">
-                <OrganizationsTab />
-              </Route>
-              <Route path="/dashboard/resources/learning/:view">
-                {(params) => <LearningTab viewMode={params.view} />}
-              </Route>
-              <Route path="/dashboard/resources/grants/:view?">
-                <GrantsTab />
-              </Route>
-              <Route path="/dashboard/resources/blogs-bulletins/:view">
-                {(params) => <BlogsBulletinsTab viewMode={params.view} />}
-              </Route>
-              <Route path="/dashboard/resources/industry-news/:view?">
-                <IndustryNewsTab />
-              </Route>
-              <Route path="/dashboard/resources/tax-incentives/:view?">
-                <div className="text-center py-12 text-gray-500">
-                  Tax Incentives tab coming soon...
-                </div>
-              </Route>
-              {/* Default redirect */}
-              <Route path="/dashboard/resources">
-                {() => {
-                  navigate('/dashboard/resources/tools-templates/list');
-                  return null;
-                }}
-              </Route>
-            </Switch>
+            {(() => {
+              console.log('🔍 Rendering content for currentTab:', currentTab, 'currentView:', currentView);
+              
+              if (currentTab === 'tools-templates') {
+                const viewMode = (currentView === 'list' || currentView === 'grid') ? currentView : 'list';
+                const subTab = (currentSubTab === 'tools' || currentSubTab === 'templates') ? currentSubTab : 'tools';
+                return <ToolsTemplatesTab viewMode={viewMode} subTab={subTab} />;
+              }
+              
+              if (currentTab === 'universities') {
+                const viewMode = (currentView === 'grid' || currentView === 'map') ? currentView : 'map';
+                return <UniversitiesTab viewMode={viewMode} />;
+              }
+              
+              if (currentTab === 'organizations') {
+                return <OrganizationsTab />;
+              }
+              
+              if (currentTab === 'learning') {
+                const viewMode = (currentView === 'grid' || currentView === 'list') ? currentView : 'grid';
+                return <LearningTab viewMode={viewMode} />;
+              }
+              
+              if (currentTab === 'grants') {
+                return <GrantsTab />;
+              }
+              
+              if (currentTab === 'blogs-bulletins') {
+                const viewMode = (currentView === 'grid' || currentView === 'list') ? currentView : 'grid';
+                return <BlogsBulletinsTab viewMode={viewMode} />;
+              }
+              
+              if (currentTab === 'industry-news') {
+                return <IndustryNewsTab />;
+              }
+              
+              if (currentTab === 'tax-incentives') {
+                return (
+                  <div className="text-center py-12 text-gray-500">
+                    Tax Incentives tab coming soon...
+                  </div>
+                );
+              }
+              
+              // Default - redirect to tools-templates
+              console.log('🔍 No matching tab, redirecting to tools-templates');
+              navigate('/dashboard/resources/tools-templates/list');
+              return null;
+            })()}
           </main>
         </div>
       </div>

@@ -29,10 +29,15 @@ export default function DashboardWrapper({ isDemo = false }: DashboardWrapperPro
       <AppShell>
         <Switch>
           {/* Feature Routes - Use absolute paths */}
-          <Route path={`${basePath}/resources`}>
-            <LazyWrapper>
-              <ResourcesRouter />
-            </LazyWrapper>
+          <Route path={`${basePath}/resources/:rest*`}>
+            {() => {
+              console.log('🔍 Resource route matched');
+              return (
+                <LazyWrapper>
+                  <ResourcesRouter />
+                </LazyWrapper>
+              );
+            }}
           </Route>
           
           <Route path={`${basePath}/resources/saved`}>

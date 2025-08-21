@@ -1,0 +1,126 @@
+The Resource Library page is now completely blank - nothing is rendering at
+   all. The routing structure isn't working. Looking at the URL in the
+  screenshot (/dashboard/resources/tools-templates/list), the routes aren't
+  matching properly.
+
+  The issue is likely that:
+  1. The ResourcesRouter component isn't being rendered at all
+  2. Or the Switch/Route components from Wouter aren't matching the paths
+  correctly
+
+  Let's debug and fix this:
+
+  1. First, add debug logging to ResourcesRouter to see if it's even being
+  rendered:
+
+  export default function ResourcesRouter() {
+    console.log('ResourcesRouter is rendering');
+    const [location] = useLocation();
+    console.log('Current location:', location);
+
+    // ... rest of component
+
+  2. Check the route in DashboardWrapper.tsx - make sure it's:
+  <Route path="/dashboard/resources/:rest*">
+    {() => {
+      console.log('Resource route matched');
+      return <ResourcesRouter />;
+    }}
+  </Route>
+
+  3. Wouter doesn't use Switch - it uses nested Routes differently. Fix the
+  ResourcesRouter to use Wouter's pattern:
+
+  import { Route, useLocation, useRoute } from "wouter";
+
+  export default function ResourcesRouter() {
+    const [location, navigate] = useLocation();
+
+    // Parse the current path
+    const basePath = '/dashboard/resources';
+    const relativePath = location.replace(basePath, '');
+
+    console.log('ResourcesRouter - location:', location);
+    console.log('ResourcesRouter - relativePath:', relativePath);
+
+    // Simple routing based on the path
+    if (relativePath.startsWith('/tools-templates')) {
+      const parts = relativePath.split('/');
+      const viewMode = parts[2] || 'list';
+      const subTab = parts[3] || 'tools';
+      return <ToolsTemplatesTab viewMode={viewMode} subTab={subTab} />;
+    }
+
+    if (relativePath.startsWith('/universities')) {
+      const parts = relativePath.split('/');
+      const viewMode = parts[2] || 'grid';
+      return <UniversitiesTab viewMode={viewMode} />;
+    }
+
+    // ... continue for other tabs
+
+    // Default - redirect to tools-templates
+    navigate('/dashboard/resources/tools-templates/list');
+    return null;
+  }
+
+  4. Alternative simpler fix - go back to URL parameters but fix the 
+  re-rendering issue:
+
+  If the routing approach is too complex, let's revert to the original
+  structure but force re-renders properly:
+
+  // In each tab component, add a key based on viewMode to force re-render
+  export default function UniversitiesTab({ onAnalyticsEvent }: 
+  UniversitiesTabProps) {
+    const [viewMode, setViewMode] = useParamState('view', 'map');
+
+    // Force component to re-render when viewMode changes
+    const [, forceUpdate] = useState({});
+
+    useEffect(() => {
+      forceUpdate({});
+    }, [viewMode]);
+
+    // ... rest of component
+
+    return (
+      <div key={viewMode}> {/* Add key here to force re-render */}
+        {/* ... rest of JSX */}
+      </div>
+    );
+  }
+
+  5. Quick fix to just get it working:
+
+  Revert to the original Resources.tsx structure but add proper state
+  management:
+
+  // In Resources.tsx
+  export default function Resources() {
+    const [location] = useLocation();
+    const urlParams = new URLSearchParams(location.split('?')[1] || '');
+
+    // Force re-render on URL change
+    const [renderKey, setRenderKey] = useState(0);
+
+    useEffect(() => {
+      setRenderKey(prev => prev + 1);
+    }, [location]);
+
+    const activeTab = urlParams.get('tab') || 'tools-templates';
+
+    return (
+      <div key={renderKey}> {/* Force re-render with key */}
+        {/* Original Resources.tsx content */}
+      </div>
+    );
+  }
+
+  Please check the console logs first to see what's actually being rendered.
+  If ResourcesRouter isn't even being called, the route isn't matching. If it
+   is being called but nothing renders, then the internal routing logic is
+  wrong.
+
+  The blank page means React isn't rendering anything, which is usually a
+  routing mismatch or an error in the component that's preventing render.
