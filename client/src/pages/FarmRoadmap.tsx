@@ -184,7 +184,7 @@ export default function FarmRoadmap() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <InDevelopmentBanner 
             title="Farm Roadmap" 
-            description="This feature is currently in development. The assessment works but recommendations are simplified for demo purposes."
+            description="This feature is currently in development. The assessment isn't representative of the types of questions we would actually ask, this is just a test to begin working through how to design this feature."
           />
           
           {/* Header */}
@@ -312,7 +312,7 @@ export default function FarmRoadmap() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <InDevelopmentBanner 
           title="Farm Roadmap" 
-          description="This feature is currently in development. The assessment works but recommendations are simplified for demo purposes."
+          description="This feature is currently in development. The assessment isn't representative of the types of questions we would actually ask, this is just a test to begin working through how to design this feature."
         />
         
         {/* Header */}
