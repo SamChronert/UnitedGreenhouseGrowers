@@ -16,8 +16,6 @@ import { ToggleGroup } from "@/features/resources/components/ToggleGroup";
 import { useToast } from "@/hooks/use-toast";
 
 interface ToolsTemplatesTabProps {
-  viewMode: 'list' | 'grid';
-  subTab: 'tools' | 'templates';
   onAnalyticsEvent?: (eventName: string, payload: any) => void;
 }
 
@@ -52,14 +50,12 @@ const TEMPLATE_CATEGORIES = [
   'Marketing'
 ];
 
-export default function ToolsTemplatesTab({ viewMode, subTab, onAnalyticsEvent }: ToolsTemplatesTabProps) {
+export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTabProps) {
   const { toast } = useToast();
   
-  // Active sub tab is now passed as prop
-  const activeSubTab = subTab;
-  
-  // Debug current viewMode
-  console.log('ToolsTemplatesTab render - activeSubTab:', activeSubTab, 'viewMode:', viewMode);
+  // URL state management
+  const [activeSubTab, setActiveSubTab] = useParamState('sub', 'tools');
+  const [viewMode, setViewMode] = useParamState('view', 'list');
   
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -199,6 +195,7 @@ export default function ToolsTemplatesTab({ viewMode, subTab, onAnalyticsEvent }
 
   return (
     <div 
+      key={`tools-${activeSubTab}-${viewMode}`}
       role="tabpanel" 
       id="tools-templates-panel" 
       aria-labelledby="tools-templates-tab"
@@ -213,7 +210,7 @@ export default function ToolsTemplatesTab({ viewMode, subTab, onAnalyticsEvent }
       </div>
 
       {/* Sub-tabs */}
-      <Tabs value={activeSubTab}>
+      <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
         <TabsList className="grid w-full grid-cols-2 max-w-md">
           <TabsTrigger value="tools" className="flex items-center gap-2">
             <Wrench className="h-4 w-4" />
@@ -239,7 +236,27 @@ export default function ToolsTemplatesTab({ viewMode, subTab, onAnalyticsEvent }
                 className="max-w-md"
               />
               
-              {/* View toggles are now handled by the ResourcesRouter */}
+              {/* View Toggle */}
+              <div className="flex gap-2">
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="flex items-center gap-2"
+                >
+                  <List className="h-4 w-4" />
+                  List
+                </Button>
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="flex items-center gap-2"
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                  Grid
+                </Button>
+              </div>
             </div>
             
             <div className="flex flex-wrap gap-4">
@@ -398,7 +415,27 @@ export default function ToolsTemplatesTab({ viewMode, subTab, onAnalyticsEvent }
                 className="max-w-md"
               />
               
-              {/* View toggles are now handled by the ResourcesRouter */}
+              {/* View Toggle */}
+              <div className="flex gap-2">
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="flex items-center gap-2"
+                >
+                  <List className="h-4 w-4" />
+                  List
+                </Button>
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="flex items-center gap-2"
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                  Grid
+                </Button>
+              </div>
             </div>
             
             <Select

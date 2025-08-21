@@ -1,0 +1,140 @@
+The Resource Library is empty again. This routing restructure is too complex and unreliable. Let's revert 
+  to the original simpler structure and fix the actual problem - the view toggles not updating the display.
+
+  Please do this:
+
+  Step 1: Revert to the original Resources.tsx
+
+  Go back to using the original Resources.tsx component with URL parameters (?tab=universities&view=grid),
+  not the complex routing with paths.
+
+  Step 2: Fix the actual problem - force re-renders when URL params change
+
+  The real issue is that changing URL params doesn't trigger re-renders. Here's a simple fix that will work:
+
+  In each tab component, add a key prop based on the view mode to force React to re-render:
+
+  // In UniversitiesTab.tsx
+  export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabProps) {
+    const [viewMode, setViewMode] = useParamState('view', 'map');
+
+    // Force re-render when viewMode changes by using it as a key
+    return (
+      <div key={`universities-${viewMode}`} className="space-y-6">
+        {/* View Toggle - Use simple buttons */}
+        <div className="flex gap-2">
+          <Button
+            variant={viewMode === 'grid' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              console.log('Switching to grid view');
+              setViewMode('grid');
+            }}
+          >
+            <Grid3X3 className="h-4 w-4 mr-2" />
+            Grid
+          </Button>
+          <Button
+            variant={viewMode === 'map' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              console.log('Switching to map view');
+              setViewMode('map');
+            }}
+          >
+            <Map className="h-4 w-4 mr-2" />
+            Map
+          </Button>
+        </div>
+
+        {/* Conditional rendering based on viewMode */}
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-3 gap-4">
+            {/* Grid content */}
+          </div>
+        ) : (
+          <div className="map-container">
+            {/* Map content */}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  Step 3: Do the same for ToolsTemplatesTab
+
+  // In ToolsTemplatesTab.tsx
+  export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTabProps) {
+    const [activeSubTab, setActiveSubTab] = useParamState('sub', 'tools');
+    const [viewMode, setViewMode] = useParamState('view', 'list');
+
+    return (
+      <div key={`tools-${activeSubTab}-${viewMode}`} className="space-y-6">
+        {/* Sub-tab buttons */}
+        <div className="flex gap-2">
+          <Button
+            variant={activeSubTab === 'tools' ? 'default' : 'outline'}
+            onClick={() => setActiveSubTab('tools')}
+          >
+            <Wrench className="h-4 w-4 mr-2" />
+            Tools
+          </Button>
+          <Button
+            variant={activeSubTab === 'templates' ? 'default' : 'outline'}
+            onClick={() => setActiveSubTab('templates')}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            Templates
+          </Button>
+        </div>
+
+        {/* View toggle */}
+        <div className="flex gap-2">
+          <Button
+            variant={viewMode === 'list' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('list')}
+          >
+            <List className="h-4 w-4 mr-2" />
+            List
+          </Button>
+          <Button
+            variant={viewMode === 'grid' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('grid')}
+          >
+            <Grid3X3 className="h-4 w-4 mr-2" />
+            Grid
+          </Button>
+        </div>
+
+        {/* Content based on activeSubTab and viewMode */}
+        {activeSubTab === 'tools' ? (
+          viewMode === 'grid' ? <ToolsGrid /> : <ToolsList />
+        ) : (
+          viewMode === 'grid' ? <TemplatesGrid /> : <TemplatesList />
+        )}
+      </div>
+    );
+  }
+
+  Step 4: Restore the routing in DashboardWrapper.tsx
+
+  Change it back to:
+  <Route path="/dashboard/resources" component={Resources} />
+  <Route path="/library" component={Resources} />
+
+  Summary
+
+  1. Delete ResourcesRouter.tsx - we don't need it
+  2. Restore the original Resources.tsx
+  3. Add key props to force re-renders in each tab component
+  4. Use simple Button components instead of Tabs for toggles
+  5. Keep using useParamState for URL parameter management
+
+  This approach is much simpler and will work because:
+  - The key prop forces React to re-render when it changes
+  - Simple buttons are more reliable than the Tabs component
+  - URL parameters are simpler than complex routing
+
+  Please revert to this simpler approach. The complex routing is causing more problems than it solves.

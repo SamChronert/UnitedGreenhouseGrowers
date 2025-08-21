@@ -35,7 +35,6 @@ import {
 } from 'lucide-react';
 
 interface BlogsBulletinsTabProps {
-  viewMode: 'grid' | 'list';
   onAnalyticsEvent?: (eventName: string, payload: any) => void;
 }
 
@@ -59,12 +58,10 @@ const TOPIC_TAGS = [
   'Economics'
 ];
 
-export default function BlogsBulletinsTab({ viewMode, onAnalyticsEvent }: BlogsBulletinsTabProps) {
-  // URL state management for section (keeping this for now)
+export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTabProps) {
+  // URL state management
   const [activeSection, setActiveSection] = useParamState('section', 'blogs');
-  
-  // Debug current viewMode
-  console.log('BlogsBulletinsTab render - activeSection:', activeSection, 'viewMode:', viewMode);
+  const [viewMode, setViewMode] = useParamState('view', 'grid');
   
   // State
   const [bulletinSearch, setBulletinSearch] = useState('');
@@ -154,6 +151,7 @@ export default function BlogsBulletinsTab({ viewMode, onAnalyticsEvent }: BlogsB
 
   return (
     <div 
+      key={`blogs-${activeSection}-${viewMode}`}
       role="tabpanel" 
       id="blogs-bulletins-panel" 
       aria-labelledby="blogs-bulletins-tab"
@@ -262,7 +260,27 @@ export default function BlogsBulletinsTab({ viewMode, onAnalyticsEvent }: BlogsB
                 />
               </div>
               
-              {/* View toggles are now handled by the ResourcesRouter */}
+              {/* View Toggle */}
+              <div className="flex gap-2">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className="flex items-center gap-2"
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                  Grid
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="flex items-center gap-2"
+                >
+                  <List className="h-4 w-4" />
+                  List
+                </Button>
+              </div>
             </div>
             
             <div className="flex flex-wrap gap-4">

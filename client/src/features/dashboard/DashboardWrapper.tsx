@@ -6,7 +6,7 @@ import LazyWrapper from "@/components/LazyWrapper";
 import DashboardHome from "@/features/dashboard/DashboardHome";
 
 // Lazy load feature components
-const ResourcesRouter = lazy(() => import("@/pages/ResourcesRouter"));
+const Resources = lazy(() => import("@/pages/Resources"));
 const Forum = lazy(() => import("@/pages/Forum"));
 const SalesHub = lazy(() => import("@/pages/SalesHub"));
 const ProductHub = lazy(() => import("@/pages/ProductHub"));
@@ -29,15 +29,10 @@ export default function DashboardWrapper({ isDemo = false }: DashboardWrapperPro
       <AppShell>
         <Switch>
           {/* Feature Routes - Use absolute paths */}
-          <Route path={`${basePath}/resources/:rest*`}>
-            {() => {
-              console.log('🔍 Resource route matched');
-              return (
-                <LazyWrapper>
-                  <ResourcesRouter />
-                </LazyWrapper>
-              );
-            }}
+          <Route path={`${basePath}/resources`}>
+            <LazyWrapper>
+              <Resources />
+            </LazyWrapper>
           </Route>
           
           <Route path={`${basePath}/resources/saved`}>

@@ -27,7 +27,6 @@ import {
 } from 'lucide-react';
 
 interface LearningTabProps {
-  viewMode: 'grid' | 'list';
   onAnalyticsEvent?: (eventName: string, payload: any) => void;
 }
 
@@ -58,9 +57,9 @@ const FORMATS = [
 ];
 
 
-export default function LearningTab({ viewMode, onAnalyticsEvent }: LearningTabProps) {
-  // Debug current viewMode
-  console.log('LearningTab render - current viewMode:', viewMode);
+export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
+  // URL state management
+  const [viewMode, setViewMode] = useParamState('view', 'grid');
   
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -126,6 +125,7 @@ export default function LearningTab({ viewMode, onAnalyticsEvent }: LearningTabP
 
   return (
     <div 
+      key={`learning-${viewMode}`}
       role="tabpanel" 
       id="learning-panel" 
       aria-labelledby="learning-tab"
@@ -151,7 +151,27 @@ export default function LearningTab({ viewMode, onAnalyticsEvent }: LearningTabP
             className="max-w-md"
           />
           
-          {/* View toggles are now handled by the ResourcesRouter */}
+          {/* View Toggle */}
+          <div className="flex gap-2">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="flex items-center gap-2"
+            >
+              <Grid3X3 className="h-4 w-4" />
+              Grid
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="flex items-center gap-2"
+            >
+              <List className="h-4 w-4" />
+              List
+            </Button>
+          </div>
         </div>
         
         <div className="flex flex-wrap gap-4">
