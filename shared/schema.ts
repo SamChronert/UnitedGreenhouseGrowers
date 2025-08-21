@@ -220,6 +220,17 @@ export const favorites = pgTable("favorites", {
   userResourceUnique: unique("favorites_user_resource_unique").on(table.user_id, table.resource_id),
 }));
 
+export const forumPostFavorites = pgTable("forum_post_favorites", {
+  id: serial("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  postId: varchar("post_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userPostUnique: unique("forum_post_favorites_user_post_unique").on(table.userId, table.postId),
+  userIdx: index("forum_post_favorites_user_idx").on(table.userId),
+  postIdx: index("forum_post_favorites_post_idx").on(table.postId),
+}));
+
 export const analytics_events = pgTable("analytics_events", {
   id: serial("id").primaryKey().notNull(),
   user_id: varchar("user_id"),
@@ -318,6 +329,7 @@ export const forumPostsRelations = relations(forumPosts, ({ one, many }) => ({
   }),
   comments: many(forumComments),
   votes: many(forumVotes),
+  favorites: many(forumPostFavorites),
 }));
 
 export const forumCommentsRelations = relations(forumComments, ({ one, many }) => ({
@@ -367,6 +379,17 @@ export const favoritesRelations = relations(favorites, ({ one }) => ({
 
 export const resourcesRelations = relations(resources, ({ many }) => ({
   favorites: many(favorites),
+}));
+
+export const forumPostFavoritesRelations = relations(forumPostFavorites, ({ one }) => ({
+  user: one(users, {
+    fields: [forumPostFavorites.userId],
+    references: [users.id],
+  }),
+  post: one(forumPosts, {
+    fields: [forumPostFavorites.postId],
+    references: [forumPosts.id],
+  }),
 }));
 
 // Farm Roadmap relations
@@ -422,6 +445,11 @@ export const insertResourceSchema = createInsertSchema(resources).omit({
 export const insertFavoriteSchema = createInsertSchema(favorites).omit({
   id: true,
   created_at: true,
+});
+
+export const insertForumPostFavoriteSchema = createInsertSchema(forumPostFavorites).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertAnalyticsEventSchema = createInsertSchema(analytics_events).omit({
@@ -521,6 +549,8 @@ export type Products = typeof products.$inferSelect;
 export type InsertProducts = z.infer<typeof insertProductsSchema>;
 export type Favorite = typeof favorites.$inferSelect;
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
+export type ForumPostFavorite = typeof forumPostFavorites.$inferSelect;
+export type InsertForumPostFavorite = z.infer<typeof insertForumPostFavoriteSchema>;
 export type AnalyticsEvent = typeof analytics_events.$inferSelect;
 export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
 

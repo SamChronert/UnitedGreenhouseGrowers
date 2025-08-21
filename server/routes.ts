@@ -1430,6 +1430,44 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
+  // Forum post favorites
+  app.post("/api/forum/posts/:postId/favorite", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const postId = req.params.postId;
+      const userId = req.user!.id;
+      
+      const result = await storage.toggleForumPostFavorite(userId, postId);
+      res.json(result);
+    } catch (error) {
+      console.error("Toggle forum post favorite error:", error);
+      res.status(500).json({ message: "Failed to save post" });
+    }
+  });
+
+  app.get("/api/forum/favorites", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user!.id;
+      const favoritePostIds = await storage.getUserForumPostFavorites(userId);
+      res.json({ favorites: favoritePostIds });
+    } catch (error) {
+      console.error("Get forum favorites error:", error);
+      res.status(500).json({ message: "Failed to get favorites" });
+    }
+  });
+
+  app.get("/api/forum/posts/:postId/favorite-status", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const postId = req.params.postId;
+      const userId = req.user!.id;
+      
+      const isFavorited = await storage.isForumPostFavorited(userId, postId);
+      res.json({ isFavorited });
+    } catch (error) {
+      console.error("Check forum post favorite status error:", error);
+      res.status(500).json({ message: "Failed to check favorite status" });
+    }
+  });
+
   // File upload endpoint
   app.post("/api/forum/upload", authenticate, requireMember, upload.single('file'), async (req: AuthRequest, res) => {
     try {

@@ -36,6 +36,8 @@ import {
   type InsertForumComment,
   type ForumVote,
   type InsertForumVote,
+  type ForumPostFavorite,
+  type InsertForumPostFavorite,
   type AssessmentTrainingData,
   type InsertAssessmentTrainingData,
   type FarmAssessment,
@@ -49,6 +51,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, like, desc, gte, ilike, sql } from "drizzle-orm";
+import { forumPostFavorites } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -100,6 +103,11 @@ export interface IStorage {
   // Favorites operations
   toggleFavorite(userId: string, resourceId: string, on: boolean): Promise<void>;
   listFavorites(userId: string, params?: { page?: number; pageSize?: number }): Promise<{ items: (Favorite & { resource: Resource & { has_location: boolean } })[], total: number }>;
+  
+  // Forum post favorites operations
+  toggleForumPostFavorite(userId: string, postId: string): Promise<{ isFavorited: boolean }>;
+  getUserForumPostFavorites(userId: string): Promise<string[]>;
+  isForumPostFavorited(userId: string, postId: string): Promise<boolean>;
   
   // Analytics operations
   recordAnalytics(event: InsertAnalyticsEvent): Promise<void>;
@@ -483,6 +491,60 @@ export class DatabaseStorage implements IStorage {
           eq(favorites.resource_id, resourceId)
         ));
     }
+  }
+
+  async toggleForumPostFavorite(userId: string, postId: string): Promise<{ isFavorited: boolean }> {
+    // Check if already favorited
+    const [existing] = await db
+      .select()
+      .from(forumPostFavorites)
+      .where(
+        and(
+          eq(forumPostFavorites.userId, userId),
+          eq(forumPostFavorites.postId, postId)
+        )
+      );
+
+    if (existing) {
+      // Remove favorite
+      await db.delete(forumPostFavorites).where(
+        and(
+          eq(forumPostFavorites.userId, userId),
+          eq(forumPostFavorites.postId, postId)
+        )
+      );
+      return { isFavorited: false };
+    } else {
+      // Add favorite
+      await db.insert(forumPostFavorites).values({
+        userId,
+        postId,
+      });
+      return { isFavorited: true };
+    }
+  }
+
+  async getUserForumPostFavorites(userId: string): Promise<string[]> {
+    const favorites = await db
+      .select()
+      .from(forumPostFavorites)
+      .where(eq(forumPostFavorites.userId, userId));
+    
+    return favorites.map(f => f.postId);
+  }
+
+  async isForumPostFavorited(userId: string, postId: string): Promise<boolean> {
+    const [favorite] = await db
+      .select()
+      .from(forumPostFavorites)
+      .where(
+        and(
+          eq(forumPostFavorites.userId, userId),
+          eq(forumPostFavorites.postId, postId)
+        )
+      );
+    
+    return !!favorite;
   }
 
   async listFavorites(userId: string, params?: { page?: number; pageSize?: number }): Promise<{ items: (Favorite & { resource: Resource & { has_location: boolean } })[], total: number }> {

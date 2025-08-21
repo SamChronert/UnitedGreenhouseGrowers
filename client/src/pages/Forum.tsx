@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,9 +49,23 @@ export default function Forum() {
   const [selectedPost, setSelectedPost] = useState<PostWithDetails | null>(null);
   const [editingPost, setEditingPost] = useState<PostWithDetails | null>(null);
   const [filters, setFilters] = useState({ state: "", category: "" });
+  const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch user's saved posts
+  const { data: favoritesData } = useQuery<{ favorites: string[] }>({
+    queryKey: ["/api/forum/favorites"],
+    enabled: !!user,
+  });
+
+  // Update saved posts when favorites data changes
+  useEffect(() => {
+    if (favoritesData && 'favorites' in favoritesData && Array.isArray(favoritesData.favorites)) {
+      setSavedPosts(new Set(favoritesData.favorites));
+    }
+  }, [favoritesData]);
 
   // Fetch forum posts with filters
   const { data: posts = [], isLoading } = useQuery({
@@ -147,6 +161,42 @@ export default function Forum() {
     if (window.confirm("Are you sure you want to delete this post?")) {
       deletePostMutation.mutate(postId);
     }
+  };
+
+  // Save post mutation
+  const savePostMutation = useMutation({
+    mutationFn: (postId: string) =>
+      apiRequest("POST", `/api/forum/posts/${postId}/favorite`),
+    onSuccess: (data, postId) => {
+      const newSavedPosts = new Set(savedPosts);
+      if (data.isFavorited) {
+        newSavedPosts.add(postId);
+        toast({
+          title: "Saved!",
+          description: "Post saved to your collection",
+        });
+      } else {
+        newSavedPosts.delete(postId);
+        toast({
+          title: "Unsaved",
+          description: "Post removed from your collection",
+        });
+      }
+      setSavedPosts(newSavedPosts);
+      queryClient.invalidateQueries({ queryKey: ["/api/forum/favorites"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSavePost = (postId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    savePostMutation.mutate(postId);
   };
 
   if (isLoading) {
@@ -376,15 +426,18 @@ export default function Forum() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="p-0 h-auto text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // TODO: Implement save functionality when backend supports it
-                            toast({ title: "Saved!", description: "Post saved to your collection" });
-                          }}
+                          className={`p-0 h-auto text-xs transition-colors ${
+                            savedPosts.has(post.id) 
+                              ? 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300' 
+                              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                          }`}
+                          onClick={(e) => handleSavePost(post.id, e)}
+                          disabled={savePostMutation.isPending}
                         >
-                          <Bookmark className="h-3 w-3 mr-1" />
-                          Save
+                          <Bookmark className={`h-3 w-3 mr-1 ${
+                            savedPosts.has(post.id) ? 'fill-current' : ''
+                          }`} />
+                          {savedPosts.has(post.id) ? 'Saved' : 'Save'}
                         </Button>
                       </div>
                     </div>
