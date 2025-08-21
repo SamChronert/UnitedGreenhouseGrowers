@@ -9,6 +9,14 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 - Avoid: Highlighting "AI" directly, flashy tech-forward language
 - Emphasize: Community, usefulness, grower empowerment, peer collaboration
 
+## Recent Changes (August 2025)
+### Major Documentation Update
+- **Date**: August 20, 2025
+- **Change**: Comprehensive README.md rewrite with complete feature documentation
+- **Details**: Updated README to include detailed descriptions of all platform features (8 resource types, AI integration, admin CRUD, community features), complete system architecture (frontend/backend stacks, database schema, API endpoints), development workflow, quality assurance practices, and project status
+- **Impact**: Provides thorough technical documentation for developers and stakeholders
+- **Status**: ✅ Complete - README now serves as comprehensive project documentation
+
 ## System Architecture
 
 ### Frontend
