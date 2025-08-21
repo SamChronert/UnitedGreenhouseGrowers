@@ -201,14 +201,6 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
       aria-labelledby="tools-templates-tab"
       className="space-y-6"
     >
-      {/* Header */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <h2 className="text-lg font-semibold text-green-900 mb-2">Tools & Templates for Greenhouse Operations</h2>
-        <p className="text-green-800">
-          Discover software tools and downloadable templates to help streamline your greenhouse business operations.
-        </p>
-      </div>
-
       {/* Sub-tabs */}
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
         <TabsList className="grid w-full grid-cols-2 max-w-md">
