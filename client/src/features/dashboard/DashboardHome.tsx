@@ -150,10 +150,10 @@ export default function DashboardHome() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-ugga-secondary" />
-            Share Your Challenge
+            We need your feedback!
           </CardTitle>
           <p className="text-gray-600">
-            Tell us about operational challenges, knowledge gaps, or areas where the industry needs better support. This will help us build tools for you, and eventually can inform policy, research, and technology development.
+            We want to make this association useful for you. Tell us what would help most, what's missing, or what you'd like to see—drop your thoughts in the box below!
           </p>
         </CardHeader>
         <CardContent>
