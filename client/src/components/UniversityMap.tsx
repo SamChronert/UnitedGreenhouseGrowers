@@ -126,9 +126,6 @@ const UniversityMap = memo(function UniversityMap({
                     key={university.id}
                     position={[university.lat!, university.long!]}
                     icon={universityIcon}
-                    eventHandlers={{
-                      click: () => onUniversityClick?.(university)
-                    }}
                   >
                     <Popup>
                       <div className="min-w-64">
