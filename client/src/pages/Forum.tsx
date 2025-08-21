@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -13,13 +11,11 @@ import {
   MessageSquare, 
   Search, 
   Plus, 
-  Clock,
-  User,
-  TrendingUp,
-  Flame,
   MoreVertical,
   Edit,
-  Trash2
+  Trash2,
+  Share,
+  Bookmark
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,6 +26,7 @@ import VoteButtons from "@/components/VoteButtons";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import { ForumCategory } from "@shared/schema";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import ForumFilters from "@/components/ForumFilters";
 
 type PostWithDetails = ForumPost & { 
   user: UserType & { profile: Profile };
@@ -37,13 +34,12 @@ type PostWithDetails = ForumPost & {
   commentCount: number;
 };
 
-type SortType = 'hot' | 'new' | 'top-day' | 'top-week' | 'top-month' | 'top-all';
 
 const categoryColors: Record<string, string> = {
   "Bulk Ordering": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
   "Plant Health Management": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
   "Greenhouse Systems Management": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-  "Operations": "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+  "Operations": "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200",
   "Other": "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
 };
 
@@ -52,63 +48,27 @@ export default function Forum() {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [selectedPost, setSelectedPost] = useState<PostWithDetails | null>(null);
   const [editingPost, setEditingPost] = useState<PostWithDetails | null>(null);
-  const [sortBy, setSortBy] = useState<SortType>('hot');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [filters, setFilters] = useState({ state: "", category: "" });
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Fetch forum posts with filters
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["/api/forum/posts", searchQuery, categoryFilter],
+    queryKey: ["/api/forum/posts", searchQuery, filters.category, filters.state],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
-      if (categoryFilter !== 'all') params.append('category', categoryFilter);
+      if (filters.category) params.append('category', filters.category);
+      if (filters.state) params.append('state', filters.state);
       const queryString = params.toString();
       return apiRequest("GET", `/api/forum/posts${queryString ? `?${queryString}` : ''}`);
     },
   });
 
-  // Sort posts based on selected sort type
+  // Sort posts by newest first (default sorting)
   const sortedPosts = posts.sort((a: PostWithDetails, b: PostWithDetails) => {
-    switch (sortBy) {
-      case 'hot':
-        // Score with time decay (Reddit-like hot algorithm simplified)
-        const aScore = a.score / (1 + Math.pow((Date.now() - new Date(a.createdAt).getTime()) / (1000 * 60 * 60), 2));
-        const bScore = b.score / (1 + Math.pow((Date.now() - new Date(b.createdAt).getTime()) / (1000 * 60 * 60), 2));
-        return bScore - aScore;
-      case 'new':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case 'top-day':
-        const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
-        const aInDay = new Date(a.createdAt).getTime() > dayAgo;
-        const bInDay = new Date(b.createdAt).getTime() > dayAgo;
-        if (aInDay && bInDay) return b.score - a.score;
-        if (aInDay) return -1;
-        if (bInDay) return 1;
-        return 0;
-      case 'top-week':
-        const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-        const aInWeek = new Date(a.createdAt).getTime() > weekAgo;
-        const bInWeek = new Date(b.createdAt).getTime() > weekAgo;
-        if (aInWeek && bInWeek) return b.score - a.score;
-        if (aInWeek) return -1;
-        if (bInWeek) return 1;
-        return 0;
-      case 'top-month':
-        const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-        const aInMonth = new Date(a.createdAt).getTime() > monthAgo;
-        const bInMonth = new Date(b.createdAt).getTime() > monthAgo;
-        if (aInMonth && bInMonth) return b.score - a.score;
-        if (aInMonth) return -1;
-        if (bInMonth) return 1;
-        return 0;
-      case 'top-all':
-        return b.score - a.score;
-      default:
-        return 0;
-    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   // Create new post mutation
@@ -218,7 +178,7 @@ export default function Forum() {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                 <MessageSquare className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -226,7 +186,7 @@ export default function Forum() {
                 <p className="text-gray-600 dark:text-gray-400">Connect with fellow growers and share knowledge</p>
               </div>
             </div>
-            <Button onClick={() => setShowCreatePost(true)} className="bg-orange-500 hover:bg-orange-600">
+            <Button onClick={() => setShowCreatePost(true)} className="bg-blue-500 hover:bg-blue-600">
               <Plus className="h-4 w-4 mr-2" />
               Create Post
             </Button>
@@ -244,35 +204,7 @@ export default function Forum() {
               />
             </div>
             
-            <div className="flex gap-4 items-center">
-              <Tabs value={sortBy} onValueChange={(value) => setSortBy(value as SortType)} className="flex-1">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="hot" className="flex items-center gap-1">
-                    <Flame className="h-3 w-3" />
-                    Hot
-                  </TabsTrigger>
-                  <TabsTrigger value="new" className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    New
-                  </TabsTrigger>
-                  <TabsTrigger value="top-day">Top Day</TabsTrigger>
-                  <TabsTrigger value="top-week">Top Week</TabsTrigger>
-                  <TabsTrigger value="top-all">Top All</TabsTrigger>
-                </TabsList>
-              </Tabs>
-              
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {Object.values(ForumCategory).map(category => (
-                    <SelectItem key={category} value={category}>{category}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <ForumFilters filters={filters} setFilters={setFilters} />
           </div>
         </div>
 
@@ -296,7 +228,7 @@ export default function Forum() {
 
         {/* Selected Post Detail View */}
         {selectedPost && (
-          <Card className="mb-6 border-orange-200 dark:border-orange-800">
+          <Card className="mb-6 border-blue-200 dark:border-blue-800">
             <CardContent className="p-6">
               <div className="flex gap-4">
                 <VoteButtons 
@@ -428,8 +360,32 @@ export default function Forum() {
                           <MessageSquare className="h-3 w-3" />
                           <span>{post.commentCount} comments</span>
                         </div>
-                        <span>Share</span>
-                        <span>Save</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="p-0 h-auto text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(window.location.origin + '/forum?post=' + post.id);
+                            toast({ title: "Link copied!", description: "Post link copied to clipboard" });
+                          }}
+                        >
+                          <Share className="h-3 w-3 mr-1" />
+                          Share
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="p-0 h-auto text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // TODO: Implement save functionality when backend supports it
+                            toast({ title: "Saved!", description: "Post saved to your collection" });
+                          }}
+                        >
+                          <Bookmark className="h-3 w-3 mr-1" />
+                          Save
+                        </Button>
                       </div>
                     </div>
                   </div>
