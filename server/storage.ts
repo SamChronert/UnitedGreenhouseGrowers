@@ -311,7 +311,13 @@ export class DatabaseStorage implements IStorage {
         id: resources.id,
         title: resources.title,
         url: resources.url,
-        tags: resources.tags
+        tags: resources.tags,
+        lat: resources.lat,
+        long: resources.long,
+        data: resources.data,
+        summary: resources.summary,
+        ugga_verified: resources.ugga_verified,
+        quality_score: resources.quality_score
       })
       .from(resources)
       .orderBy(resources.title);
@@ -360,25 +366,31 @@ export class DatabaseStorage implements IStorage {
         ['hydroponics', 'controlled-environment', 'organic'].includes(tag)
       ) || [],
       cost: 'free', // Default assumption
-      ugga_verified: false, // Default
-      quality_score: 75, // Default
-      has_location: false, // No location data in current schema
+      ugga_verified: item.ugga_verified || false,
+      quality_score: item.quality_score || 75,
+      has_location: !!(item.lat && item.long),
       region: 'US', // Default
-      summary: item.tags?.length > 0 ? `Resource about ${item.tags.slice(0, 3).join(', ')}.` : 'Educational resource for greenhouse growers.',
-      // Add grant-specific mock data for grants
-      data: item.tags?.includes?.('grant') ? {
-        sponsor: item.tags?.includes?.('university') ? 'USDA NIFA' : 'NSF',
-        program_name: item.title,
-        award_min: 50000,
-        award_max: 500000,
-        due_date: 'rolling',
-        status: 'open',
-        eligibility_geo: ['US'],
-        link_to_rfp: item.url
-      } : item.tags?.includes?.('template') ? {
-        version: '1.0',
-        version_notes: 'Latest version with updated formatting'
-      } : {}
+      summary: item.summary || (item.tags?.length > 0 ? `Resource about ${item.tags.slice(0, 3).join(', ')}.` : 'Educational resource for greenhouse growers.'),
+      lat: item.lat,
+      long: item.long,
+      // Merge existing data with type-specific mock data
+      data: {
+        ...(item.data || {}),
+        ...(item.tags?.includes?.('grant') ? {
+          sponsor: item.tags?.includes?.('university') ? 'USDA NIFA' : 'NSF',
+          program_name: item.title,
+          award_min: 50000,
+          award_max: 500000,
+          due_date: 'rolling',
+          status: 'open',
+          eligibility_geo: ['US'],
+          link_to_rfp: item.url
+        } : {}),
+        ...(item.tags?.includes?.('template') ? {
+          version: '1.0',
+          version_notes: 'Latest version with updated formatting'
+        } : {})
+      }
     }));
     
     return { items, total };
@@ -390,7 +402,13 @@ export class DatabaseStorage implements IStorage {
         id: resources.id,
         title: resources.title,
         url: resources.url,
-        tags: resources.tags
+        tags: resources.tags,
+        lat: resources.lat,
+        long: resources.long,
+        data: resources.data,
+        summary: resources.summary,
+        ugga_verified: resources.ugga_verified,
+        quality_score: resources.quality_score
       })
       .from(resources)
       .where(eq(resources.id, id));
@@ -413,16 +431,16 @@ export class DatabaseStorage implements IStorage {
         ['hydroponics', 'controlled-environment', 'organic'].includes(tag)
       ) || [],
       cost: 'free',
-      ugga_verified: false,
-      quality_score: 75,
-      has_location: false,
+      ugga_verified: resource.ugga_verified || false,
+      quality_score: resource.quality_score || 75,
+      has_location: !!(resource.lat && resource.long),
       region: 'US',
-      summary: resource.tags?.length > 0 ? `Resource about ${resource.tags.slice(0, 3).join(', ')}.` : 'Educational resource for greenhouse growers.',
+      summary: resource.summary || (resource.tags?.length > 0 ? `Resource about ${resource.tags.slice(0, 3).join(', ')}.` : 'Educational resource for greenhouse growers.'),
       last_verified_at: null,
       review_interval_days: null,
       version: null,
-      lat: null,
-      long: null,
+      lat: resource.lat,
+      long: resource.long,
       // Add type-specific mock data
       data: resource.tags?.includes('grant') ? {
         sponsor: resource.tags.includes('university') ? 'USDA NIFA' : 'NSF',
