@@ -87,48 +87,52 @@ export default function ChallengeSubmissionForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Suggestion Questions */}
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">
-          Here are some questions you might consider responding to (optional):
-        </h3>
-        <div className="grid gap-2">
-          {suggestionQuestions.map((question, index) => (
-            <div key={index} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-2">
-              <span className="text-ugga-secondary font-medium mt-0.5">{index + 1}.</span>
-              <span>{question}</span>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid md:grid-cols-3 gap-6">
+        {/* Response Text Area - Left Side */}
+        <div className="md:col-span-2 space-y-2">
+          <label htmlFor="description" className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            Your Response
+          </label>
+          <Textarea
+            id="description"
+            placeholder="Share your thoughts on any of the questions in the sidebar, or tell us anything else you'd like us to know about your vision for the Association..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="min-h-[200px] resize-none"
+            maxLength={2000}
+          />
+          <p className="text-xs text-gray-500">
+            {description.length}/2000 characters
+          </p>
+          
+          <Button 
+            type="submit" 
+            disabled={!description.trim() || submitChallenge.isPending}
+            className="w-full text-white rounded-lg font-medium shadow-lg hover:opacity-90 transition-all duration-300 mt-4"
+            style={{backgroundColor: 'var(--color-clay)'}}
+          >
+            {submitChallenge.isPending ? "Submitting..." : "Submit Response"}
+          </Button>
+        </div>
+
+        {/* Suggestion Questions - Right Sidebar */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            Questions to Consider (optional)
+          </h3>
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 h-[240px] overflow-y-auto">
+            <div className="space-y-3">
+              {suggestionQuestions.map((question, index) => (
+                <div key={index} className="text-xs text-gray-700 dark:text-gray-300 flex items-start gap-2 pb-2 border-b border-gray-200 dark:border-gray-700 last:border-b-0 last:pb-0">
+                  <span className="text-ugga-secondary font-medium mt-0.5 flex-shrink-0">{index + 1}.</span>
+                  <span className="leading-relaxed">{question}</span>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
-
-      {/* Response Text Area */}
-      <div className="space-y-2">
-        <label htmlFor="description" className="text-sm font-medium text-gray-900 dark:text-gray-100">
-          Your Response
-        </label>
-        <Textarea
-          id="description"
-          placeholder="Share your thoughts on any of the questions above, or tell us anything else you'd like us to know about your vision for the Association..."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="min-h-[150px] resize-none"
-          maxLength={2000}
-        />
-        <p className="text-xs text-gray-500">
-          {description.length}/2000 characters
-        </p>
-      </div>
-      
-      <Button 
-        type="submit" 
-        disabled={!description.trim() || submitChallenge.isPending}
-        className="w-full text-white rounded-lg font-medium shadow-lg hover:opacity-90 transition-all duration-300"
-        style={{backgroundColor: 'var(--color-clay)'}}
-      >
-        {submitChallenge.isPending ? "Submitting..." : "Submit Response"}
-      </Button>
     </form>
   );
 }
