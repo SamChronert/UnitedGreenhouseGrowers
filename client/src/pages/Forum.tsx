@@ -48,7 +48,7 @@ export default function Forum() {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [selectedPost, setSelectedPost] = useState<PostWithDetails | null>(null);
   const [editingPost, setEditingPost] = useState<PostWithDetails | null>(null);
-  const [filters, setFilters] = useState({ state: "", category: "" });
+  const [filters, setFilters] = useState({ region: "", category: "" });
   const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
   const { user } = useAuth();
   const { toast } = useToast();
@@ -69,12 +69,12 @@ export default function Forum() {
 
   // Fetch forum posts with filters
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ["/api/forum/posts", searchQuery, filters.category, filters.state],
+    queryKey: ["/api/forum/posts", searchQuery, filters.category, filters.region],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append('search', searchQuery);
       if (filters.category) params.append('category', filters.category);
-      if (filters.state) params.append('state', filters.state);
+      if (filters.region) params.append('region', filters.region);
       const queryString = params.toString();
       return apiRequest("GET", `/api/forum/posts${queryString ? `?${queryString}` : ''}`);
     },

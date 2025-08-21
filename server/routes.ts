@@ -1204,10 +1204,10 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
   // Forum routes
   app.get("/api/forum/posts", authenticate, requireMember, async (req: AuthRequest, res) => {
     try {
-      const { search, state, county, category } = req.query;
+      const { search, region, county, category } = req.query;
       const posts = await storage.getAllForumPosts({
         searchQuery: search as string,
-        state: state as string,
+        region: region as string,
         county: county as string,
         category: category as string,
       });

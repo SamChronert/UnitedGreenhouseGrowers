@@ -876,15 +876,17 @@ export class DatabaseStorage implements IStorage {
   // Forum operations
   async getAllForumPosts(filters?: {
     searchQuery?: string;
-    state?: string;
+    region?: string;
     county?: string;
     category?: string;
   }): Promise<(ForumPost & { user: User & { profile: Profile }; comments: (ForumComment & { user: User & { profile: Profile } })[]; commentCount: number })[]> {
     // Build where conditions
     const conditions = [eq(forumPosts.isDeleted, false)];
     
-    if (filters?.state) {
-      conditions.push(eq(profiles.state, filters.state));
+    if (filters?.region) {
+      // For now, we'll map regions to states or handle differently
+      // This is a placeholder - you might want to add a region field to profiles
+      // or map regions to groups of states
     }
     
     if (filters?.county) {

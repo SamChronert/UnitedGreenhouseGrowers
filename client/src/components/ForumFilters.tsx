@@ -3,34 +3,33 @@ import { ForumCategory } from "@shared/schema";
 
 interface ForumFiltersProps {
   filters: {
-    state: string;
+    region: string;
     category: string;
   };
   setFilters: (filters: {
-    state: string;
+    region: string;
     category: string;
   }) => void;
 }
 
-// US States list
-const US_STATES = [
-  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware",
-  "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
-  "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi",
-  "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico",
-  "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania",
-  "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
-  "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"
+// US Regions list (from existing resource filters)
+const US_REGIONS = [
+  "Northeast US",
+  "Southeast US",
+  "Midwest US", 
+  "Southwest US",
+  "West US",
+  "California"
 ];
 
 
 
 export default function ForumFilters({ filters, setFilters }: ForumFiltersProps) {
 
-  const handleStateChange = (value: string) => {
-    const newState = value === "all" ? "" : value;
+  const handleRegionChange = (value: string) => {
+    const newRegion = value === "all" ? "" : value;
     setFilters({
-      state: newState,
+      region: newRegion,
       category: filters.category,
     });
   };
@@ -48,17 +47,17 @@ export default function ForumFilters({ filters, setFilters }: ForumFiltersProps)
     <div className="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
       <div className="flex-1 min-w-48">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          State
+          Region
         </label>
-        <Select value={filters.state || "all"} onValueChange={handleStateChange}>
+        <Select value={filters.region || "all"} onValueChange={handleRegionChange}>
           <SelectTrigger>
-            <SelectValue placeholder="All states" />
+            <SelectValue placeholder="All regions" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All States</SelectItem>
-            {US_STATES.map(state => (
-              <SelectItem key={state} value={state}>
-                {state}
+            <SelectItem value="all">All Regions</SelectItem>
+            {US_REGIONS.map(region => (
+              <SelectItem key={region} value={region}>
+                {region}
               </SelectItem>
             ))}
           </SelectContent>
