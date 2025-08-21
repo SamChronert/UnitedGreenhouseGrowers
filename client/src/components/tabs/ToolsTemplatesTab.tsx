@@ -11,6 +11,8 @@ import { useResources, Resource, ResourceFilters } from "@/hooks/useResources";
 import SearchBox from "@/components/SearchBox";
 import TemplatePreviewModal from "../TemplatePreviewModal";
 import { trackTabView, trackResourceClick } from "@/lib/analytics";
+import { useToggleView } from "@/hooks/useToggleView";
+import { ToggleGroup } from "@/features/resources/components/ToggleGroup";
 import { useToast } from "@/hooks/use-toast";
 
 interface ToolsTemplatesTabProps {
@@ -70,7 +72,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
 
   // Track tab view on mount
   useEffect(() => {
-    trackTabView('tools-templates', 'Tools & Templates');
+    trackTabView('tools-templates');
     onAnalyticsEvent?.('tab_view', { tab: 'tools-templates', sub: activeSubTab });
   }, [onAnalyticsEvent, activeSubTab]);
 
@@ -242,18 +244,16 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
               />
               
               {/* View Toggle */}
-              <Tabs value={viewMode} onValueChange={handleViewModeChange}>
-                <TabsList className="grid w-full grid-cols-2 max-w-[200px]">
-                  <TabsTrigger value="list" className="flex items-center gap-2">
-                    <List className="h-4 w-4" />
-                    List
-                  </TabsTrigger>
-                  <TabsTrigger value="grid" className="flex items-center gap-2">
-                    <Grid3X3 className="h-4 w-4" />
-                    Grid
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <ToggleGroup
+                value={viewMode}
+                onValueChange={handleViewModeChange}
+                options={[
+                  { value: 'list', label: 'List', icon: <List className="h-4 w-4" /> },
+                  { value: 'grid', label: 'Grid', icon: <Grid3X3 className="h-4 w-4" /> }
+                ]}
+                ariaLabel="View mode for tools"
+                className="max-w-[200px]"
+              />
             </div>
             
             <div className="flex flex-wrap gap-4">
@@ -413,18 +413,16 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
               />
               
               {/* View Toggle */}
-              <Tabs value={viewMode} onValueChange={handleViewModeChange}>
-                <TabsList className="grid w-full grid-cols-2 max-w-[200px]">
-                  <TabsTrigger value="list" className="flex items-center gap-2">
-                    <List className="h-4 w-4" />
-                    List
-                  </TabsTrigger>
-                  <TabsTrigger value="grid" className="flex items-center gap-2">
-                    <Grid3X3 className="h-4 w-4" />
-                    Grid
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <ToggleGroup
+                value={viewMode}
+                onValueChange={handleViewModeChange}
+                options={[
+                  { value: 'list', label: 'List', icon: <List className="h-4 w-4" /> },
+                  { value: 'grid', label: 'Grid', icon: <Grid3X3 className="h-4 w-4" /> }
+                ]}
+                ariaLabel="View mode for templates"
+                className="max-w-[200px]"
+              />
             </div>
             
             <Select

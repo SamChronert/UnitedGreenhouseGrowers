@@ -13,6 +13,8 @@ import { UniversityMapWithLoading } from "@/components/LazyComponents";
 import SearchBox from "@/components/SearchBox";
 import FilterBar from "@/components/FilterBar";
 import { trackTabView, trackResourceClick } from "@/lib/analytics";
+import { useToggleView } from "@/hooks/useToggleView";
+import { ToggleGroup } from "@/features/resources/components/ToggleGroup";
 
 interface UniversitiesTabProps {
   onAnalyticsEvent?: (eventName: string, payload: any) => void;
@@ -40,7 +42,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
 
   // Track tab view on mount
   useEffect(() => {
-    trackTabView('universities', { tab_name: 'Universities' });
+    trackTabView('universities');
     onAnalyticsEvent?.('tab_view', { tab: 'universities' });
   }, [onAnalyticsEvent]);
 
@@ -121,18 +123,16 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
           />
           
           {/* View Toggle */}
-          <Tabs value={viewMode} onValueChange={handleViewModeChange}>
-            <TabsList className="grid w-full grid-cols-2 max-w-[200px]">
-              <TabsTrigger value="grid" className="flex items-center gap-2">
-                <Grid3X3 className="h-4 w-4" />
-                Grid
-              </TabsTrigger>
-              <TabsTrigger value="map" className="flex items-center gap-2">
-                <Map className="h-4 w-4" />
-                Map
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <ToggleGroup
+            value={viewMode}
+            onValueChange={handleViewModeChange}
+            options={[
+              { value: 'grid', label: 'Grid', icon: <Grid3X3 className="h-4 w-4" /> },
+              { value: 'map', label: 'Map', icon: <Map className="h-4 w-4" /> }
+            ]}
+            ariaLabel="View mode for universities"
+            className="max-w-[200px]"
+          />
         </div>
         
         <FilterBar
@@ -283,7 +283,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
               variant="outline" 
               onClick={() => {
                 setSearchQuery('');
-                setFilters({});
+                handleFiltersChange({});
                 setSort('relevance');
               }}
             >

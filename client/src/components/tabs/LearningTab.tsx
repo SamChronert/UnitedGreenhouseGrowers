@@ -7,8 +7,10 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParamState } from '@/hooks/useQueryParams';
 import { useResources } from '@/hooks/useResources';
 import SearchBox from '@/components/SearchBox';
-import { type Resource, type ResourceFilters } from '@shared/schema';
+import { type Resource, type ResourceFilters } from '@/hooks/useResources';
 import { trackTabView, trackResourceClick } from '@/lib/analytics';
+import { useToggleView } from '@/hooks/useToggleView';
+import { ToggleGroup } from '@/features/resources/components/ToggleGroup';
 import { 
   GraduationCap, 
   Clock, 
@@ -70,7 +72,7 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
 
   // Track tab view on mount
   useEffect(() => {
-    trackTabView('learning', 'Learning');
+    trackTabView('learning');
     onAnalyticsEvent?.('tab_view', { tab: 'learning' });
   }, [onAnalyticsEvent]);
 
@@ -94,13 +96,13 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
     onAnalyticsEvent?.('course_click', {
       course_id: course.id,
       course_name: course.title,
-      provider: course.data?.provider,
-      level: course.data?.level,
-      cost_type: course.data?.costType
+      provider: course.data?.provider || 'Unknown',
+      level: course.data?.level || 'Unknown',
+      cost_type: course.data?.costType || 'Unknown'
     });
     
-    if (course.url || course.data?.url) {
-      window.open(course.url || course.data?.url, '_blank');
+    if (course.url || (course.data && 'url' in course.data && course.data.url)) {
+      window.open(course.url || (course.data as any).url, '_blank');
     }
   }, [onAnalyticsEvent]);
 
@@ -152,18 +154,16 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
           />
           
           {/* View Toggle */}
-          <Tabs value={viewMode} onValueChange={handleViewModeChange}>
-            <TabsList className="grid w-full grid-cols-2 max-w-[200px]">
-              <TabsTrigger value="grid" className="flex items-center gap-2">
-                <Grid3X3 className="h-4 w-4" />
-                Grid
-              </TabsTrigger>
-              <TabsTrigger value="list" className="flex items-center gap-2">
-                <List className="h-4 w-4" />
-                List
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <ToggleGroup
+            value={viewMode}
+            onValueChange={handleViewModeChange}
+            options={[
+              { value: 'grid', label: 'Grid', icon: <Grid3X3 className="h-4 w-4" /> },
+              { value: 'list', label: 'List', icon: <List className="h-4 w-4" /> }
+            ]}
+            ariaLabel="View mode for learning resources"
+            className="max-w-[200px]"
+          />
         </div>
         
         <div className="flex flex-wrap gap-4">
@@ -273,6 +273,15 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
                 viewMode === 'list' ? 'flex' : ''
               }`}
               onClick={() => handleCourseClick(course)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleCourseClick(course);
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label={`View details for ${course.title}`}
             >
               {viewMode === 'grid' ? (
                 <>

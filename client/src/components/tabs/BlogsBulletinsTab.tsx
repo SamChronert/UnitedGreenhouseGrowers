@@ -8,8 +8,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { useParamState } from '@/hooks/useQueryParams';
 import { useResources } from '@/hooks/useResources';
-import { type Resource, type ResourceFilters, type BlogPost } from '@shared/schema';
+import { type Resource, type ResourceFilters } from '@/hooks/useResources';
 import { trackTabView, trackResourceClick } from '@/lib/analytics';
+import { useToggleView } from '@/hooks/useToggleView';
+import { ToggleGroup } from '@/features/resources/components/ToggleGroup';
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  contentMd: string;
+  publishedAt: string | Date;
+}
 import { 
   FileText, 
   Calendar,
@@ -19,7 +29,9 @@ import {
   Building,
   Clock,
   Loader2,
-  Tag
+  Tag,
+  Grid3X3,
+  List
 } from 'lucide-react';
 
 interface BlogsBulletinsTabProps {
@@ -49,6 +61,7 @@ const TOPIC_TAGS = [
 export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTabProps) {
   // URL state management
   const [activeSection, setActiveSection] = useParamState('section', 'blogs');
+  const [viewMode, setViewMode] = useParamState('view', 'grid');
   
   // State
   const [bulletinSearch, setBulletinSearch] = useState('');
@@ -59,7 +72,7 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
 
   // Track tab view on mount
   useEffect(() => {
-    trackTabView('blogs-bulletins', 'Blogs & Bulletins');
+    trackTabView('blogs-bulletins');
     onAnalyticsEvent?.('tab_view', { tab: 'blogs-bulletins', section: activeSection });
   }, [onAnalyticsEvent, activeSection]);
 
@@ -101,12 +114,12 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
     onAnalyticsEvent?.('bulletin_click', {
       bulletin_id: bulletin.id,
       bulletin_title: bulletin.title,
-      source: bulletin.data?.source,
-      topic_tags: bulletin.data?.topicTags
+      source: (bulletin.data as any)?.source || 'Unknown',
+      topic_tags: (bulletin.data as any)?.topicTags || []
     });
     
-    if (bulletin.url || bulletin.data?.url) {
-      window.open(bulletin.url || bulletin.data?.url, '_blank');
+    if (bulletin.url || (bulletin.data && 'url' in bulletin.data && bulletin.data.url)) {
+      window.open(bulletin.url || (bulletin.data as any).url, '_blank');
     }
   }, [onAnalyticsEvent]);
 
@@ -234,14 +247,28 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
         <TabsContent value="bulletins" className="space-y-6">
           {/* Search and Filters */}
           <div className="space-y-4">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search bulletins by topic or title..."
-                value={bulletinSearch}
-                onChange={(e) => setBulletinSearch(e.target.value)}
-                className="pl-10"
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search bulletins by topic or title..."
+                  value={bulletinSearch}
+                  onChange={(e) => setBulletinSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              {/* View Toggle */}
+              <ToggleGroup
+                value={viewMode}
+                onValueChange={setViewMode}
+                options={[
+                  { value: 'grid', label: 'Grid', icon: <Grid3X3 className="h-4 w-4" /> },
+                  { value: 'list', label: 'List', icon: <List className="h-4 w-4" /> }
+                ]}
+                ariaLabel="View mode for bulletins"
+                className="max-w-[200px]"
               />
             </div>
             
@@ -311,6 +338,56 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
               <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No bulletins found</h3>
               <p className="text-gray-600">Try adjusting your search or filters to find research bulletins.</p>
+            </div>
+          ) : viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {bulletins.map(bulletin => (
+                <Card 
+                  key={bulletin.id} 
+                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => handleBulletinClick(bulletin)}
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                          <BookOpen className="h-6 w-6 text-green-600" />
+                        </div>
+                        <div className="flex-1">
+                          <CardTitle className="text-lg line-clamp-2">{bulletin.title}</CardTitle>
+                          <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                            {(bulletin.data as any)?.source && (
+                              <div className="flex items-center gap-1">
+                                <Building className="h-3 w-3" />
+                                <span>{(bulletin.data as any).source}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                      {bulletin.summary || 'Bulletin description not available.'}
+                    </p>
+                    
+                    {/* Topic Tags */}
+                    {(bulletin.data as any)?.topicTags && (bulletin.data as any).topicTags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {((bulletin.data as any).topicTags as string[]).slice(0, 3).map((tag: string) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            <Tag className="h-3 w-3 mr-1" />
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           ) : (
             <div className="space-y-4">
