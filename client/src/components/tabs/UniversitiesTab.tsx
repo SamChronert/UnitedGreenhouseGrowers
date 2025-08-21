@@ -125,6 +125,56 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
         </Alert>
       )}
 
+      {/* Universities Map Section */}
+      <Collapsible open={mapExpanded} onOpenChange={setMapExpanded}>
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            style={{ backgroundColor: '#36533C' }}
+            className="w-full p-4 justify-between text-lg font-semibold text-white hover:opacity-90 border rounded-lg"
+          >
+            <div className="flex items-center gap-3">
+              <Map className="h-5 w-5" />
+              Universities Map
+            </div>
+            {mapExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent className="space-y-4 mt-4">
+          {/* Map Loading State */}
+          {isLoading && (
+            <div className="min-h-[600px] flex items-center justify-center">
+              <div className="text-center">
+                <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-600">Loading map...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Universities Map */}
+          {!isLoading && !error && universities.length > 0 && (
+            <div className="min-h-[600px]">
+              <UniversityMapWithLoading 
+                universities={universities}
+                onUniversityClick={handleUniversityClick}
+              />
+            </div>
+          )}
+          
+          {/* Map Empty State */}
+          {!isLoading && !error && universities.length === 0 && (
+            <div className="text-center py-12 min-h-[400px] flex flex-col items-center justify-center">
+              <Map className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No universities to display on map</h3>
+              <p className="text-gray-600">
+                {searchQuery.trim() ? "Try adjusting your search to find universities with location data." : "No universities with location data are currently available."}
+              </p>
+            </div>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+
       {/* Universities List Section */}
       <Collapsible open={listExpanded} onOpenChange={setListExpanded}>
         <CollapsibleTrigger asChild>
@@ -135,7 +185,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
           >
             <div className="flex items-center gap-3">
               <List className="h-5 w-5" />
-              Universities List ({universities.length})
+              Universities List
             </div>
             {listExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </Button>
@@ -242,56 +292,6 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
                   Clear Search
                 </Button>
               )}
-            </div>
-          )}
-        </CollapsibleContent>
-      </Collapsible>
-
-      {/* Universities Map Section */}
-      <Collapsible open={mapExpanded} onOpenChange={setMapExpanded}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            style={{ backgroundColor: '#36533C' }}
-            className="w-full p-4 justify-between text-lg font-semibold text-white hover:opacity-90 border rounded-lg"
-          >
-            <div className="flex items-center gap-3">
-              <Map className="h-5 w-5" />
-              Universities Map ({universities.length})
-            </div>
-            {mapExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-          </Button>
-        </CollapsibleTrigger>
-        
-        <CollapsibleContent className="space-y-4 mt-4">
-          {/* Map Loading State */}
-          {isLoading && (
-            <div className="min-h-[600px] flex items-center justify-center">
-              <div className="text-center">
-                <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-600">Loading map...</p>
-              </div>
-            </div>
-          )}
-
-          {/* Universities Map */}
-          {!isLoading && !error && universities.length > 0 && (
-            <div className="min-h-[600px]">
-              <UniversityMapWithLoading 
-                universities={universities}
-                onUniversityClick={handleUniversityClick}
-              />
-            </div>
-          )}
-          
-          {/* Map Empty State */}
-          {!isLoading && !error && universities.length === 0 && (
-            <div className="text-center py-12 min-h-[400px] flex flex-col items-center justify-center">
-              <Map className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No universities to display on map</h3>
-              <p className="text-gray-600">
-                {searchQuery.trim() ? "Try adjusting your search to find universities with location data." : "No universities with location data are currently available."}
-              </p>
             </div>
           )}
         </CollapsibleContent>
