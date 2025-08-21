@@ -4,37 +4,30 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ExternalLink, MapPin, GraduationCap, AlertCircle, RefreshCw, Grid3X3, Map } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ExternalLink, MapPin, GraduationCap, AlertCircle, RefreshCw, List, Map, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useInfiniteResources, useResourcesList, Resource, ResourceFilters } from "@/hooks/useResources";
 import { useParamState } from "@/hooks/useQueryParams";
 import { UniversityMapWithLoading } from "@/components/LazyComponents";
 import SearchBox from "@/components/SearchBox";
-import FilterBar from "@/components/FilterBar";
 import { trackTabView, trackResourceClick } from "@/lib/analytics";
-import { useToggleView } from "@/hooks/useToggleView";
-import { ToggleGroup } from "@/features/resources/components/ToggleGroup";
 
 interface UniversitiesTabProps {
   onAnalyticsEvent?: (eventName: string, payload: any) => void;
 }
 
 export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabProps) {
-  // URL state management with useParamState
-  const [viewMode, setViewMode] = useParamState('view', 'map');
-  const [searchQuery, setSearchQuery] = useParamState('q', '');
-  const [filtersParam, setFiltersParam] = useParamState('filters', '{}');
-  const [sort, setSort] = useParamState('sort', 'relevance');
+  // State for collapsible sections
+  const [listExpanded, setListExpanded] = useState(true);
+  const [mapExpanded, setMapExpanded] = useState(true);
   
-  // Parse filters from URL param
-  const filters = useMemo(() => {
-    try {
-      return JSON.parse(filtersParam) as ResourceFilters;
-    } catch {
-      return {} as ResourceFilters;
-    }
-  }, [filtersParam]);
+  // URL state management with useParamState
+  const [searchQuery, setSearchQuery] = useParamState('q', '');
+  
+  // Use empty filters since user said overall filter doesn't need to be there
+  const filters = useMemo(() => ({} as ResourceFilters), []);
+  const sort = 'relevance';
   
   // Local state
   const [selectedUniversity, setSelectedUniversity] = useState<Resource | null>(null);
@@ -58,12 +51,6 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
   const universities = useResourcesList(infiniteQuery);
   const { data, isLoading, error, hasNextPage, fetchNextPage, isFetchingNextPage } = infiniteQuery;
 
-  // Update URL when filters change
-  const handleFiltersChange = useCallback((newFilters: ResourceFilters) => {
-    setFiltersParam(JSON.stringify(newFilters));
-  }, [setFiltersParam]);
-
-  // View mode is now controlled by routing, no need for handler
 
   // Handle university card click
   const handleUniversityClick = useCallback((university: Resource) => {
@@ -102,71 +89,22 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
 
   return (
     <div 
-      key={`universities-${viewMode}`}
       role="tabpanel" 
       id="universities-panel" 
       aria-labelledby="universities-tab"
       className="space-y-6"
     >
-      {/* Search and Filters */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <SearchBox
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search universities by name, program, or location..."
-            resources={universities}
-            resourceType="universities"
-            className="max-w-md"
-          />
-          
-          {/* View Toggle */}
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                console.log('Switching to grid view');
-                setViewMode('grid');
-              }}
-              className="flex items-center gap-2"
-            >
-              <Grid3X3 className="h-4 w-4" />
-              Grid
-            </Button>
-            <Button
-              variant={viewMode === 'map' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                console.log('Switching to map view');
-                setViewMode('map');
-              }}
-              className="flex items-center gap-2"
-            >
-              <Map className="h-4 w-4" />
-              Map
-            </Button>
-          </div>
-        </div>
-        
-        <FilterBar
-          resourceType="universities"
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          sort={sort}
-          onSortChange={setSort}
-        />
-      </div>
+      {/* Search Bar */}
+      <SearchBox
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search universities by name, program, or location..."
+        resources={universities}
+        resourceType="universities"
+        className="max-w-md"
+      />
 
-      {/* Results Count */}
-      {!isLoading && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">
-            {totalCount} {totalCount === 1 ? 'university' : 'universities'} found
-            {Object.keys(filters).length > 0 || searchQuery.trim() ? ' (filtered)' : ''}
-          </div>
-        </div>
-      )}
+
 
       {/* Error State */}
       {error && (
@@ -187,28 +125,43 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
         </Alert>
       )}
 
-      {/* Loading Skeletons */}
-      {isLoading && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader className="pb-3">
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardHeader>
-              <CardContent className="pt-0">
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      {/* Universities List Section */}
+      <Collapsible open={listExpanded} onOpenChange={setListExpanded}>
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            style={{ backgroundColor: '#36533C' }}
+            className="w-full p-4 justify-between text-lg font-semibold text-white hover:opacity-90 border rounded-lg"
+          >
+            <div className="flex items-center gap-3">
+              <List className="h-5 w-5" />
+              Universities List ({universities.length})
+            </div>
+            {listExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent className="space-y-4 mt-4">
+          {/* Loading Skeletons */}
+          {isLoading && (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i}>
+                  <CardHeader className="pb-3">
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-      {/* Content - Grid or Map View */}
-      {!isLoading && !error && universities.length > 0 && (
-        <div className="space-y-6">
-          {viewMode === 'grid' ? (
+          {/* Universities Grid */}
+          {!isLoading && !error && universities.length > 0 && (
             <>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {universities.map(university => (
@@ -271,7 +224,58 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
                 </div>
               )}
             </>
-          ) : (
+          )}
+          
+          {/* Empty State */}
+          {!isLoading && !error && universities.length === 0 && (
+            <div className="text-center py-12">
+              <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No universities found</h3>
+              <p className="text-gray-600 mb-4">
+                {searchQuery.trim() ? "Try adjusting your search to find more results." : "No universities are currently available."}
+              </p>
+              {searchQuery.trim() && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => setSearchQuery('')}
+                >
+                  Clear Search
+                </Button>
+              )}
+            </div>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+
+      {/* Universities Map Section */}
+      <Collapsible open={mapExpanded} onOpenChange={setMapExpanded}>
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            style={{ backgroundColor: '#36533C' }}
+            className="w-full p-4 justify-between text-lg font-semibold text-white hover:opacity-90 border rounded-lg"
+          >
+            <div className="flex items-center gap-3">
+              <Map className="h-5 w-5" />
+              Universities Map ({universities.length})
+            </div>
+            {mapExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent className="space-y-4 mt-4">
+          {/* Map Loading State */}
+          {isLoading && (
+            <div className="min-h-[600px] flex items-center justify-center">
+              <div className="text-center">
+                <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-600">Loading map...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Universities Map */}
+          {!isLoading && !error && universities.length > 0 && (
             <div className="min-h-[600px]">
               <UniversityMapWithLoading 
                 universities={universities}
@@ -279,33 +283,19 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
               />
             </div>
           )}
-        </div>
-      )}
-
-      {/* Empty State */}
-      {!isLoading && !error && universities.length === 0 && (
-        <div className="text-center py-12">
-          <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No universities found</h3>
-          <p className="text-gray-600 mb-4">
-            {searchQuery.trim() || Object.keys(filters).length > 0 
-              ? "Try adjusting your search or filters to find more results."
-              : "No universities are currently available."}
-          </p>
-          {(searchQuery.trim() || Object.keys(filters).length > 0) && (
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setSearchQuery('');
-                handleFiltersChange({});
-                setSort('relevance');
-              }}
-            >
-              Clear Search and Filters
-            </Button>
+          
+          {/* Map Empty State */}
+          {!isLoading && !error && universities.length === 0 && (
+            <div className="text-center py-12 min-h-[400px] flex flex-col items-center justify-center">
+              <Map className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No universities to display on map</h3>
+              <p className="text-gray-600">
+                {searchQuery.trim() ? "Try adjusting your search to find universities with location data." : "No universities with location data are currently available."}
+              </p>
+            </div>
           )}
-        </div>
-      )}
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* University Details Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
