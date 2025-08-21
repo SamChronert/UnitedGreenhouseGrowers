@@ -1,41 +1,38 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Check } from "lucide-react";
 
-const challengeCategories = [
-  { value: "irrigation", label: "Irrigation & Water Management" },
-  { value: "disease", label: "Disease & Pest Control" },
-  { value: "labor", label: "Labor & Workforce" },
-  { value: "economics", label: "Economics & Pricing" },
-  { value: "policy", label: "Policy & Regulations" },
-  { value: "technology", label: "Technology & Equipment" },
-  { value: "energy", label: "Energy & Climate Control" },
-  { value: "market", label: "Market Access & Distribution" },
-  { value: "research", label: "Research & Development" },
-  { value: "other", label: "Other" }
+const suggestionQuestions = [
+  "What does a United Greenhouse Growers Association look like to you?",
+  "Which existing features or resources would you actually see yourself using regularly?",
+  "What different features, tools, or resources would be most helpful to you that aren't here yet?",
+  "What problems or challenges in your work do you hope this Association could help solve?",
+  "What would make you excited to join and stay engaged with a community like this?",
+  "What kinds of connections (with growers, researchers, suppliers, policymakers, etc.) would you most value?",
+  "What formats of resources are most useful for you (guides, templates, webinars, discussion boards, research summaries, funding opportunities, etc.)?",
+  "How could the Association best support you in growing your business, advancing your career, or improving your greenhouse operations?",
+  "What would make this Association feel unique and worth your time compared to existing resources or networks?",
+  "What's one big idea or 'dream feature' you'd love to see included here?"
 ];
 
 export default function ChallengeSubmissionForm() {
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const submitChallenge = useMutation({
-    mutationFn: (data: { description: string; category?: string }) => 
+    mutationFn: (data: { description: string }) => 
       apiRequest("POST", "/api/challenges", data),
     onSuccess: () => {
       setIsSubmitted(true);
       setDescription("");
-      setCategory("");
       toast({
-        title: "Challenge Submitted",
+        title: "Response Submitted",
         description: "Thanks for sharing — your insight helps shape what we build next.",
       });
       
@@ -48,7 +45,7 @@ export default function ChallengeSubmissionForm() {
     onError: (error: Error) => {
       toast({
         title: "Submission Failed",
-        description: "Unable to submit your challenge. Please try again.",
+        description: "Unable to submit your response. Please try again.",
         variant: "destructive",
       });
     },
@@ -59,16 +56,15 @@ export default function ChallengeSubmissionForm() {
     
     if (!description.trim()) {
       toast({
-        title: "Description Required",
-        description: "Please describe the challenge you're facing.",
+        title: "Response Required",
+        description: "Please share your thoughts before submitting.",
         variant: "destructive",
       });
       return;
     }
 
     submitChallenge.mutate({
-      description: description.trim(),
-      category: category || undefined,
+      description: description.trim()
     });
   };
 
@@ -91,52 +87,48 @@ export default function ChallengeSubmissionForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="md:col-span-2 space-y-2">
-          <label htmlFor="description" className="text-sm font-medium">
-            What challenge are you facing?
-          </label>
-          <Textarea
-            id="description"
-            placeholder="Tell us about operational challenges, areas where you need better support, knowledge gaps, or suggestions for research and policy..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="min-h-[120px] resize-none"
-            maxLength={2000}
-          />
-          <p className="text-xs text-gray-500">
-            {description.length}/2000 characters
-          </p>
-        </div>
-        
-        <div className="space-y-2">
-          <label htmlFor="category" className="text-sm font-medium">
-            Category (optional)
-          </label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              {challengeCategories.map((cat) => (
-                <SelectItem key={cat.value} value={cat.value}>
-                  {cat.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Button 
-            type="submit" 
-            disabled={!description.trim() || submitChallenge.isPending}
-            className="w-full text-white rounded-lg font-medium shadow-lg hover:opacity-90 transition-all duration-300 mt-4"
-            style={{backgroundColor: 'var(--color-clay)'}}
-          >
-            {submitChallenge.isPending ? "Submitting..." : "Share Challenge"}
-          </Button>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Suggestion Questions */}
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">
+          Here are some questions you might consider responding to (optional):
+        </h3>
+        <div className="grid gap-2">
+          {suggestionQuestions.map((question, index) => (
+            <div key={index} className="text-sm text-gray-700 dark:text-gray-300 flex items-start gap-2">
+              <span className="text-ugga-secondary font-medium mt-0.5">{index + 1}.</span>
+              <span>{question}</span>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Response Text Area */}
+      <div className="space-y-2">
+        <label htmlFor="description" className="text-sm font-medium text-gray-900 dark:text-gray-100">
+          Your Response
+        </label>
+        <Textarea
+          id="description"
+          placeholder="Share your thoughts on any of the questions above, or tell us anything else you'd like us to know about your vision for the Association..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="min-h-[150px] resize-none"
+          maxLength={2000}
+        />
+        <p className="text-xs text-gray-500">
+          {description.length}/2000 characters
+        </p>
+      </div>
+      
+      <Button 
+        type="submit" 
+        disabled={!description.trim() || submitChallenge.isPending}
+        className="w-full text-white rounded-lg font-medium shadow-lg hover:opacity-90 transition-all duration-300"
+        style={{backgroundColor: 'var(--color-clay)'}}
+      >
+        {submitChallenge.isPending ? "Submitting..." : "Submit Response"}
+      </Button>
     </form>
   );
 }

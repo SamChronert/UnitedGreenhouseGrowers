@@ -139,10 +139,10 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-ugga-secondary" />
-              Share Your Challenge
+              We want to hear from you!
             </CardTitle>
             <p className="text-gray-600">
-              Tell us about operational challenges, knowledge gaps, or areas where the industry needs better support. This will help us build tools for you, and eventually can inform policy, research, and technology development.
+              We want this association to make a real difference for growers. To help shape that vision, we'd love to know: what does a "United Greenhouse Growers Association" look like to you?
             </p>
           </CardHeader>
           <CardContent>
