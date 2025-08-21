@@ -75,8 +75,8 @@ export default function Dashboard() {
       description: "Connect with growers by location and expertise",
       href: "/dashboard/find-grower",
       inDevelopment: true,
-      iconBg: "bg-blue-600/10",
-      iconColor: "text-blue-700"
+      iconBgColor: "#dbeafe",
+      iconColor: "#1d4ed8"
     },
     {
       icon: <MessageCircle className="h-8 w-8" />,
@@ -84,8 +84,8 @@ export default function Dashboard() {
       description: "Connect with fellow growers, share knowledge, organize bulk ordering.",
       href: "/dashboard/forum",
       inDevelopment: false,
-      iconBg: "bg-purple-600/10",
-      iconColor: "text-purple-700"
+      iconBgColor: "#e9d5ff",
+      iconColor: "#7c3aed"
     },
     {
       icon: <FolderOpen className="h-8 w-8" />,
@@ -93,8 +93,8 @@ export default function Dashboard() {
       description: "Browse curated grower resources — find relevant research, organizations near you, tax incentives and rebates, upcoming events, and more.",
       href: "/dashboard/resources",
       inDevelopment: true,
-      iconBg: "bg-orange-600/10",
-      iconColor: "text-orange-700"
+      iconBgColor: "#fed7aa",
+      iconColor: "#c2410c"
     },
     // Row 2: Farm Assessment, Sales Hub, Product Hub, Member Profile
     {
@@ -103,8 +103,8 @@ export default function Dashboard() {
       description: "Respond to the prompts to determine which areas of your farm to work on to improve yield and profitability for your operation.",
       href: "/dashboard/assessment",
       inDevelopment: true,
-      iconBg: "bg-red-600/10",
-      iconColor: "text-red-700"
+      iconBgColor: "#fecaca",
+      iconColor: "#dc2626"
     },
     {
       icon: <Store className="h-8 w-8" />,
@@ -112,8 +112,8 @@ export default function Dashboard() {
       description: "Find buyers and distributors for your products",
       href: "/dashboard/saleshub",
       inDevelopment: true,
-      iconBg: "bg-green-600/10",
-      iconColor: "text-green-700"
+      iconBgColor: "#bbf7d0",
+      iconColor: "#16a34a"
     },
     {
       icon: <ShoppingBag className="h-8 w-8" />,
@@ -121,8 +121,8 @@ export default function Dashboard() {
       description: "Browse vetted products and services",
       href: "/dashboard/producthub",
       inDevelopment: true,
-      iconBg: "bg-pink-600/10",
-      iconColor: "text-pink-700"
+      iconBgColor: "#fce7f3",
+      iconColor: "#db2777"
     },
     {
       icon: <UserCircle className="h-8 w-8" />,
@@ -130,8 +130,8 @@ export default function Dashboard() {
       description: "Update your information and preferences",
       href: "/dashboard/profile",
       inDevelopment: false,
-      iconBg: "bg-indigo-600/10",
-      iconColor: "text-indigo-700"
+      iconBgColor: "#e0e7ff",
+      iconColor: "#4f46e5"
     }
   ];
 
@@ -179,8 +179,11 @@ export default function Dashboard() {
                     </div>
                   )}
                   <CardContent className="p-6 text-center">
-                    <div className={`inline-flex items-center justify-center w-16 h-16 ${tool.iconBg} rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200`}>
-                      <span className={tool.iconColor}>{tool.icon}</span>
+                    <div 
+                      className="inline-flex items-center justify-center w-16 h-16 rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200"
+                      style={{ backgroundColor: tool.iconBgColor }}
+                    >
+                      <span style={{ color: tool.iconColor }}>{tool.icon}</span>
                     </div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{tool.title}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{tool.description}</p>
@@ -201,8 +204,11 @@ export default function Dashboard() {
                     </div>
                   )}
                   <CardContent className="p-6 text-center">
-                    <div className={`inline-flex items-center justify-center w-16 h-16 ${tool.iconBg} rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200`}>
-                      <span className={tool.iconColor}>{tool.icon}</span>
+                    <div 
+                      className="inline-flex items-center justify-center w-16 h-16 rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200"
+                      style={{ backgroundColor: tool.iconBgColor }}
+                    >
+                      <span style={{ color: tool.iconColor }}>{tool.icon}</span>
                     </div>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{tool.title}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{tool.description}</p>
