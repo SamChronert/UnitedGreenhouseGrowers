@@ -100,13 +100,6 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
       aria-labelledby="organizations-tab"
       className="space-y-6"
     >
-      {/* Header */}
-      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <h2 className="text-lg font-semibold text-purple-900 mb-2">Organizations & Associations</h2>
-        <p className="text-purple-800">
-          Connect with industry organizations, research institutions, and associations supporting greenhouse agriculture.
-        </p>
-      </div>
 
       {/* Search and Filters */}
       <div className="space-y-4">

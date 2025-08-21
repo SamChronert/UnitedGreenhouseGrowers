@@ -191,15 +191,6 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
       aria-labelledby="tools-templates-tab"
       className="space-y-6"
     >
-      {/* Search Bar */}
-      <SearchBox
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder="Search tools and templates..."
-        resources={[...tools, ...templates]}
-        resourceType="tools-templates"
-        className="max-w-md"
-      />
 
       {/* Tools Section */}
       <Collapsible open={toolsExpanded} onOpenChange={setToolsExpanded}>

@@ -110,16 +110,6 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
 
       {/* Universities Map Section */}
       <div className="space-y-4">
-        {/* Static Header */}
-        <div
-          style={{ backgroundColor: '#36533C' }}
-          className="w-full p-4 text-lg font-semibold text-white border rounded-lg"
-        >
-          <div className="flex items-center gap-3">
-            <Map className="h-5 w-5" />
-            Universities Map
-          </div>
-        </div>
         
         {/* Map Content */}
         <div className="space-y-4">

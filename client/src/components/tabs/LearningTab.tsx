@@ -189,14 +189,6 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
       {/* Search and Filters */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <SearchBox
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search courses by title, provider, or topic..."
-            resources={courses}
-            resourceType="learning"
-            className="max-w-md"
-          />
           
           {/* View Toggle */}
           <div className="flex gap-2">
