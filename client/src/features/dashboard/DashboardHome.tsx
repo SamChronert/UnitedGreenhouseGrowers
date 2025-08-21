@@ -99,7 +99,7 @@ export default function DashboardHome() {
       icon: <ClipboardList className="h-8 w-8" />,
       title: "Farm Roadmap",
       description: "Respond to the prompts to determine which areas of your farm to work on to improve yield and profitability for your operation.",
-      href: isDemo ? "/demo/assessment" : "/dashboard/assessment",
+      href: isDemo ? "/demo/farm-roadmap" : "/dashboard/farm-roadmap",
       inDevelopment: true
     },
     {

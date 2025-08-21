@@ -216,6 +216,50 @@ export const analytics_events = pgTable("analytics_events", {
   sessionIdx: index("analytics_session_idx").on(table.session_id),
 }));
 
+// Farm Roadmap tables
+export const farmAssessments = pgTable("farm_assessments", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  responses: jsonb("responses").notNull(), // Store all question responses
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
+  version: varchar("version").default("1.0").notNull(), // Track assessment version
+}, (table) => ({
+  userIdx: index("farm_assessments_user_idx").on(table.userId),
+  completedAtIdx: index("farm_assessments_completed_at_idx").on(table.completedAt),
+}));
+
+export const farmProfiles = pgTable("farm_profiles", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  assessmentId: varchar("assessment_id").notNull(),
+  profileData: jsonb("profile_data").notNull(), // Farm profile scores and analysis
+  strengths: text("strengths").array().default([]),
+  improvementAreas: text("improvement_areas").array().default([]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdx: index("farm_profiles_user_idx").on(table.userId),
+  assessmentIdx: index("farm_profiles_assessment_idx").on(table.assessmentId),
+  createdAtIdx: index("farm_profiles_created_at_idx").on(table.createdAt),
+}));
+
+export const farmRecommendations = pgTable("farm_recommendations", {
+  id: varchar("id").primaryKey().notNull(),
+  profileId: varchar("profile_id").notNull(),
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  category: varchar("category").notNull(), // Farm Design, Technology, Processes, etc.
+  priority: varchar("priority").notNull(), // High, Medium, Low
+  resourceIds: text("resource_ids").array().default([]), // Links to relevant resources
+  estimatedImpact: varchar("estimated_impact"), // High, Medium, Low
+  timeframe: varchar("timeframe"), // Immediate, Short-term, Long-term
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  profileIdx: index("farm_recommendations_profile_idx").on(table.profileId),
+  categoryIdx: index("farm_recommendations_category_idx").on(table.category),
+  priorityIdx: index("farm_recommendations_priority_idx").on(table.priority),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, {
@@ -288,6 +332,37 @@ export const resourcesRelations = relations(resources, ({ many }) => ({
   favorites: many(favorites),
 }));
 
+// Farm Roadmap relations
+export const farmAssessmentsRelations = relations(farmAssessments, ({ one }) => ({
+  user: one(users, {
+    fields: [farmAssessments.userId],
+    references: [users.id],
+  }),
+  profile: one(farmProfiles, {
+    fields: [farmAssessments.id],
+    references: [farmProfiles.assessmentId],
+  }),
+}));
+
+export const farmProfilesRelations = relations(farmProfiles, ({ one, many }) => ({
+  user: one(users, {
+    fields: [farmProfiles.userId],
+    references: [users.id],
+  }),
+  assessment: one(farmAssessments, {
+    fields: [farmProfiles.assessmentId],
+    references: [farmAssessments.id],
+  }),
+  recommendations: many(farmRecommendations),
+}));
+
+export const farmRecommendationsRelations = relations(farmRecommendations, ({ one }) => ({
+  profile: one(farmProfiles, {
+    fields: [farmRecommendations.profileId],
+    references: [farmProfiles.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -357,6 +432,23 @@ export const insertProductsSchema = createInsertSchema(products).omit({
   id: true,
 });
 
+// Farm Roadmap insert schemas
+export const insertFarmAssessmentSchema = createInsertSchema(farmAssessments).omit({
+  id: true,
+  completedAt: true,
+});
+
+export const insertFarmProfileSchema = createInsertSchema(farmProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFarmRecommendationSchema = createInsertSchema(farmRecommendations).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -384,3 +476,11 @@ export type Favorite = typeof favorites.$inferSelect;
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type AnalyticsEvent = typeof analytics_events.$inferSelect;
 export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
+
+// Farm Roadmap types
+export type FarmAssessment = typeof farmAssessments.$inferSelect;
+export type InsertFarmAssessment = z.infer<typeof insertFarmAssessmentSchema>;
+export type FarmProfile = typeof farmProfiles.$inferSelect;
+export type InsertFarmProfile = z.infer<typeof insertFarmProfileSchema>;
+export type FarmRecommendation = typeof farmRecommendations.$inferSelect;
+export type InsertFarmRecommendation = z.infer<typeof insertFarmRecommendationSchema>;

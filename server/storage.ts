@@ -10,6 +10,9 @@ import {
   forumPosts,
   forumComments,
   assessmentTrainingData,
+  farmAssessments,
+  farmProfiles,
+  farmRecommendations,
   type User,
   type InsertUser,
   type Profile,
@@ -32,6 +35,12 @@ import {
   type InsertForumComment,
   type AssessmentTrainingData,
   type InsertAssessmentTrainingData,
+  type FarmAssessment,
+  type InsertFarmAssessment,
+  type FarmProfile,
+  type InsertFarmProfile,
+  type FarmRecommendation,
+  type InsertFarmRecommendation,
   type ResourceType,
   Role
 } from "@shared/schema";
@@ -984,6 +993,97 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAssessmentTrainingData(id: string): Promise<void> {
     await db.delete(assessmentTrainingData).where(eq(assessmentTrainingData.id, id));
+  }
+
+  // Farm Roadmap operations
+  async createFarmAssessment(data: InsertFarmAssessment): Promise<FarmAssessment> {
+    const [assessment] = await db
+      .insert(farmAssessments)
+      .values({
+        id: randomUUID(),
+        ...data,
+      })
+      .returning();
+    return assessment;
+  }
+
+  async getFarmAssessmentsByUser(userId: string): Promise<FarmAssessment[]> {
+    return await db
+      .select()
+      .from(farmAssessments)
+      .where(eq(farmAssessments.userId, userId))
+      .orderBy(desc(farmAssessments.completedAt));
+  }
+
+  async getLatestFarmAssessment(userId: string): Promise<FarmAssessment | null> {
+    const assessments = await db
+      .select()
+      .from(farmAssessments)
+      .where(eq(farmAssessments.userId, userId))
+      .orderBy(desc(farmAssessments.completedAt))
+      .limit(1);
+    return assessments[0] || null;
+  }
+
+  async createFarmProfile(data: InsertFarmProfile): Promise<FarmProfile> {
+    const [profile] = await db
+      .insert(farmProfiles)
+      .values({
+        id: randomUUID(),
+        ...data,
+      })
+      .returning();
+    return profile;
+  }
+
+  async getFarmProfileByUser(userId: string): Promise<FarmProfile | null> {
+    const profiles = await db
+      .select()
+      .from(farmProfiles)
+      .where(eq(farmProfiles.userId, userId))
+      .orderBy(desc(farmProfiles.createdAt))
+      .limit(1);
+    return profiles[0] || null;
+  }
+
+  async getFarmProfileByAssessment(assessmentId: string): Promise<FarmProfile | null> {
+    const profiles = await db
+      .select()
+      .from(farmProfiles)
+      .where(eq(farmProfiles.assessmentId, assessmentId))
+      .limit(1);
+    return profiles[0] || null;
+  }
+
+  async updateFarmProfile(id: string, updates: Partial<FarmProfile>): Promise<FarmProfile> {
+    const [profile] = await db
+      .update(farmProfiles)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(farmProfiles.id, id))
+      .returning();
+    return profile;
+  }
+
+  async createFarmRecommendations(recommendations: InsertFarmRecommendation[]): Promise<FarmRecommendation[]> {
+    if (recommendations.length === 0) return [];
+    
+    const recommendationsWithIds = recommendations.map(rec => ({
+      id: randomUUID(),
+      ...rec,
+    }));
+
+    return await db
+      .insert(farmRecommendations)
+      .values(recommendationsWithIds)
+      .returning();
+  }
+
+  async getFarmRecommendationsByProfile(profileId: string): Promise<FarmRecommendation[]> {
+    return await db
+      .select()
+      .from(farmRecommendations)
+      .where(eq(farmRecommendations.profileId, profileId))
+      .orderBy(desc(farmRecommendations.priority), desc(farmRecommendations.createdAt));
   }
 }
 

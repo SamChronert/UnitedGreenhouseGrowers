@@ -21,6 +21,7 @@ import {
 } from "./auth";
 import { sendEmail } from "./sendgrid";
 import { findGrowerAI, assessmentAI } from "./openai";
+import { calculateFarmProfile, generateRecommendations } from "./farmRoadmapLogic";
 import { 
   insertUserSchema, 
   insertProfileSchema, 
@@ -997,6 +998,87 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     } catch (error) {
       console.error("Assessment AI error:", error);
       res.status(500).json({ message: "Assessment service is currently unavailable. Please try again later." });
+    }
+  });
+
+  // Farm Roadmap API endpoints
+  app.post("/api/farm-roadmap/submit", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const { responses } = req.body;
+      
+      if (!responses || typeof responses !== 'object') {
+        return res.status(400).json({ message: "Assessment responses are required" });
+      }
+      
+      const userId = req.user!.id;
+      
+      // Create assessment record
+      const assessment = await storage.createFarmAssessment({
+        userId,
+        responses,
+      });
+      
+      // Calculate farm profile based on responses
+      const profileData = calculateFarmProfile(responses);
+      
+      // Create farm profile
+      const farmProfile = await storage.createFarmProfile({
+        userId,
+        assessmentId: assessment.id,
+        profileData,
+        strengths: profileData.strengths,
+        improvementAreas: profileData.improvementAreas,
+      });
+      
+      // Generate recommendations
+      const recommendationData = generateRecommendations(profileData, responses);
+      const recommendations = await storage.createFarmRecommendations(
+        recommendationData.map(rec => ({
+          ...rec,
+          profileId: farmProfile.id,
+        }))
+      );
+      
+      res.status(201).json({
+        assessment,
+        profile: farmProfile,
+        recommendations,
+      });
+    } catch (error) {
+      console.error("Farm roadmap submission error:", error);
+      res.status(500).json({ message: "Failed to submit farm roadmap assessment" });
+    }
+  });
+
+  app.get("/api/farm-roadmap/profile", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      const profile = await storage.getFarmProfileByUser(userId);
+      if (!profile) {
+        return res.status(404).json({ message: "No farm profile found" });
+      }
+      
+      const recommendations = await storage.getFarmRecommendationsByProfile(profile.id);
+      
+      res.json({
+        profile,
+        recommendations,
+      });
+    } catch (error) {
+      console.error("Farm profile fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch farm profile" });
+    }
+  });
+
+  app.get("/api/farm-roadmap/assessments", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user!.id;
+      const assessments = await storage.getFarmAssessmentsByUser(userId);
+      res.json(assessments);
+    } catch (error) {
+      console.error("Farm assessments fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch farm assessments" });
     }
   });
 

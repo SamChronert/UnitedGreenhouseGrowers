@@ -10,7 +10,7 @@ const Resources = lazy(() => import("@/pages/Resources"));
 const Forum = lazy(() => import("@/pages/Forum"));
 const SalesHub = lazy(() => import("@/pages/SalesHub"));
 const ProductHub = lazy(() => import("@/pages/ProductHub"));
-const Assessment = lazy(() => import("@/pages/Assessment"));
+const FarmRoadmap = lazy(() => import("@/pages/FarmRoadmap"));
 const FindGrower = lazy(() => import("@/pages/FindGrower"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const ResourceDetail = lazy(() => import("@/pages/ResourceDetail"));
@@ -66,9 +66,16 @@ export default function DashboardWrapper({ isDemo = false }: DashboardWrapperPro
             </LazyWrapper>
           </Route>
           
+          <Route path={`${basePath}/farm-roadmap`}>
+            <LazyWrapper>
+              <FarmRoadmap />
+            </LazyWrapper>
+          </Route>
+          
+          {/* Backward compatibility - redirect old assessment route */}
           <Route path={`${basePath}/assessment`}>
             <LazyWrapper>
-              <Assessment />
+              <FarmRoadmap />
             </LazyWrapper>
           </Route>
           

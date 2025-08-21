@@ -57,11 +57,11 @@ export const features: Feature[] = [
     requiresAuth: false // Available in demo
   },
   {
-    id: "assessment",
-    label: "Farm Assessment",
-    path: "/dashboard/assessment",
+    id: "farm-roadmap",
+    label: "Farm Roadmap",
+    path: "/dashboard/farm-roadmap",
     iconName: "ClipboardList",
-    description: "Assess your farm operation",
+    description: "Get a personalized roadmap for your farm",
     inDevelopment: true,
     requiresAuth: false // Available in demo
   },

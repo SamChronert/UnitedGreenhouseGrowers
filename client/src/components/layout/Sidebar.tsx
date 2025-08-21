@@ -121,9 +121,9 @@ export default function Sidebar({ className }: SidebarProps) {
       icon: Store,
     },
     {
-      id: "assessment",
+      id: "farm-roadmap",
       label: "Farm Roadmap",
-      path: isDemo ? "/demo/assessment" : "/dashboard/assessment",
+      path: isDemo ? "/demo/farm-roadmap" : "/dashboard/farm-roadmap",
       icon: ClipboardList,
     },
     {
