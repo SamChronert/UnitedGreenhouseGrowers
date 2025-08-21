@@ -1,18 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParamState } from "@/hooks/useQueryParams";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ExternalLink, Download, Eye, Copy, FileSpreadsheet, DollarSign, Monitor, Smartphone, Globe, Wrench, FileText, Calculator, Grid3X3, List } from "lucide-react";
+import { ExternalLink, Download, Eye, Copy, FileSpreadsheet, DollarSign, Monitor, Smartphone, Globe, Wrench, FileText, Calculator, ChevronDown, ChevronRight } from "lucide-react";
 import { useResources, Resource, ResourceFilters } from "@/hooks/useResources";
 import SearchBox from "@/components/SearchBox";
 import TemplatePreviewModal from "../TemplatePreviewModal";
 import { trackTabView, trackResourceClick } from "@/lib/analytics";
-import { useToggleView } from "@/hooks/useToggleView";
-import { ToggleGroup } from "@/features/resources/components/ToggleGroup";
 import { useToast } from "@/hooks/use-toast";
 
 interface ToolsTemplatesTabProps {
@@ -53,9 +49,9 @@ const TEMPLATE_CATEGORIES = [
 export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTabProps) {
   const { toast } = useToast();
   
-  // URL state management
-  const [activeSubTab, setActiveSubTab] = useParamState('sub', 'tools');
-  const [viewMode, setViewMode] = useParamState('view', 'list');
+  // State for collapsible sections
+  const [toolsExpanded, setToolsExpanded] = useState(true);
+  const [templatesExpanded, setTemplatesExpanded] = useState(true);
   
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,29 +69,25 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
   // Track tab view on mount
   useEffect(() => {
     trackTabView('tools-templates');
-    onAnalyticsEvent?.('tab_view', { tab: 'tools-templates', sub: activeSubTab });
-  }, [onAnalyticsEvent, activeSubTab]);
+    onAnalyticsEvent?.('tab_view', { tab: 'tools-templates' });
+  }, [onAnalyticsEvent]);
 
   // Data fetching for tools
   const { data: toolsData, isLoading: toolsLoading, error: toolsError } = useResources({
     type: 'tools',
     query: searchQuery,
-    filters: Object.fromEntries(Object.entries(toolFilters).filter(([_, v]) => v && v !== 'all')) as ResourceFilters,
-    enabled: activeSubTab === 'tools'
+    filters: Object.fromEntries(Object.entries(toolFilters).filter(([_, v]) => v && v !== 'all')) as ResourceFilters
   });
 
   // Data fetching for templates
   const { data: templatesData, isLoading: templatesLoading, error: templatesError } = useResources({
     type: 'templates',
     query: searchQuery,
-    filters: Object.fromEntries(Object.entries(templateFilters).filter(([_, v]) => v && v !== 'all')) as ResourceFilters,
-    enabled: activeSubTab === 'templates'
+    filters: Object.fromEntries(Object.entries(templateFilters).filter(([_, v]) => v && v !== 'all')) as ResourceFilters
   });
 
   const tools = toolsData?.items || [];
   const templates = templatesData?.items || [];
-
-  // Sub-tab and view mode changes are now handled by routing
 
   // Handle tool click
   const handleToolClick = useCallback((tool: Resource) => {
@@ -159,7 +151,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
 
   // Handle copy link
   const handleCopyLink = useCallback((template: Resource) => {
-    const shareUrl = `${window.location.origin}${window.location.pathname}?sub=templates&template=${template.id}`;
+    const shareUrl = `${window.location.origin}${window.location.pathname}?template=${template.id}`;
     navigator.clipboard.writeText(shareUrl);
     
     toast({
@@ -195,111 +187,86 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
 
   return (
     <div 
-      key={`tools-${activeSubTab}-${viewMode}`}
       role="tabpanel" 
       id="tools-templates-panel" 
       aria-labelledby="tools-templates-tab"
       className="space-y-6"
     >
-      {/* Sub-tabs */}
-      <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="tools" className="flex items-center gap-2">
-            <Wrench className="h-4 w-4" />
-            Tools
-          </TabsTrigger>
-          <TabsTrigger value="templates" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Templates
-          </TabsTrigger>
-        </TabsList>
+      {/* Search Bar */}
+      <SearchBox
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder="Search tools and templates..."
+        resources={[...tools, ...templates]}
+        resourceType="tools-templates"
+        className="max-w-md"
+      />
 
-        {/* Tools Tab */}
-        <TabsContent value="tools" className="space-y-6">
-          {/* Search and Filters */}
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <SearchBox
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search tools by name or description..."
-                resources={tools}
-                resourceType="tools"
-                className="max-w-md"
-              />
-              
-              {/* View Toggle */}
-              <div className="flex gap-2">
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="flex items-center gap-2"
-                >
-                  <List className="h-4 w-4" />
-                  List
-                </Button>
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="flex items-center gap-2"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                  Grid
-                </Button>
-              </div>
+      {/* Tools Section */}
+      <Collapsible open={toolsExpanded} onOpenChange={setToolsExpanded}>
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className="w-full p-4 justify-between text-lg font-semibold hover:bg-gray-50 border rounded-lg"
+          >
+            <div className="flex items-center gap-3">
+              <Wrench className="h-5 w-5" />
+              Tools ({tools.length})
             </div>
+            {toolsExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent className="space-y-4 mt-4">
+          {/* Tool Filters */}
+          <div className="flex flex-wrap gap-4">
+            <Select
+              value={toolFilters.category}
+              onValueChange={(value) => setToolFilters(prev => ({ ...prev, category: value }))}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {TOOL_CATEGORIES.map(cat => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             
-            <div className="flex flex-wrap gap-4">
-              <Select
-                value={toolFilters.category}
-                onValueChange={(value) => setToolFilters(prev => ({ ...prev, category: value }))}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {TOOL_CATEGORIES.map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Select
-                value={toolFilters.platform}
-                onValueChange={(value) => setToolFilters(prev => ({ ...prev, platform: value }))}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Platform" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Platforms</SelectItem>
-                  {PLATFORMS.map(platform => (
-                    <SelectItem key={platform} value={platform}>{platform}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Select
-                value={toolFilters.costType}
-                onValueChange={(value) => setToolFilters(prev => ({ ...prev, costType: value }))}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Cost Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Cost Types</SelectItem>
-                  {COST_TYPES.map(cost => (
-                    <SelectItem key={cost} value={cost}>{cost}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Select
+              value={toolFilters.platform}
+              onValueChange={(value) => setToolFilters(prev => ({ ...prev, platform: value }))}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Platform" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Platforms</SelectItem>
+                {PLATFORMS.map(platform => (
+                  <SelectItem key={platform} value={platform}>{platform}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Select
+              value={toolFilters.costType}
+              onValueChange={(value) => setToolFilters(prev => ({ ...prev, costType: value }))}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Cost Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Cost Types</SelectItem>
+                {COST_TYPES.map(cost => (
+                  <SelectItem key={cost} value={cost}>{cost}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          {/* Tools Grid */}
+          {/* Tools List */}
           {toolsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -315,73 +282,39 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
               ))}
             </div>
           ) : (
-            viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {tools.map(tool => (
-                  <Card key={tool.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleToolClick(tool)}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <Calculator className="h-6 w-6 text-blue-600" />
-                          </div>
-                          <div>
-                            <CardTitle className="text-lg">{tool.title}</CardTitle>
-                            <div className="flex items-center gap-2 mt-1">
-                              {getPlatformIcon(tool.data?.platform || 'Web')}
-                              <span className="text-sm text-gray-600">{tool.data?.platform || 'Web'}</span>
-                            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tools.map(tool => (
+                <Card key={tool.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleToolClick(tool)}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <Calculator className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{tool.title}</CardTitle>
+                          <div className="flex items-center gap-2 mt-1">
+                            {getPlatformIcon(tool.data?.platform || 'Web')}
+                            <span className="text-sm text-gray-600">{tool.data?.platform || 'Web'}</span>
                           </div>
                         </div>
-                        <ExternalLink className="h-4 w-4 text-gray-400" />
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-600 mb-4 line-clamp-3">{tool.summary}</p>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline">{tool.data?.category || 'General'}</Badge>
-                        <Badge variant={getCostBadgeVariant(tool.data?.costType)}>
-                          <DollarSign className="h-3 w-3 mr-1" />
-                          {tool.data?.costType || 'Unknown'}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {tools.map(tool => (
-                  <Card key={tool.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleToolClick(tool)}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 flex-1">
-                          <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                            <Calculator className="h-5 w-5 text-blue-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 truncate">{tool.title}</h3>
-                            <p className="text-sm text-gray-600 line-clamp-1 mt-1">{tool.summary}</p>
-                            <div className="flex items-center gap-3 mt-2">
-                              <div className="flex items-center gap-1 text-xs text-gray-500">
-                                {getPlatformIcon(tool.data?.platform || 'Web')}
-                                <span>{tool.data?.platform || 'Web'}</span>
-                              </div>
-                              <Badge variant="outline" className="text-xs">{tool.data?.category || 'General'}</Badge>
-                              <Badge variant={getCostBadgeVariant(tool.data?.costType)} className="text-xs">
-                                <DollarSign className="h-3 w-3 mr-1" />
-                                {tool.data?.costType || 'Unknown'}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                        <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )
+                      <ExternalLink className="h-4 w-4 text-gray-400" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{tool.summary}</p>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline">{tool.data?.category || 'General'}</Badge>
+                      <Badge variant={getCostBadgeVariant(tool.data?.costType)}>
+                        <DollarSign className="h-3 w-3 mr-1" />
+                        {tool.data?.costType || 'Unknown'}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
           
           {!toolsLoading && tools.length === 0 && (
@@ -391,62 +324,42 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
               <p className="text-gray-600">Try adjusting your search or filters.</p>
             </div>
           )}
-        </TabsContent>
+        </CollapsibleContent>
+      </Collapsible>
 
-        {/* Templates Tab */}
-        <TabsContent value="templates" className="space-y-6">
-          {/* Search and Filters */}
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <SearchBox
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search templates by name or description..."
-                resources={templates}
-                resourceType="templates"
-                className="max-w-md"
-              />
-              
-              {/* View Toggle */}
-              <div className="flex gap-2">
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="flex items-center gap-2"
-                >
-                  <List className="h-4 w-4" />
-                  List
-                </Button>
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="flex items-center gap-2"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                  Grid
-                </Button>
-              </div>
+      {/* Templates Section */}
+      <Collapsible open={templatesExpanded} onOpenChange={setTemplatesExpanded}>
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className="w-full p-4 justify-between text-lg font-semibold hover:bg-gray-50 border rounded-lg"
+          >
+            <div className="flex items-center gap-3">
+              <FileText className="h-5 w-5" />
+              Templates ({templates.length})
             </div>
-            
-            <Select
-              value={templateFilters.category}
-              onValueChange={(value) => setTemplateFilters(prev => ({ ...prev, category: value }))}
-            >
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {TEMPLATE_CATEGORIES.map(cat => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            {templatesExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent className="space-y-4 mt-4">
+          {/* Template Filters */}
+          <Select
+            value={templateFilters.category}
+            onValueChange={(value) => setTemplateFilters(prev => ({ ...prev, category: value }))}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {TEMPLATE_CATEGORIES.map(cat => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          {/* Templates Gallery */}
+          {/* Templates List */}
           {templatesLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -461,7 +374,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                 </Card>
               ))}
             </div>
-          ) : viewMode === 'grid' ? (
+          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {templates.map(template => (
                 <Card key={template.id} className="hover:shadow-lg transition-shadow">
@@ -535,60 +448,6 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                 </Card>
               ))}
             </div>
-          ) : (
-            <div className="space-y-3">
-              {templates.map(template => (
-                <Card key={template.id} className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
-                          <FileSpreadsheet className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 truncate">{template.title}</h3>
-                          <p className="text-sm text-gray-600 line-clamp-1 mt-1">{template.summary}</p>
-                          <div className="flex items-center gap-3 mt-2">
-                            <Badge variant="outline" className="text-xs">
-                              {template.data?.category || 'General'}
-                            </Badge>
-                            {template.data?.language && (
-                              <span className="text-xs text-gray-500">
-                                Language: {template.data.language}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleTemplatePreview(template);
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {template.data?.fileRefs?.csv && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleTemplateDownload(template, 'csv');
-                            }}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           )}
           
           {!templatesLoading && templates.length === 0 && (
@@ -598,21 +457,20 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
               <p className="text-gray-600">Try adjusting your search or filters.</p>
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Template Preview Modal */}
       {selectedTemplate && (
         <TemplatePreviewModal
           template={selectedTemplate}
-          open={previewModalOpen}
+          isOpen={previewModalOpen}
           onClose={() => {
             setPreviewModalOpen(false);
             setSelectedTemplate(null);
           }}
-          onDownload={handleTemplateDownload}
-          onGoogleSheetsOpen={handleGoogleSheetsOpen}
-          onCopyLink={handleCopyLink}
+          onDownload={(format) => handleTemplateDownload(selectedTemplate, format)}
+          onGoogleSheetsOpen={() => handleGoogleSheetsOpen(selectedTemplate)}
         />
       )}
     </div>
