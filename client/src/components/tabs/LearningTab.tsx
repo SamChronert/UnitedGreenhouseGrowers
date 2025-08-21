@@ -1,16 +1,14 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useParamState } from '@/hooks/useQueryParams';
 import { useResources } from '@/hooks/useResources';
 import SearchBox from '@/components/SearchBox';
 import { type Resource, type ResourceFilters } from '@/hooks/useResources';
 import { trackTabView, trackResourceClick } from '@/lib/analytics';
-import { useToggleView } from '@/hooks/useToggleView';
-import { ToggleGroup } from '@/features/resources/components/ToggleGroup';
 import { 
   GraduationCap, 
   Clock, 
@@ -23,7 +21,9 @@ import {
   Grid3X3,
   List,
   ExternalLink,
-  Loader2
+  Loader2,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 
 interface LearningTabProps {
@@ -44,16 +44,12 @@ const COST_TYPES = [
   'Freemium'
 ];
 
-const LEVELS = [
-  'Beginner',
-  'Intermediate', 
-  'Advanced'
-];
-
-const FORMATS = [
-  'Online',
-  'In-person',
-  'Hybrid'
+// Format categories as specified in requirements
+const FORMAT_CATEGORIES = [
+  'Online Courses',
+  'Certifications', 
+  'Workshops',
+  'Webinars'
 ];
 
 
@@ -65,9 +61,20 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     category: 'all',
-    costType: 'all',
-    level: 'all',
-    format: 'all'
+    costType: 'all'
+  });
+  
+  // Expanded sections state
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
+    const saved = localStorage.getItem('ugga-learning-sections-expanded');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return { [FORMAT_CATEGORIES[0]]: true };
+      }
+    }
+    return { [FORMAT_CATEGORIES[0]]: true };
   });
 
   // Track tab view on mount
@@ -84,6 +91,53 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
   });
 
   const courses = data?.items || [];
+  
+  // Group courses by format
+  const groupedCourses = useMemo(() => {
+    const groups: Record<string, Resource[]> = {};
+    
+    // Initialize all groups
+    FORMAT_CATEGORIES.forEach(format => {
+      groups[format] = [];
+    });
+    
+    // Group courses by their format
+    courses.forEach(course => {
+      const format = course.data?.format || course.data?.type;
+      let targetGroup = 'Online Courses'; // default
+      
+      // Map course format/type to our categories
+      if (format) {
+        const formatLower = format.toLowerCase();
+        if (formatLower.includes('certification') || formatLower.includes('certificate')) {
+          targetGroup = 'Certifications';
+        } else if (formatLower.includes('workshop')) {
+          targetGroup = 'Workshops';
+        } else if (formatLower.includes('webinar')) {
+          targetGroup = 'Webinars';
+        } else if (formatLower.includes('online') || formatLower.includes('course')) {
+          targetGroup = 'Online Courses';
+        }
+      }
+      
+      groups[targetGroup].push(course);
+    });
+    
+    return groups;
+  }, [courses]);
+  
+  // Save expanded sections to localStorage
+  useEffect(() => {
+    localStorage.setItem('ugga-learning-sections-expanded', JSON.stringify(expandedSections));
+  }, [expandedSections]);
+  
+  // Toggle section expanded state
+  const toggleSection = useCallback((format: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [format]: !prev[format]
+    }));
+  }, []);
 
   // View mode changes are now handled by routing
 
@@ -131,13 +185,6 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
       aria-labelledby="learning-tab"
       className="space-y-6"
     >
-      {/* Header */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h2 className="text-lg font-semibold text-blue-900 mb-2">Learning & Development</h2>
-        <p className="text-blue-800">
-          Expand your greenhouse expertise with courses, certifications, and training resources from leading institutions.
-        </p>
-      </div>
 
       {/* Search and Filters */}
       <div className="space-y-4">
@@ -205,35 +252,6 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
             </SelectContent>
           </Select>
           
-          <Select
-            value={filters.level}
-            onValueChange={(value) => setFilters(prev => ({ ...prev, level: value }))}
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Level" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Levels</SelectItem>
-              {LEVELS.map(level => (
-                <SelectItem key={level} value={level}>{level}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Select
-            value={filters.format}
-            onValueChange={(value) => setFilters(prev => ({ ...prev, format: value }))}
-          >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Format" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Formats</SelectItem>
-              {FORMATS.map(format => (
-                <SelectItem key={format} value={format}>{format}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           
         </div>
       </div>
@@ -241,18 +259,18 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
       {/* Results Count */}
       {!isLoading && (
         <div className="text-sm text-gray-600">
-          {courses.length} {courses.length === 1 ? 'course' : 'courses'} found
+          {courses.length} {courses.length === 1 ? 'learning resource' : 'learning resources'} found
         </div>
       )}
 
       {/* Content */}
       {isLoading ? (
-        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
+        <div className="space-y-4">
+          {FORMAT_CATEGORIES.map((format) => (
+            <Card key={format} className="animate-pulse">
               <CardContent className="p-6">
                 <div className="space-y-4">
-                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-6 bg-gray-200 rounded w-1/3"></div>
                   <div className="h-4 bg-gray-200 rounded w-full"></div>
                   <div className="h-4 bg-gray-200 rounded w-2/3"></div>
                 </div>
@@ -263,163 +281,209 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
       ) : error ? (
         <div className="text-center py-12">
           <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load courses</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Unable to load learning resources</h3>
           <p className="text-gray-600">Please check your connection and try again.</p>
         </div>
       ) : courses.length === 0 ? (
         <div className="text-center py-12">
           <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No learning resources found</h3>
           <p className="text-gray-600">Try adjusting your search or filters to find learning resources.</p>
         </div>
       ) : (
-        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
-          {courses.map(course => (
-            <Card 
-              key={course.id} 
-              className={`hover:shadow-lg transition-shadow cursor-pointer ${
-                viewMode === 'list' ? 'flex' : ''
-              }`}
-              onClick={() => handleCourseClick(course)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleCourseClick(course);
-                }
-              }}
-              tabIndex={0}
-              role="button"
-              aria-label={`View details for ${course.title}`}
-            >
-              {viewMode === 'grid' ? (
-                <>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
+        <div className="space-y-6">
+          {FORMAT_CATEGORIES.map((format) => {
+            const sectionCourses = groupedCourses[format] || [];
+            
+            // Only show sections that have courses
+            if (sectionCourses.length === 0) {
+              return null;
+            }
+            
+            return (
+              <Collapsible
+                key={format}
+                open={expandedSections[format] || false}
+                onOpenChange={() => toggleSection(format)}
+              >
+                <Card>
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full p-6 justify-between hover:bg-gray-50"
+                    >
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <GraduationCap className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <CardTitle className="text-lg line-clamp-2">{course.title}</CardTitle>
-                          <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
-                            <Users className="h-4 w-4" />
-                            <span>{course.data?.provider || 'Provider'}</span>
-                          </div>
-                        </div>
+                        {expandedSections[format] ? (
+                          <ChevronDown className="h-5 w-5 text-gray-600" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 text-gray-600" />
+                        )}
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {format}
+                        </h3>
+                        <Badge variant="secondary">
+                          {sectionCourses.length}
+                        </Badge>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    </div>
-                  </CardHeader>
+                    </Button>
+                  </CollapsibleTrigger>
                   
-                  <CardContent>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                      {course.summary || 'Course description not available.'}
-                    </p>
-                    
-                    <div className="space-y-3">
-                      {/* Badges */}
-                      <div className="flex flex-wrap gap-2">
-                        {course.data?.level && (
-                          <Badge variant={getLevelBadgeVariant(course.data.level)}>
-                            {course.data.level}
-                          </Badge>
-                        )}
-                        {course.data?.costType && (
-                          <Badge variant={getCostBadgeVariant(course.data.costType)}>
-                            {course.data.costType}
-                          </Badge>
-                        )}
-                        {course.data?.format && (
-                          <Badge variant="outline">
-                            {course.data.format === 'Online' ? <Globe className="h-3 w-3 mr-1" /> : 
-                             course.data.format === 'In-person' ? <MapPin className="h-3 w-3 mr-1" /> :
-                             <Globe className="h-3 w-3 mr-1" />}
-                            {course.data.format}
-                          </Badge>
-                        )}
-                      </div>
-                      
-                      {/* Course details */}
-                      <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                        {course.data?.duration && (
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            <span>{course.data.duration}</span>
-                          </div>
-                        )}
-                        {course.data?.priceTypical && (
-                          <div className="flex items-center gap-1">
-                            <DollarSign className="h-3 w-3" />
-                            <span>{course.data.priceTypical}</span>
-                          </div>
-                        )}
-                        {course.data?.credential && (
-                          <div className="flex items-center gap-1">
-                            <Award className="h-3 w-3" />
-                            <span>{course.data.credential}</span>
-                          </div>
-                        )}
-                        {course.data?.languages && course.data.languages.length > 0 && (
-                          <div className="flex items-center gap-1">
-                            <Globe className="h-3 w-3" />
-                            <span>{course.data.languages.join(', ')}</span>
-                          </div>
-                        )}
+                  <CollapsibleContent>
+                    <div className="px-6 pb-6">
+                      <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
+                        {sectionCourses.map(course => (
+                          <Card 
+                            key={course.id} 
+                            className={`hover:shadow-lg transition-shadow cursor-pointer ${
+                              viewMode === 'list' ? 'flex' : ''
+                            }`}
+                            onClick={() => handleCourseClick(course)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handleCourseClick(course);
+                              }
+                            }}
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`View details for ${course.title}`}
+                          >
+                            {viewMode === 'grid' ? (
+                              <>
+                                <CardHeader>
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-3">
+                                      <div className="p-2 bg-blue-100 rounded-lg">
+                                        <GraduationCap className="h-6 w-6 text-blue-600" />
+                                      </div>
+                                      <div className="flex-1">
+                                        <CardTitle className="text-lg line-clamp-2">{course.title}</CardTitle>
+                                        <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                                          <Users className="h-4 w-4" />
+                                          <span>{course.data?.provider || 'Provider'}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                  </div>
+                                </CardHeader>
+                                
+                                <CardContent>
+                                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                                    {course.summary || 'Course description not available.'}
+                                  </p>
+                                  
+                                  <div className="space-y-3">
+                                    {/* Badges */}
+                                    <div className="flex flex-wrap gap-2">
+                                      {course.data?.level && (
+                                        <Badge variant={getLevelBadgeVariant(course.data.level)}>
+                                          {course.data.level}
+                                        </Badge>
+                                      )}
+                                      {course.data?.costType && (
+                                        <Badge variant={getCostBadgeVariant(course.data.costType)}>
+                                          {course.data.costType}
+                                        </Badge>
+                                      )}
+                                      {course.data?.format && (
+                                        <Badge variant="outline">
+                                          {course.data.format === 'Online' ? <Globe className="h-3 w-3 mr-1" /> : 
+                                           course.data.format === 'In-person' ? <MapPin className="h-3 w-3 mr-1" /> :
+                                           <Globe className="h-3 w-3 mr-1" />}
+                                          {course.data.format}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    
+                                    {/* Course details */}
+                                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                                      {course.data?.duration && (
+                                        <div className="flex items-center gap-1">
+                                          <Clock className="h-3 w-3" />
+                                          <span>{course.data.duration}</span>
+                                        </div>
+                                      )}
+                                      {course.data?.priceTypical && (
+                                        <div className="flex items-center gap-1">
+                                          <DollarSign className="h-3 w-3" />
+                                          <span>{course.data.priceTypical}</span>
+                                        </div>
+                                      )}
+                                      {course.data?.credential && (
+                                        <div className="flex items-center gap-1">
+                                          <Award className="h-3 w-3" />
+                                          <span>{course.data.credential}</span>
+                                        </div>
+                                      )}
+                                      {course.data?.languages && course.data.languages.length > 0 && (
+                                        <div className="flex items-center gap-1">
+                                          <Globe className="h-3 w-3" />
+                                          <span>{course.data.languages.join(', ')}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </>
+                            ) : (
+                              <div className="flex-1 p-6">
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <div className="p-2 bg-blue-100 rounded-lg">
+                                        <GraduationCap className="h-5 w-5 text-blue-600" />
+                                      </div>
+                                      <div>
+                                        <h3 className="text-lg font-semibold">{course.title}</h3>
+                                        <p className="text-sm text-gray-600">{course.data?.provider || 'Provider'}</p>
+                                      </div>
+                                    </div>
+                                    
+                                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                                      {course.summary || 'Course description not available.'}
+                                    </p>
+                                    
+                                    <div className="flex flex-wrap gap-2">
+                                      {course.data?.level && (
+                                        <Badge variant={getLevelBadgeVariant(course.data.level)} className="text-xs">
+                                          {course.data.level}
+                                        </Badge>
+                                      )}
+                                      {course.data?.costType && (
+                                        <Badge variant={getCostBadgeVariant(course.data.costType)} className="text-xs">
+                                          {course.data.costType}
+                                        </Badge>
+                                      )}
+                                      {course.data?.format && (
+                                        <Badge variant="outline" className="text-xs">
+                                          {course.data.format}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex flex-col items-end gap-2 ml-4">
+                                    <ExternalLink className="h-4 w-4 text-gray-400" />
+                                    {course.data?.duration && (
+                                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                                        <Clock className="h-3 w-3" />
+                                        <span>{course.data.duration}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </Card>
+                        ))}
                       </div>
                     </div>
-                  </CardContent>
-                </>
-              ) : (
-                <div className="flex-1 p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <GraduationCap className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold">{course.title}</h3>
-                          <p className="text-sm text-gray-600">{course.data?.provider || 'Provider'}</p>
-                        </div>
-                      </div>
-                      
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                        {course.summary || 'Course description not available.'}
-                      </p>
-                      
-                      <div className="flex flex-wrap gap-2">
-                        {course.data?.level && (
-                          <Badge variant={getLevelBadgeVariant(course.data.level)} className="text-xs">
-                            {course.data.level}
-                          </Badge>
-                        )}
-                        {course.data?.costType && (
-                          <Badge variant={getCostBadgeVariant(course.data.costType)} className="text-xs">
-                            {course.data.costType}
-                          </Badge>
-                        )}
-                        {course.data?.format && (
-                          <Badge variant="outline" className="text-xs">
-                            {course.data.format}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col items-end gap-2 ml-4">
-                      <ExternalLink className="h-4 w-4 text-gray-400" />
-                      {course.data?.duration && (
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
-                          <Clock className="h-3 w-3" />
-                          <span>{course.data.duration}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </Card>
-          ))}
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            );
+          })}
         </div>
       )}
     </div>

@@ -1,28 +1,56 @@
+import { DismissibleInfo } from "@/components/ui/dismissible-info";
+
 interface TabIntroProps {
   activeTab: string;
 }
 
-const TAB_DESCRIPTIONS: Record<string, string> = {
-  'universities': 'Research universities and extension programs providing greenhouse and controlled environment agriculture expertise.',
-  'organizations': 'Professional associations, industry groups, and non-profit organizations supporting greenhouse growers.',
-  'grants': 'Federal, state, and private funding opportunities for greenhouse operations, research, and infrastructure improvements.',
-  'tax-incentives': 'Tax credits, deductions, and incentive programs available to greenhouse and agricultural operations.',
-  'tools-templates': 'Software tools, calculators, templates, and digital resources for greenhouse management and planning.',
-  'learning': 'Educational courses, certifications, webinars, and training programs for greenhouse professionals.',
-  'blogs-bulletins': 'Extension bulletins, research publications, and expert blogs covering greenhouse best practices.',
-  'industry-news': 'Latest news, market updates, and industry developments affecting the greenhouse sector.'
+const TAB_POPUPS: Record<string, { message: string; variant?: "info" | "success" | "warning" }> = {
+  'tools-templates': {
+    message: 'Tools & Templates for Greenhouse Operations - Discover software tools and downloadable templates to help streamline your greenhouse business operations.',
+    variant: 'info'
+  },
+  'universities': {
+    message: 'Research universities and extension programs providing greenhouse and controlled environment agriculture expertise.',
+    variant: 'info'
+  },
+  'organizations': {
+    message: 'Professional associations, industry groups, and non-profit organizations supporting greenhouse growers.',
+    variant: 'info'
+  },
+  'learning': {
+    message: 'Expand your greenhouse expertise with courses, certifications, and training resources.',
+    variant: 'info'
+  },
+  'grants': {
+    message: 'Federal, state, and private funding opportunities for greenhouse operations, research, and infrastructure improvements.',
+    variant: 'info'
+  },
+  'blogs-bulletins': {
+    message: 'Extension bulletins, research publications, and expert blogs covering greenhouse best practices.',
+    variant: 'info'
+  },
+  'industry-news': {
+    message: 'Connect with trusted greenhouse industry news sources and publications.',
+    variant: 'info'
+  },
+  'tax-incentives': {
+    message: 'Tax credits, deductions, and incentive programs available to greenhouse and agricultural operations.',
+    variant: 'info'
+  }
 };
 
 export default function TabIntro({ activeTab }: TabIntroProps) {
-  const description = TAB_DESCRIPTIONS[activeTab] || '';
+  const popup = TAB_POPUPS[activeTab];
   
-  if (!description) return null;
+  if (!popup) return null;
   
   return (
-    <div className="mb-6">
-      <p className="text-gray-600 text-base leading-relaxed max-w-4xl">
-        {description}
-      </p>
-    </div>
+    <DismissibleInfo
+      id={`tab-intro-${activeTab}`}
+      variant={popup.variant}
+      showDontShowAgain={true}
+    >
+      {popup.message}
+    </DismissibleInfo>
   );
 }

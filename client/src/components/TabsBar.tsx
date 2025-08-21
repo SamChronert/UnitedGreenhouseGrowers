@@ -14,7 +14,7 @@ const TABS: Tab[] = [
   { id: 'organizations', label: 'Organizations', slug: 'organizations' },
   { id: 'learning', label: 'Learning', slug: 'learning' },
   { id: 'grants', label: 'Grants', slug: 'grants' },
-  { id: 'blogs-bulletins', label: 'Blogs & Bulletins', slug: 'blogs-bulletins' },
+  { id: 'blogs-bulletins', label: 'Extension & Articles', slug: 'blogs-bulletins' },
   { id: 'industry-news', label: 'Industry News', slug: 'industry-news' },
   { id: 'tax-incentives', label: 'Tax Incentives', slug: 'tax-incentives' }
 ];
