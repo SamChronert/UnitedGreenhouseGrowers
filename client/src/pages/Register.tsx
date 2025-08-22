@@ -24,7 +24,7 @@ const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(12, "Password must be at least 12 characters"),
-  phone: z.string().min(10, "Phone number is required"),
+  phone: z.string().optional(),
   state: z.string().min(1, "State is required"),
   employer: z.string().optional(),
   jobTitle: z.string().optional(),
@@ -162,7 +162,6 @@ export default function Register() {
     { id: 'memberType', title: 'Choose Membership Type' },
     { id: 'basicInfo', title: 'Tell Us About Yourself' },
     { id: 'password', title: 'Secure Your Account' },
-    { id: 'contact', title: 'How Can We Reach You?' },
     ...(watchedMemberType === 'grower' ? [{ id: 'growerInfo', title: 'Your Growing Operation' }] : []),
     { id: 'confirmation', title: 'Welcome to the Community!' }
   ];
@@ -374,60 +373,13 @@ export default function Register() {
                   <p className="text-sm text-red-600">{form.formState.errors.email.message}</p>
                 )}
               </div>
-            </div>
-          </div>
-        );
-
-      case 'password':
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Secure Your Account</h2>
-              <p className="text-gray-600">Create a strong password to protect your account</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password *</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  {...form.register("password")}
-                  placeholder="Enter a secure password"
-                  className="pr-10"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-              {form.formState.errors.password && (
-                <p className="text-sm text-red-600">{form.formState.errors.password.message}</p>
-              )}
-              <p className="text-sm text-gray-500">Password must be at least 12 characters long</p>
-            </div>
-          </div>
-        );
-
-      case 'contact':
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">How Can We Reach You?</h2>
-              <p className="text-gray-600">We'll use this information to connect you with local growers</p>
-            </div>
-            <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number *</Label>
+                <Label htmlFor="phone">Phone Number</Label>
                 <Input
                   id="phone"
                   type="tel"
                   {...form.register("phone")}
-                  placeholder="(555) 123-4567"
+                  placeholder="(555) 123-4567 (optional)"
                 />
                 {form.formState.errors.phone && (
                   <p className="text-sm text-red-600">{form.formState.errors.phone.message}</p>
@@ -470,6 +422,42 @@ export default function Register() {
             </div>
           </div>
         );
+
+      case 'password':
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Secure Your Account</h2>
+              <p className="text-gray-600">Create a strong password to protect your account</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password *</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  {...form.register("password")}
+                  placeholder="Enter a secure password"
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+              {form.formState.errors.password && (
+                <p className="text-sm text-red-600">{form.formState.errors.password.message}</p>
+              )}
+              <p className="text-sm text-gray-500">Password must be at least 12 characters long</p>
+            </div>
+          </div>
+        );
+
 
       case 'growerInfo':
         return (
