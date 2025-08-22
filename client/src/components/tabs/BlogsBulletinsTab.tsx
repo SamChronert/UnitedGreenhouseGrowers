@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -69,6 +70,8 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
     source: 'all',
     topicTag: 'all'
   });
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [resourceModalOpen, setResourceModalOpen] = useState(false);
 
   // Track tab view on mount
   useEffect(() => {
@@ -110,6 +113,8 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
 
   // Handle bulletin click
   const handleBulletinClick = useCallback((bulletin: Resource) => {
+    setSelectedResource(bulletin);
+    setResourceModalOpen(true);
     trackResourceClick(bulletin.id, 'bulletin', bulletin.title);
     onAnalyticsEvent?.('bulletin_click', {
       bulletin_id: bulletin.id,
@@ -117,9 +122,23 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
       source: (bulletin.data as any)?.source || 'Unknown',
       topic_tags: (bulletin.data as any)?.topicTags || []
     });
-    
-    if (bulletin.url || (bulletin.data && 'url' in bulletin.data && bulletin.data.url)) {
-      window.open(bulletin.url || (bulletin.data as any).url, '_blank');
+  }, [onAnalyticsEvent]);
+
+  // Handle modal close
+  const handleModalClose = useCallback(() => {
+    setResourceModalOpen(false);
+    setSelectedResource(null);
+  }, []);
+
+  // Handle external link click from modal
+  const handleExternalLinkClick = useCallback((resource: Resource) => {
+    if (resource.url || (resource.data && 'url' in resource.data && resource.data.url)) {
+      window.open(resource.url || (resource.data as any).url, '_blank');
+      onAnalyticsEvent?.('bulletin_external_click', {
+        resource_id: resource.id,
+        resource_type: 'bulletin',
+        resource_title: resource.title
+      });
     }
   }, [onAnalyticsEvent]);
 
@@ -471,6 +490,71 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Bulletin Details Modal */}
+      <Dialog open={resourceModalOpen} onOpenChange={setResourceModalOpen}>
+        <DialogContent className="max-w-2xl z-[1000]">
+          {selectedResource && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <FileText className="h-6 w-6 text-blue-600" />
+                  {selectedResource.title}
+                </DialogTitle>
+                <DialogDescription className="flex items-center gap-2">
+                  {selectedResource.data?.source && (
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Building className="h-3 w-3" />
+                      {selectedResource.data.source}
+                    </Badge>
+                  )}
+                  {selectedResource.data?.publishedAt && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {formatDate(selectedResource.data.publishedAt)}
+                    </Badge>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
+                  <p className="text-gray-700">
+                    {selectedResource.summary || 'No description available.'}
+                  </p>
+                </div>
+                
+                {selectedResource.data?.topicTags && selectedResource.data.topicTags.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Topics</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedResource.data.topicTags.map((tag: string, index: number) => (
+                        <Badge key={index} variant="outline" className="flex items-center gap-1">
+                          <Tag className="h-3 w-3" />
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  {(selectedResource.url || (selectedResource.data && 'url' in selectedResource.data)) && (
+                    <Button 
+                      onClick={() => handleExternalLinkClick(selectedResource)}
+                      className="flex-1"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      View Bulletin
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

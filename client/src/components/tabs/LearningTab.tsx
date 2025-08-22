@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useParamState } from '@/hooks/useQueryParams';
@@ -63,6 +64,8 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
     category: 'all',
     costType: 'all'
   });
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [resourceModalOpen, setResourceModalOpen] = useState(false);
   
   // Expanded sections state
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() => {
@@ -91,6 +94,36 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
   });
 
   const courses = data?.items || [];
+
+  // Handle resource click for modal
+  const handleResourceClick = useCallback((resource: Resource) => {
+    setSelectedResource(resource);
+    setResourceModalOpen(true);
+    trackResourceClick(resource.id, 'learning', resource.title);
+    onAnalyticsEvent?.('resource_open', {
+      resource_id: resource.id,
+      resource_type: 'learning',
+      resource_title: resource.title
+    });
+  }, [onAnalyticsEvent]);
+
+  // Handle modal close
+  const handleModalClose = useCallback(() => {
+    setResourceModalOpen(false);
+    setSelectedResource(null);
+  }, []);
+
+  // Handle external link click from modal
+  const handleExternalLinkClick = useCallback((resource: Resource) => {
+    if (resource.url) {
+      window.open(resource.url, '_blank', 'noopener,noreferrer');
+      onAnalyticsEvent?.('learning_external_click', {
+        resource_id: resource.id,
+        resource_type: 'learning',
+        resource_title: resource.title
+      });
+    }
+  }, [onAnalyticsEvent]);
   
   // Group courses by format
   const groupedCourses = useMemo(() => {
@@ -329,11 +362,11 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
                             className={`hover:shadow-lg transition-shadow cursor-pointer ${
                               viewMode === 'list' ? 'flex' : ''
                             }`}
-                            onClick={() => handleCourseClick(course)}
+                            onClick={() => handleResourceClick(course)}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
-                                handleCourseClick(course);
+                                handleResourceClick(course);
                               }
                             }}
                             tabIndex={0}
@@ -478,6 +511,78 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
           })}
         </div>
       )}
+
+      {/* Learning Resource Details Modal */}
+      <Dialog open={resourceModalOpen} onOpenChange={setResourceModalOpen}>
+        <DialogContent className="max-w-2xl z-[1000]">
+          {selectedResource && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <GraduationCap className="h-6 w-6 text-blue-600" />
+                  {selectedResource.title}
+                </DialogTitle>
+                <DialogDescription className="flex items-center gap-2">
+                  {selectedResource.data?.provider && (
+                    <Badge variant="outline">
+                      {selectedResource.data.provider}
+                    </Badge>
+                  )}
+                  {selectedResource.data?.level && (
+                    <Badge variant="secondary">
+                      {selectedResource.data.level}
+                    </Badge>
+                  )}
+                  {selectedResource.data?.costType && (
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <DollarSign className="h-3 w-3" />
+                      {selectedResource.data.costType}
+                    </Badge>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
+                  <p className="text-gray-700">
+                    {selectedResource.summary || 'No description available.'}
+                  </p>
+                </div>
+                
+                {selectedResource.data?.duration && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Duration</h4>
+                    <p className="text-gray-700 flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      {selectedResource.data.duration}
+                    </p>
+                  </div>
+                )}
+                
+                {selectedResource.data?.format && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Format</h4>
+                    <Badge variant="outline">{selectedResource.data.format}</Badge>
+                  </div>
+                )}
+                
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  {selectedResource.url && (
+                    <Button 
+                      onClick={() => handleExternalLinkClick(selectedResource)}
+                      className="flex-1"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Access Course
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -70,6 +71,8 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
   const [selectedOrgTypes, setSelectedOrgTypes] = useState<string[]>([]);
   const [selectedStates, setSelectedStates] = useState<string[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [resourceModalOpen, setResourceModalOpen] = useState(false);
 
   // Track tab view on mount
   useEffect(() => {
@@ -147,12 +150,32 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
 
   // Handle grant click
   const handleGrantClick = useCallback((grant: Resource) => {
+    setSelectedResource(grant);
+    setResourceModalOpen(true);
     trackResourceClick(grant.id, 'grant', grant.title);
     onAnalyticsEvent?.('resource_open', {
       resource_id: grant.id,
       resource_type: 'grant',
       resource_title: grant.title
     });
+  }, [onAnalyticsEvent]);
+
+  // Handle modal close
+  const handleModalClose = useCallback(() => {
+    setResourceModalOpen(false);
+    setSelectedResource(null);
+  }, []);
+
+  // Handle external link click from modal
+  const handleExternalLinkClick = useCallback((grant: Resource) => {
+    if (grant.url) {
+      window.open(grant.url, '_blank', 'noopener,noreferrer');
+      onAnalyticsEvent?.('grant_external_click', {
+        resource_id: grant.id,
+        resource_type: 'grant',
+        resource_title: grant.title
+      });
+    }
   }, [onAnalyticsEvent]);
 
   // Handle column sort
@@ -599,6 +622,92 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
           )}
         </div>
       )}
+
+      {/* Grant Details Modal */}
+      <Dialog open={resourceModalOpen} onOpenChange={setResourceModalOpen}>
+        <DialogContent className="max-w-2xl z-[1000]">
+          {selectedResource && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <DollarSign className="h-6 w-6 text-green-600" />
+                  {selectedResource.title}
+                </DialogTitle>
+                <DialogDescription className="flex items-center gap-2">
+                  {selectedResource.data?.agency && (
+                    <Badge variant="outline">
+                      {selectedResource.data.agency}
+                    </Badge>
+                  )}
+                  {selectedResource.data?.status && (
+                    <Badge variant="secondary">
+                      {selectedResource.data.status}
+                    </Badge>
+                  )}
+                  {selectedResource.data?.due_date && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      Due: {new Date(selectedResource.data.due_date).toLocaleDateString()}
+                    </Badge>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
+                  <p className="text-gray-700">
+                    {selectedResource.summary || 'No description available.'}
+                  </p>
+                </div>
+                
+                {(selectedResource.data?.award_min || selectedResource.data?.award_max) && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Award Amount</h4>
+                    <p className="text-gray-700">
+                      ${selectedResource.data.award_min?.toLocaleString() || 'N/A'} - ${selectedResource.data.award_max?.toLocaleString() || 'N/A'}
+                    </p>
+                  </div>
+                )}
+                
+                {selectedResource.data?.focusAreas && selectedResource.data.focusAreas.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Focus Areas</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedResource.data.focusAreas.map((area: string, index: number) => (
+                        <Badge key={index} variant="outline">{area}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  {selectedResource.url && (
+                    <Button 
+                      onClick={() => handleExternalLinkClick(selectedResource)}
+                      className="flex-1"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      View Grant Details
+                    </Button>
+                  )}
+                  
+                  {selectedResource.data?.applyUrls?.grantsGov && (
+                    <Button 
+                      variant="outline"
+                      onClick={() => window.open(selectedResource.data.applyUrls.grantsGov, '_blank')}
+                      className="flex-1"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Apply on Grants.gov
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

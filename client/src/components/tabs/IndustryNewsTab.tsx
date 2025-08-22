@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParamState } from '@/hooks/useQueryParams';
@@ -42,6 +43,8 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
   const [filters, setFilters] = useState({
     frequency: 'all'
   });
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [resourceModalOpen, setResourceModalOpen] = useState(false);
   
   // Handle view mode change
   const handleViewModeChange = useCallback((mode: string) => {
@@ -64,20 +67,36 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
   const newsSources = data?.items || [];
 
   // Handle news source click
-  const handleNewsSourceClick = useCallback((source: Resource, action: 'visit' | 'subscribe') => {
+  const handleNewsSourceClick = useCallback((source: Resource) => {
+    setSelectedResource(source);
+    setResourceModalOpen(true);
     trackResourceClick(source.id, 'news_source', source.title);
-    onAnalyticsEvent?.(action === 'visit' ? 'news_source_visit' : 'news_source_subscribe', {
+    onAnalyticsEvent?.('news_source_click', {
       source_id: source.id,
       source_name: source.title,
       source_frequency: source.data?.frequency
     });
-    
+  }, [onAnalyticsEvent]);
+
+  // Handle modal close
+  const handleModalClose = useCallback(() => {
+    setResourceModalOpen(false);
+    setSelectedResource(null);
+  }, []);
+
+  // Handle external link click from modal
+  const handleExternalLinkClick = useCallback((source: Resource, action: 'visit' | 'subscribe') => {
     const url = action === 'subscribe' && source.data?.subscribeUrl 
       ? source.data.subscribeUrl 
       : source.url || source.data?.url;
       
     if (url) {
       window.open(url, '_blank');
+      onAnalyticsEvent?.(action === 'visit' ? 'news_source_visit' : 'news_source_subscribe', {
+        source_id: source.id,
+        source_name: source.title,
+        source_frequency: source.data?.frequency
+      });
     }
   }, [onAnalyticsEvent]);
 
@@ -286,7 +305,7 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {newsSources.map(source => (
-            <Card key={source.id} className="hover:shadow-lg transition-shadow">
+            <Card key={source.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleNewsSourceClick(source)}>
               <CardHeader>
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-orange-100 rounded-lg flex-shrink-0">
@@ -321,23 +340,11 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
                       variant="outline" 
                       size="sm" 
                       className="flex-1"
-                      onClick={() => handleNewsSourceClick(source, 'visit')}
+                      onClick={() => handleNewsSourceClick(source)}
                     >
                       <Globe className="h-4 w-4 mr-2" />
-                      Visit
+                      View Details
                     </Button>
-                    
-                    {source.data?.subscribeUrl && (
-                      <Button 
-                        variant="default" 
-                        size="sm" 
-                        className="flex-1"
-                        onClick={() => handleNewsSourceClick(source, 'subscribe')}
-                      >
-                        <Mail className="h-4 w-4 mr-2" />
-                        Subscribe
-                      </Button>
-                    )}
                   </div>
                 </div>
               </CardContent>
@@ -345,6 +352,67 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
           ))}
         </div>
       )}
+
+      {/* News Source Details Modal */}
+      <Dialog open={resourceModalOpen} onOpenChange={setResourceModalOpen}>
+        <DialogContent className="max-w-2xl z-[1000]">
+          {selectedResource && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Newspaper className="h-6 w-6 text-orange-600" />
+                  {selectedResource.title}
+                </DialogTitle>
+                <DialogDescription className="flex items-center gap-2">
+                  {selectedResource.data?.sourceName && selectedResource.data.sourceName !== selectedResource.title && (
+                    <Badge variant="outline">
+                      {selectedResource.data.sourceName}
+                    </Badge>
+                  )}
+                  {selectedResource.data?.frequency && (
+                    <Badge variant={getFrequencyBadgeVariant(selectedResource.data.frequency)} className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {selectedResource.data.frequency}
+                    </Badge>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
+                  <p className="text-gray-700">
+                    {selectedResource.summary || selectedResource.data?.description || 'Industry publication providing news and insights.'}
+                  </p>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  {(selectedResource.url || selectedResource.data?.url) && (
+                    <Button 
+                      onClick={() => handleExternalLinkClick(selectedResource, 'visit')}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <Globe className="h-4 w-4 mr-2" />
+                      Visit Website
+                    </Button>
+                  )}
+                  
+                  {selectedResource.data?.subscribeUrl && (
+                    <Button 
+                      onClick={() => handleExternalLinkClick(selectedResource, 'subscribe')}
+                      className="flex-1"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Subscribe
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

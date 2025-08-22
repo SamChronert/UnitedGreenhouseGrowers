@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -52,6 +53,8 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
     region: 'all',
     focusArea: 'all'
   });
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [resourceModalOpen, setResourceModalOpen] = useState(false);
 
   // Track tab view on mount
   useEffect(() => {
@@ -71,19 +74,34 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
   const totalCount = data?.total || 0;
 
 
-  // Handle organization website click
-  const handleWebsiteClick = useCallback((organization: Resource) => {
-    // Track analytics
+  // Handle organization click for modal
+  const handleOrganizationClick = useCallback((organization: Resource) => {
+    setSelectedResource(organization);
+    setResourceModalOpen(true);
     trackResourceClick(organization.id, 'organization', organization.title);
     onAnalyticsEvent?.('resource_open', {
       resource_id: organization.id,
       resource_type: 'organization',
       resource_title: organization.title
     });
-    
+  }, [onAnalyticsEvent]);
+
+  // Handle modal close
+  const handleModalClose = useCallback(() => {
+    setResourceModalOpen(false);
+    setSelectedResource(null);
+  }, []);
+
+  // Handle external link click from modal
+  const handleExternalLinkClick = useCallback((organization: Resource) => {
     const website = organization.data?.urls?.site || organization.url;
     if (website) {
       window.open(website, '_blank', 'noopener,noreferrer');
+      onAnalyticsEvent?.('organization_external_click', {
+        resource_id: organization.id,
+        resource_type: 'organization',
+        resource_title: organization.title
+      });
     }
   }, [onAnalyticsEvent]);
 
@@ -248,7 +266,7 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
               
               return (
                 <Card key={organization.id} className="hover:shadow-lg transition-shadow cursor-pointer"
-                      onClick={() => website && handleWebsiteClick(organization)}>
+                      onClick={() => handleOrganizationClick(organization)}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
@@ -404,7 +422,10 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleWebsiteClick(organization)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleExternalLinkClick(organization);
+                            }}
                             className="inline-flex items-center gap-2"
                           >
                             <Globe className="h-4 w-4" />
@@ -442,6 +463,62 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
           )}
         </div>
       )}
+
+      {/* Organization Details Modal */}
+      <Dialog open={resourceModalOpen} onOpenChange={setResourceModalOpen}>
+        <DialogContent className="max-w-2xl z-[1000]">
+          {selectedResource && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Building2 className="h-6 w-6 text-purple-600" />
+                  {selectedResource.title}
+                </DialogTitle>
+                <DialogDescription className="flex items-center gap-2">
+                  {selectedResource.data?.orgType && (
+                    <Badge variant="outline">
+                      {selectedResource.data.orgType}
+                    </Badge>
+                  )}
+                  {selectedResource.data?.region && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {selectedResource.data.region}
+                    </Badge>
+                  )}
+                  {selectedResource.data?.focusArea && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {selectedResource.data.focusArea}
+                    </Badge>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">About</h4>
+                  <p className="text-gray-700">
+                    {selectedResource.data?.description || selectedResource.summary || 'No description available.'}
+                  </p>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  {(selectedResource.data?.urls?.site || selectedResource.url) && (
+                    <Button 
+                      onClick={() => handleExternalLinkClick(selectedResource)}
+                      className="flex-1"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Visit Website
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
