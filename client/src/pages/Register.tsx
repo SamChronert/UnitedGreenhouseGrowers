@@ -692,7 +692,7 @@ export default function Register() {
           </div>
           
           {/* Title with dark green background */}
-          <div className="bg-ugga-primary rounded-lg p-4">
+          <div className="bg-sage rounded-lg p-4">
             <h1 className="text-2xl font-bold text-white">Join UGGA</h1>
             <p className="text-white font-medium">United Greenhouse Growers Association</p>
           </div>
