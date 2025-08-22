@@ -292,7 +292,10 @@ export default function Register() {
               onValueChange={handleMemberTypeChange}
               className="space-y-4"
             >
-              <Card className={`cursor-pointer transition-all ${watchedMemberType === 'grower' ? 'ring-2 ring-ugga-primary' : 'hover:shadow-md'}`}>
+              <Card 
+                className={`cursor-pointer transition-all ${watchedMemberType === 'grower' ? 'ring-2 ring-ugga-primary' : 'hover:shadow-md'}`}
+                onClick={() => handleMemberTypeChange('grower')}
+              >
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-3">
                     <RadioGroupItem value="grower" id="grower" className="mt-1" />
@@ -307,7 +310,10 @@ export default function Register() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className={`cursor-pointer transition-all ${watchedMemberType === 'general' ? 'ring-2 ring-ugga-primary' : 'hover:shadow-md'}`}>
+              <Card 
+                className={`cursor-pointer transition-all ${watchedMemberType === 'general' ? 'ring-2 ring-ugga-primary' : 'hover:shadow-md'}`}
+                onClick={() => handleMemberTypeChange('general')}
+              >
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-3">
                     <RadioGroupItem value="general" id="general" className="mt-1" />
