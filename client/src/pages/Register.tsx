@@ -492,7 +492,7 @@ export default function Register() {
                     onValueChange={(value) => form.setValue("ghSize", value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select size" />
+                      <SelectValue placeholder="Select greenhouse size" />
                     </SelectTrigger>
                     <SelectContent>
                       {GREENHOUSE_SIZES.map((size) => (
@@ -508,7 +508,7 @@ export default function Register() {
                     onValueChange={(value) => form.setValue("farmType", value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
+                      <SelectValue placeholder="Select farm type" />
                     </SelectTrigger>
                     <SelectContent>
                       {FARM_TYPES.map((type) => (
@@ -516,26 +516,124 @@ export default function Register() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {form.watch("farmType") === "Other" && (
+                    <div className="mt-2">
+                      <Label htmlFor="otherFarmType">Specify Other Farm Type *</Label>
+                      <Input
+                        id="otherFarmType"
+                        {...form.register("otherFarmType")}
+                        placeholder="Enter other farm type"
+                        className="mt-1"
+                      />
+                      {form.formState.errors.otherFarmType && (
+                        <p className="text-sm text-red-600 mt-1">{form.formState.errors.otherFarmType.message}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
+              {/* Crop Types */}
               <div className="space-y-3">
-                <Label className="text-base font-medium">Climate Control Type *</Label>
-                <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
-                  {CLIMATE_CONTROL_OPTIONS.slice(0, 4).map((option) => (
-                    <div key={option.value} className="flex items-center space-x-2">
+                <Label className="text-base font-medium">Crop Types Grown (select up to 8)</Label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {CROP_TYPES.map((crop) => (
+                    <div key={crop} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={crop}
+                        checked={selectedCrops.includes(crop)}
+                        onCheckedChange={() => handleCropToggle(crop)}
+                        disabled={!selectedCrops.includes(crop) && selectedCrops.length >= 8}
+                      />
+                      <Label htmlFor={crop} className="cursor-pointer text-sm">
+                        {crop}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                {selectedCrops.includes("Other") && (
+                  <div className="space-y-2">
+                    <Label htmlFor="otherCrop">Specify Other Crop Type *</Label>
+                    <Input
+                      id="otherCrop"
+                      {...form.register("otherCrop")}
+                      placeholder="Enter other crop type"
+                    />
+                    {form.formState.errors.otherCrop && (
+                      <p className="text-sm text-red-600">{form.formState.errors.otherCrop.message}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Production Method */}
+              <div className="space-y-2">
+                <Label htmlFor="productionMethod">Production Method</Label>
+                <Select 
+                  value={form.watch("productionMethod")} 
+                  onValueChange={(value) => form.setValue("productionMethod", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select production method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PRODUCTION_METHODS.map((method) => (
+                      <SelectItem key={method} value={method}>{method}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Supplemental Lighting */}
+              <div className="space-y-2">
+                <Label htmlFor="suppLighting">Supplemental Lighting</Label>
+                <Select 
+                  value={form.watch("suppLighting")} 
+                  onValueChange={(value) => form.setValue("suppLighting", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select lighting option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LIGHTING_OPTIONS.map((option) => (
+                      <SelectItem key={option} value={option}>{option}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Climate Control Type - Complete list */}
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Climate Control Type (select at least one) *</Label>
+                <div className="grid grid-cols-1 gap-3">
+                  {CLIMATE_CONTROL_OPTIONS.map((option) => (
+                    <div key={option.value} className="flex items-start space-x-2">
                       <Checkbox
                         id={option.value}
                         checked={selectedClimateControl.includes(option.value)}
                         onCheckedChange={() => handleClimateControlToggle(option.value)}
+                        className="mt-1"
                       />
-                      <Label htmlFor={option.value} className="text-sm">{option.label}</Label>
+                      <Label htmlFor={option.value} className="cursor-pointer text-sm flex-1">
+                        <span className="font-medium">{option.label}</span>
+                        <span className="block text-gray-500 italic text-xs mt-1">{option.blurb}</span>
+                      </Label>
                     </div>
                   ))}
                 </div>
                 {form.formState.errors.climateControl && (
                   <p className="text-sm text-red-600">{form.formState.errors.climateControl.message}</p>
                 )}
+              </div>
+
+              {/* Professional Information */}
+              <div className="space-y-2">
+                <Label htmlFor="employer">Employer/Company</Label>
+                <Input
+                  id="employer"
+                  {...form.register("employer")}
+                  placeholder="Enter your employer or company name"
+                />
               </div>
             </div>
           </div>
