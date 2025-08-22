@@ -216,7 +216,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
 
       {/* University Details Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl z-[1000] [&_~_*]:z-[999]">
           {selectedUniversity && (
             <>
               <DialogHeader>
