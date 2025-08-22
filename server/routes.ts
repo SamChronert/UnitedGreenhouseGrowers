@@ -1687,6 +1687,63 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
+  // Admin endpoints for managing AI Agent Configurations
+  app.get("/api/admin/ai-agent-configs", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const configs = await storage.getAllAiAgentConfigs();
+      res.json(configs);
+    } catch (error) {
+      console.error("Get AI agent configs error:", error);
+      res.status(500).json({ message: "Failed to fetch AI agent configurations" });
+    }
+  });
+
+  app.get("/api/admin/ai-agent-configs/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const config = await storage.getAiAgentConfigByType(req.params.id);
+      if (!config) {
+        return res.status(404).json({ message: "AI agent configuration not found" });
+      }
+      res.json(config);
+    } catch (error) {
+      console.error("Get AI agent config error:", error);
+      res.status(500).json({ message: "Failed to fetch AI agent configuration" });
+    }
+  });
+
+  app.post("/api/admin/ai-agent-configs", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const config = await storage.createAiAgentConfig({
+        ...req.body,
+        createdBy: req.user!.id,
+      });
+      res.status(201).json(config);
+    } catch (error) {
+      console.error("Create AI agent config error:", error);
+      res.status(500).json({ message: "Failed to create AI agent configuration" });
+    }
+  });
+
+  app.put("/api/admin/ai-agent-configs/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const config = await storage.updateAiAgentConfig(req.params.id, req.body);
+      res.json(config);
+    } catch (error) {
+      console.error("Update AI agent config error:", error);
+      res.status(500).json({ message: "Failed to update AI agent configuration" });
+    }
+  });
+
+  app.delete("/api/admin/ai-agent-configs/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      await storage.deleteAiAgentConfig(req.params.id);
+      res.json({ message: "AI agent configuration deleted" });
+    } catch (error) {
+      console.error("Delete AI agent config error:", error);
+      res.status(500).json({ message: "Failed to delete AI agent configuration" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

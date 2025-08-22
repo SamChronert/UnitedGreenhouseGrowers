@@ -10,7 +10,8 @@ import {
   Users,
   MessageSquare,
   TrendingUp,
-  Target
+  Target,
+  Bot
 } from "lucide-react";
 
 export default function AdminDashboardHome() {
@@ -58,6 +59,13 @@ export default function AdminDashboardHome() {
       description: "Manage categories and questions for the farm roadmap assessment tool.",
       href: "/admin/farm-roadmap",
       iconBgColor: "#bbf7d0"
+    },
+    {
+      icon: <Bot className="h-8 w-8" style={{ color: "#0ea5e9" }} />,
+      title: "AI Agent Manager",
+      description: "Configure AI chatbot prompts and settings for Find-a-Grower and other AI features.",
+      href: "/admin/ai-agents",
+      iconBgColor: "#bae6fd"
     }
   ];
 
@@ -94,9 +102,29 @@ export default function AdminDashboardHome() {
         </div>
 
         {/* Second row - 3 tools */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-6 mb-6">
           {adminTools.slice(3, 6).map((tool, index) => (
             <Link key={index + 3} href={tool.href}>
+              <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full group focus:outline-none focus:ring-2 focus:ring-red-500">
+                <CardContent className="p-6 text-center">
+                  <div 
+                    className="inline-flex items-center justify-center w-16 h-16 rounded-lg mb-4 group-hover:scale-110 transition-transform duration-200"
+                    style={{ backgroundColor: tool.iconBgColor }}
+                  >
+                    {tool.icon}
+                  </div>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">{tool.title}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{tool.description}</p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
+        {/* Third row - 1 tool */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {adminTools.slice(6, 7).map((tool, index) => (
+            <Link key={index + 6} href={tool.href}>
               <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full group focus:outline-none focus:ring-2 focus:ring-red-500">
                 <CardContent className="p-6 text-center">
                   <div 

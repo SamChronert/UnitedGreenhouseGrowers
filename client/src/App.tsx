@@ -26,6 +26,7 @@ import AdminMembers from "@/pages/AdminMembers";
 import AdminChallenges from "@/pages/AdminChallenges";
 import AdminFarmRoadmapManager from "@/pages/AdminFarmRoadmapManager";
 import AdminAnalytics from "@/pages/AdminAnalytics";
+import AdminAiAgents from "@/pages/AdminAiAgents";
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -156,6 +157,14 @@ function Router() {
         <LayoutWrapper>
           <AuthGuard requireAdmin>
             <AdminAnalytics />
+          </AuthGuard>
+        </LayoutWrapper>
+      </Route>
+      
+      <Route path="/admin/ai-agents">
+        <LayoutWrapper>
+          <AuthGuard requireAdmin>
+            <AdminAiAgents />
           </AuthGuard>
         </LayoutWrapper>
       </Route>

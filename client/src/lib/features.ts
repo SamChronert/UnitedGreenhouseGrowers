@@ -80,7 +80,7 @@ export const features: Feature[] = [
     path: "/dashboard/find-grower",
     iconName: "MapPin",
     description: "Connect with growers by location",
-    inDevelopment: true,
+    inDevelopment: false,
     requiresAuth: false // Available in demo
   },
   {

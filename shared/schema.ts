@@ -325,6 +325,24 @@ export const farmRoadmapQuestions = pgTable("farm_roadmap_questions", {
   isActiveIdx: index("farm_roadmap_questions_is_active_idx").on(table.isActive),
 }));
 
+// AI Agent configurations table
+export const aiAgentConfigs = pgTable("ai_agent_configs", {
+  id: varchar("id").primaryKey().notNull(),
+  name: varchar("name").notNull(), // e.g. "Find-a-Grower", "Farm Assessment"
+  type: varchar("type").notNull(), // FIND_GROWER, ASSESSMENT, etc.
+  systemPrompt: text("system_prompt").notNull(),
+  modelConfig: jsonb("model_config").notNull().default('{}'), // { model: "gpt-4o", temperature: 0.7, maxTokens: 500 }
+  isActive: boolean("is_active").default(true).notNull(),
+  version: varchar("version").default("1.0").notNull(),
+  createdBy: varchar("created_by").notNull(), // Admin user ID who created/modified
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  typeIdx: index("ai_agent_configs_type_idx").on(table.type),
+  isActiveIdx: index("ai_agent_configs_is_active_idx").on(table.isActive),
+  createdByIdx: index("ai_agent_configs_created_by_idx").on(table.createdBy),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, {
@@ -333,6 +351,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   }),
   chatLogs: many(chatLogs),
   growerChallenges: many(growerChallenges),
+  aiAgentConfigs: many(aiAgentConfigs),
 }));
 
 export const profilesRelations = relations(profiles, ({ one }) => ({
@@ -468,6 +487,13 @@ export const farmRoadmapQuestionsRelations = relations(farmRoadmapQuestions, ({ 
   }),
 }));
 
+export const aiAgentConfigsRelations = relations(aiAgentConfigs, ({ one }) => ({
+  creator: one(users, {
+    fields: [aiAgentConfigs.createdBy],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -579,6 +605,12 @@ export const insertFarmRoadmapQuestionSchema = createInsertSchema(farmRoadmapQue
   updatedAt: true,
 });
 
+export const insertAiAgentConfigSchema = createInsertSchema(aiAgentConfigs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -622,3 +654,5 @@ export type FarmRoadmapCategory = typeof farmRoadmapCategories.$inferSelect;
 export type InsertFarmRoadmapCategory = z.infer<typeof insertFarmRoadmapCategorySchema>;
 export type FarmRoadmapQuestion = typeof farmRoadmapQuestions.$inferSelect;
 export type InsertFarmRoadmapQuestion = z.infer<typeof insertFarmRoadmapQuestionSchema>;
+export type AiAgentConfig = typeof aiAgentConfigs.$inferSelect;
+export type InsertAiAgentConfig = z.infer<typeof insertAiAgentConfigSchema>;

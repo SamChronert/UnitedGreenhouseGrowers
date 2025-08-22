@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { type Profile, type User } from "@shared/schema";
+import { storage } from "./storage";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
@@ -15,6 +16,9 @@ export async function findGrowerAI(question: string, members: (User & { profile:
   }
 
   try {
+    // Get AI agent configuration from database
+    const config = await storage.getAiAgentConfigByType("FIND_GROWER");
+    
     // Create a sanitized member directory for the AI prompt
     const memberData = members.map(member => ({
       name: member.profile.name,
@@ -24,7 +28,8 @@ export async function findGrowerAI(question: string, members: (User & { profile:
       jobTitle: member.profile.jobTitle,
     })).slice(0, 50); // Limit to 50 members to avoid token limits
 
-    const systemPrompt = `You are an AI assistant for the United Greenhouse Growers Association (UGGA). Your role is to help members find and connect with other growers based on their specific needs.
+    // Use configurable prompt or fall back to default
+    const basePrompt = config?.systemPrompt || `You are an AI assistant for the United Greenhouse Growers Association (UGGA). Your role is to help members find and connect with other growers based on their specific needs.
 
 Given a member directory and a question, suggest relevant growers who might be able to help. Focus on:
 - Geographic proximity when relevant
@@ -32,19 +37,27 @@ Given a member directory and a question, suggest relevant growers who might be a
 - Professional experience
 - Specific skills or knowledge areas
 
-Be helpful, professional, and specific in your recommendations. If you can't find exact matches, suggest similar alternatives or broader categories.
+Be helpful, professional, and specific in your recommendations. If you can't find exact matches, suggest similar alternatives or broader categories.`;
+
+    const systemPrompt = `${basePrompt}
 
 Member Directory (showing name, state, farm type, employer, job title):
 ${JSON.stringify(memberData, null, 2)}`;
 
+    // Use configurable model settings or fall back to defaults
+    const modelConfig = config?.modelConfig as any || {};
+    const model = modelConfig.model || "gpt-4o";
+    const maxTokens = modelConfig.maxTokens || 500;
+    const temperature = modelConfig.temperature || 0.7;
+
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: question }
       ],
-      max_tokens: 500,
-      temperature: 0.7,
+      max_tokens: maxTokens,
+      temperature,
     });
 
     return response.choices[0].message.content || "I apologize, but I couldn't process your request. Please try rephrasing your question.";

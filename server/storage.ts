@@ -16,6 +16,7 @@ import {
   farmRecommendations,
   farmRoadmapCategories,
   farmRoadmapQuestions,
+  aiAgentConfigs,
   type User,
   type InsertUser,
   type Profile,
@@ -52,6 +53,8 @@ import {
   type InsertFarmRoadmapCategory,
   type FarmRoadmapQuestion,
   type InsertFarmRoadmapQuestion,
+  type AiAgentConfig,
+  type InsertAiAgentConfig,
   type ResourceType,
   Role
 } from "@shared/schema";
@@ -184,6 +187,13 @@ export interface IStorage {
   createFarmRoadmapQuestion(question: InsertFarmRoadmapQuestion): Promise<FarmRoadmapQuestion>;
   updateFarmRoadmapQuestion(id: string, updates: Partial<FarmRoadmapQuestion>): Promise<FarmRoadmapQuestion>;
   deleteFarmRoadmapQuestion(id: string): Promise<void>;
+
+  // AI Agent Config operations
+  getAllAiAgentConfigs(): Promise<AiAgentConfig[]>;
+  getAiAgentConfigByType(type: string): Promise<AiAgentConfig | undefined>;
+  createAiAgentConfig(config: InsertAiAgentConfig): Promise<AiAgentConfig>;
+  updateAiAgentConfig(id: string, updates: Partial<AiAgentConfig>): Promise<AiAgentConfig>;
+  deleteAiAgentConfig(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1420,6 +1430,48 @@ export class DatabaseStorage implements IStorage {
 
   async deleteFarmRoadmapQuestion(id: string): Promise<void> {
     await db.delete(farmRoadmapQuestions).where(eq(farmRoadmapQuestions.id, id));
+  }
+
+  // AI Agent Config operations
+  async getAllAiAgentConfigs(): Promise<AiAgentConfig[]> {
+    return await db.select().from(aiAgentConfigs).orderBy(aiAgentConfigs.name);
+  }
+
+  async getAiAgentConfigByType(type: string): Promise<AiAgentConfig | undefined> {
+    const [config] = await db
+      .select()
+      .from(aiAgentConfigs)
+      .where(and(
+        eq(aiAgentConfigs.type, type),
+        eq(aiAgentConfigs.isActive, true)
+      ))
+      .orderBy(desc(aiAgentConfigs.createdAt))
+      .limit(1);
+    return config;
+  }
+
+  async createAiAgentConfig(data: InsertAiAgentConfig): Promise<AiAgentConfig> {
+    const [config] = await db
+      .insert(aiAgentConfigs)
+      .values({
+        id: randomUUID(),
+        ...data,
+      })
+      .returning();
+    return config;
+  }
+
+  async updateAiAgentConfig(id: string, updates: Partial<AiAgentConfig>): Promise<AiAgentConfig> {
+    const [config] = await db
+      .update(aiAgentConfigs)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(aiAgentConfigs.id, id))
+      .returning();
+    return config;
+  }
+
+  async deleteAiAgentConfig(id: string): Promise<void> {
+    await db.delete(aiAgentConfigs).where(eq(aiAgentConfigs.id, id));
   }
 }
 
