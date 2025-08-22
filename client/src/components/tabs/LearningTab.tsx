@@ -19,8 +19,6 @@ import {
   Award, 
   Users,
   BookOpen,
-  Grid3X3,
-  List,
   ExternalLink,
   Loader2,
   ChevronDown,
@@ -55,8 +53,6 @@ const FORMAT_CATEGORIES = [
 
 
 export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
-  // URL state management
-  const [viewMode, setViewMode] = useParamState('view', 'grid');
   
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -212,7 +208,6 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
 
   return (
     <div 
-      key={`learning-${viewMode}`}
       role="tabpanel" 
       id="learning-panel" 
       aria-labelledby="learning-tab"
@@ -222,28 +217,6 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
       {/* Search and Filters */}
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          
-          {/* View Toggle */}
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="flex items-center gap-2"
-            >
-              <Grid3X3 className="h-4 w-4" />
-              Grid
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="flex items-center gap-2"
-            >
-              <List className="h-4 w-4" />
-              List
-            </Button>
-          </div>
         </div>
         
         <div className="flex flex-wrap gap-4">
@@ -355,13 +328,11 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
                   
                   <CollapsibleContent>
                     <div className="px-6 pb-6">
-                      <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
+                      <div className="space-y-4">
                         {sectionCourses.map(course => (
                           <Card 
                             key={course.id} 
-                            className={`hover:shadow-lg transition-shadow cursor-pointer ${
-                              viewMode === 'list' ? 'flex' : ''
-                            }`}
+                            className="hover:shadow-lg transition-shadow cursor-pointer flex"
                             onClick={() => handleResourceClick(course)}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
@@ -373,133 +344,53 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
                             role="button"
                             aria-label={`View details for ${course.title}`}
                           >
-                            {viewMode === 'grid' ? (
-                              <>
-                                <CardHeader>
-                                  <div className="flex items-start justify-between">
-                                    <div className="flex items-center gap-3">
-                                      <div className="p-2 bg-blue-100 rounded-lg">
-                                        <GraduationCap className="h-6 w-6 text-blue-600" />
-                                      </div>
-                                      <div className="flex-1">
-                                        <CardTitle className="text-lg line-clamp-2">{course.title}</CardTitle>
-                                        <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
-                                          <Users className="h-4 w-4" />
-                                          <span>{course.data?.provider || 'Provider'}</span>
-                                        </div>
-                                      </div>
+                            <div className="flex-1 p-6">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                      <GraduationCap className="h-5 w-5 text-blue-600" />
                                     </div>
-                                    <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                    <div>
+                                      <h3 className="text-lg font-semibold">{course.title}</h3>
+                                      <p className="text-sm text-gray-600">{course.data?.provider || 'Provider'}</p>
+                                    </div>
                                   </div>
-                                </CardHeader>
-                                
-                                <CardContent>
-                                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                                  
+                                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                                     {course.summary || 'Course description not available.'}
                                   </p>
                                   
-                                  <div className="space-y-3">
-                                    {/* Badges */}
-                                    <div className="flex flex-wrap gap-2">
-                                      {course.data?.level && (
-                                        <Badge variant={getLevelBadgeVariant(course.data.level)}>
-                                          {course.data.level}
-                                        </Badge>
-                                      )}
-                                      {course.data?.costType && (
-                                        <Badge variant={getCostBadgeVariant(course.data.costType)}>
-                                          {course.data.costType}
-                                        </Badge>
-                                      )}
-                                      {course.data?.format && (
-                                        <Badge variant="outline">
-                                          {course.data.format === 'Online' ? <Globe className="h-3 w-3 mr-1" /> : 
-                                           course.data.format === 'In-person' ? <MapPin className="h-3 w-3 mr-1" /> :
-                                           <Globe className="h-3 w-3 mr-1" />}
-                                          {course.data.format}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    
-                                    {/* Course details */}
-                                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                                      {course.data?.duration && (
-                                        <div className="flex items-center gap-1">
-                                          <Clock className="h-3 w-3" />
-                                          <span>{course.data.duration}</span>
-                                        </div>
-                                      )}
-                                      {course.data?.priceTypical && (
-                                        <div className="flex items-center gap-1">
-                                          <DollarSign className="h-3 w-3" />
-                                          <span>{course.data.priceTypical}</span>
-                                        </div>
-                                      )}
-                                      {course.data?.credential && (
-                                        <div className="flex items-center gap-1">
-                                          <Award className="h-3 w-3" />
-                                          <span>{course.data.credential}</span>
-                                        </div>
-                                      )}
-                                      {course.data?.languages && course.data.languages.length > 0 && (
-                                        <div className="flex items-center gap-1">
-                                          <Globe className="h-3 w-3" />
-                                          <span>{course.data.languages.join(', ')}</span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                </CardContent>
-                              </>
-                            ) : (
-                              <div className="flex-1 p-6">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                      <div className="p-2 bg-blue-100 rounded-lg">
-                                        <GraduationCap className="h-5 w-5 text-blue-600" />
-                                      </div>
-                                      <div>
-                                        <h3 className="text-lg font-semibold">{course.title}</h3>
-                                        <p className="text-sm text-gray-600">{course.data?.provider || 'Provider'}</p>
-                                      </div>
-                                    </div>
-                                    
-                                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                                      {course.summary || 'Course description not available.'}
-                                    </p>
-                                    
-                                    <div className="flex flex-wrap gap-2">
-                                      {course.data?.level && (
-                                        <Badge variant={getLevelBadgeVariant(course.data.level)} className="text-xs">
-                                          {course.data.level}
-                                        </Badge>
-                                      )}
-                                      {course.data?.costType && (
-                                        <Badge variant={getCostBadgeVariant(course.data.costType)} className="text-xs">
-                                          {course.data.costType}
-                                        </Badge>
-                                      )}
-                                      {course.data?.format && (
-                                        <Badge variant="outline" className="text-xs">
-                                          {course.data.format}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="flex flex-col items-end gap-2 ml-4">
-                                    <ExternalLink className="h-4 w-4 text-gray-400" />
-                                    {course.data?.duration && (
-                                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                                        <Clock className="h-3 w-3" />
-                                        <span>{course.data.duration}</span>
-                                      </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {course.data?.level && (
+                                      <Badge variant={getLevelBadgeVariant(course.data.level)} className="text-xs">
+                                        {course.data.level}
+                                      </Badge>
+                                    )}
+                                    {course.data?.costType && (
+                                      <Badge variant={getCostBadgeVariant(course.data.costType)} className="text-xs">
+                                        {course.data.costType}
+                                      </Badge>
+                                    )}
+                                    {course.data?.format && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {course.data.format}
+                                      </Badge>
                                     )}
                                   </div>
                                 </div>
+                                
+                                <div className="flex flex-col items-end gap-2 ml-4">
+                                  <ExternalLink className="h-4 w-4 text-gray-400" />
+                                  {course.data?.duration && (
+                                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                                      <Clock className="h-3 w-3" />
+                                      <span>{course.data.duration}</span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            )}
+                            </div>
                           </Card>
                         ))}
                       </div>

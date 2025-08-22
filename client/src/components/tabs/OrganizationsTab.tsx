@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ExternalLink, Building2, AlertCircle, RefreshCw, Globe, Grid3X3, List, MapPin, Users } from "lucide-react";
+import { ExternalLink, Building2, AlertCircle, RefreshCw, Globe, MapPin, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useResources, Resource, ResourceFilters } from "@/hooks/useResources";
 import SearchBox from "@/components/SearchBox";
@@ -43,8 +43,6 @@ const FOCUS_AREAS = [
 ];
 
 export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabProps) {
-  // URL state management
-  const [viewMode, setViewMode] = useParamState('view', 'grid');
   
   // Local state
   const [searchQuery, setSearchQuery] = useState('');
@@ -112,7 +110,6 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
 
   return (
     <div 
-      key={`organizations-${viewMode}`}
       role="tabpanel" 
       id="organizations-panel" 
       aria-labelledby="organizations-tab"
@@ -130,28 +127,6 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
             resourceType="organizations"
             className="max-w-md"
           />
-          
-          {/* View Toggle */}
-          <div className="flex gap-2">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="flex items-center gap-2"
-            >
-              <Grid3X3 className="h-4 w-4" />
-              Grid
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="flex items-center gap-2"
-            >
-              <List className="h-4 w-4" />
-              List
-            </Button>
-          </div>
         </div>
         
         <div className="flex flex-wrap gap-4">
@@ -231,7 +206,7 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
 
       {/* Loading Skeletons */}
       {isLoading && (
-        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
+        <div className="space-y-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i}>
               <CardContent className="p-6">
@@ -254,65 +229,56 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
 
       {/* Organizations Content */}
       {!isLoading && !error && organizations.length > 0 && (
-        viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {organizations.map((organization) => {
-              const description = organization.data?.description || organization.summary;
-              const website = organization.data?.urls?.site || organization.url;
-              const logoUrl = organization.data?.logoUrl;
-              const orgType = organization.data?.orgType;
-              const region = organization.data?.region;
-              const focusArea = organization.data?.focusArea;
-              
-              return (
-                <Card key={organization.id} className="hover:shadow-lg transition-shadow cursor-pointer"
-                      onClick={() => handleOrganizationClick(organization)}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0">
-                          {logoUrl ? (
-                            <img 
-                              src={logoUrl}
-                              alt={`${organization.title} logo`}
-                              className="h-10 w-10 object-contain rounded border"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                target.nextElementSibling?.classList.remove('hidden');
-                              }}
-                            />
-                          ) : null}
-                          <div className={cn(
-                            "h-10 w-10 bg-purple-100 rounded border flex items-center justify-center",
-                            logoUrl ? "hidden" : "flex"
-                          )}>
-                            <Building2 className="h-5 w-5 text-purple-600" />
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <CardTitle className="text-lg line-clamp-2">{organization.title}</CardTitle>
-                          {orgType && (
-                            <Badge variant="outline" className="mt-1 text-xs">
-                              {orgType}
-                            </Badge>
-                          )}
-                        </div>
+        <div className="space-y-4">
+          {organizations.map((organization) => {
+            const description = organization.data?.description || organization.summary;
+            const website = organization.data?.urls?.site || organization.url;
+            const logoUrl = organization.data?.logoUrl;
+            const orgType = organization.data?.orgType;
+            const region = organization.data?.region;
+            const focusArea = organization.data?.focusArea;
+            
+            return (
+              <Card key={organization.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleOrganizationClick(organization)}>
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    {/* Logo */}
+                    <div className="flex-shrink-0">
+                      {logoUrl ? (
+                        <img 
+                          src={logoUrl}
+                          alt={`${organization.title} logo`}
+                          className="h-12 w-12 object-contain rounded border"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            target.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={cn(
+                        "h-12 w-12 bg-purple-100 rounded border flex items-center justify-center",
+                        logoUrl ? "hidden" : "flex"
+                      )}>
+                        <Building2 className="h-6 w-6 text-purple-600" />
                       </div>
-                      {website && <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />}
                     </div>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    {description && (
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                        {description}
-                      </p>
-                    )}
                     
-                    <div className="space-y-3">
-                      {/* Info badges */}
-                      <div className="flex flex-wrap gap-2">
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 break-words">
+                          {organization.title}
+                        </h3>
+                        {website && <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0 ml-2" />}
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {orgType && (
+                          <Badge variant="outline" className="text-xs">
+                            {orgType}
+                          </Badge>
+                        )}
                         {region && (
                           <div className="flex items-center gap-1 text-xs text-gray-500">
                             <MapPin className="h-3 w-3" />
@@ -327,120 +293,34 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
                         )}
                       </div>
                       
+                      {description && (
+                        <p className="text-gray-700 mb-4 leading-relaxed break-words">
+                          {description}
+                        </p>
+                      )}
+                      
                       {website && (
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleWebsiteClick(organization);
+                            handleExternalLinkClick(organization);
                           }}
+                          className="inline-flex items-center gap-2"
                         >
-                          <Globe className="h-4 w-4 mr-2" />
+                          <Globe className="h-4 w-4" />
                           Visit Website
+                          <ExternalLink className="h-3 w-3" />
                         </Button>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {organizations.map((organization) => {
-              const description = organization.data?.description || organization.summary;
-              const website = organization.data?.urls?.site || organization.url;
-              const logoUrl = organization.data?.logoUrl;
-              const orgType = organization.data?.orgType;
-              const region = organization.data?.region;
-              const focusArea = organization.data?.focusArea;
-              
-              return (
-                <Card key={organization.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      {/* Logo */}
-                      <div className="flex-shrink-0">
-                        {logoUrl ? (
-                          <img 
-                            src={logoUrl}
-                            alt={`${organization.title} logo`}
-                            className="h-12 w-12 object-contain rounded border"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              target.nextElementSibling?.classList.remove('hidden');
-                            }}
-                          />
-                        ) : null}
-                        <div className={cn(
-                          "h-12 w-12 bg-purple-100 rounded border flex items-center justify-center",
-                          logoUrl ? "hidden" : "flex"
-                        )}>
-                          <Building2 className="h-6 w-6 text-purple-600" />
-                        </div>
-                      </div>
-                      
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900 break-words">
-                            {organization.title}
-                          </h3>
-                          {website && <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0 ml-2" />}
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {orgType && (
-                            <Badge variant="outline" className="text-xs">
-                              {orgType}
-                            </Badge>
-                          )}
-                          {region && (
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <MapPin className="h-3 w-3" />
-                              <span>{region}</span>
-                            </div>
-                          )}
-                          {focusArea && (
-                            <div className="flex items-center gap-1 text-xs text-gray-500">
-                              <Users className="h-3 w-3" />
-                              <span>{focusArea}</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {description && (
-                          <p className="text-gray-700 mb-4 leading-relaxed break-words">
-                            {description}
-                          </p>
-                        )}
-                        
-                        {website && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleExternalLinkClick(organization);
-                            }}
-                            className="inline-flex items-center gap-2"
-                          >
-                            <Globe className="h-4 w-4" />
-                            Visit Website
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       )}
 
       {/* Empty State */}
