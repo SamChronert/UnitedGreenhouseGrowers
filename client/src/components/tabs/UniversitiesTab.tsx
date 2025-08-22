@@ -183,7 +183,18 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
                               <div className="space-y-3">
                                 <div className="flex items-start gap-3">
                                   <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 border-2 border-dashed border-gray-300">
-                                    <GraduationCap className="h-6 w-6 text-gray-400" />
+                                    {university.image_url ? (
+                                      <img
+                                        src={university.image_url}
+                                        alt={`${university.title} logo`}
+                                        className="w-full h-full object-contain rounded-lg"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                          e.currentTarget.nextElementSibling!.classList.remove('hidden');
+                                        }}
+                                      />
+                                    ) : null}
+                                    <GraduationCap className={`h-6 w-6 text-gray-400 ${university.image_url ? 'hidden' : 'block'}`} />
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <h5 className="font-medium text-gray-900 line-clamp-2 text-sm">
