@@ -13,7 +13,7 @@ import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle } from "lucide-react";
 import uggaLogo from "@assets/2_1750100657577.png";
 import greenhouseVanImage from "@assets/ProduceVanGreenhouse_1755900251902.png";
 import nationalNetworkImage from "@assets/NationalNetwork_1755900255831.png";
@@ -124,11 +124,10 @@ const CLIMATE_CONTROL_OPTIONS = [
 export default function Register() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [memberType, setMemberType] = useState<"grower" | "general">("grower");
+  const [currentStep, setCurrentStep] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
   const [selectedCrops, setSelectedCrops] = useState<string[]>([]);
   const [selectedClimateControl, setSelectedClimateControl] = useState<string[]>([]);
-  const [showPassword, setShowPassword] = useState(false);
-  const [passwordLength, setPasswordLength] = useState(0);
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -155,9 +154,38 @@ export default function Register() {
     },
   });
 
+  const watchedMemberType = form.watch("memberType");
+
+  // Define wizard steps
+  const steps = [
+    { id: 'welcome', title: 'Welcome to UGGA!' },
+    { id: 'memberType', title: 'Choose Membership Type' },
+    { id: 'basicInfo', title: 'Tell Us About Yourself' },
+    { id: 'password', title: 'Secure Your Account' },
+    { id: 'contact', title: 'How Can We Reach You?' },
+    ...(watchedMemberType === 'grower' ? [{ id: 'growerInfo', title: 'Your Growing Operation' }] : []),
+    { id: 'confirmation', title: 'Welcome to the Community!' }
+  ];
+
+  const totalSteps = steps.length;
+
+  const nextStep = () => {
+    if (currentStep < totalSteps - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const isFirstStep = currentStep === 0;
+  const isLastStep = currentStep === totalSteps - 1;
+
   // Handle member type change
   const handleMemberTypeChange = (type: "grower" | "general") => {
-    setMemberType(type);
     form.setValue("memberType", type);
     
     // Clear grower-specific fields when switching to general
@@ -208,11 +236,11 @@ export default function Register() {
   const registerMutation = useMutation({
     mutationFn: (data: RegisterForm) => apiRequest("POST", "/api/auth/register", data),
     onSuccess: () => {
+      setCurrentStep(totalSteps - 1); // Go to confirmation step
       toast({
-        title: "Welcome to the pilot program!",
-        description: "You're now a founding member. Log in to help shape the tools we build together.",
+        title: "Welcome to UGGA!",
+        description: "Your account has been created successfully.",
       });
-      setLocation("/login");
     },
     onError: (error: Error) => {
       toast({
@@ -227,25 +255,28 @@ export default function Register() {
     registerMutation.mutate(data);
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section with Greenhouse Van Image */}
-      <div className="relative bg-white py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left: Welcome Content */}
-            <div className="text-center lg:text-left">
-              <div className="flex items-center justify-center lg:justify-start mb-6">
-                <img src={uggaLogo} alt="UGGA Logo" className="h-12 w-12 mr-3" />
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Join UGGA</h1>
-                  <p className="text-ugga-primary font-medium">United Greenhouse Growers Association</p>
-                </div>
+  const renderStepContent = () => {
+    switch (steps[currentStep]?.id) {
+      case 'welcome':
+        return (
+          <div className="text-center space-y-6">
+            <div className="relative">
+              <img 
+                src={greenhouseVanImage} 
+                alt="Greenhouse farm with delivery van showing fresh produce" 
+                className="w-full h-80 object-cover rounded-lg"
+              />
+              <div className="absolute inset-0 bg-black/20 rounded-lg"></div>
+              <div className="absolute bottom-4 left-4 right-4 bg-white/95 rounded-lg p-4">
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Welcome to UGGA!</h2>
+                <p className="text-gray-700">From greenhouse to community - supporting growers everywhere</p>
               </div>
-              <p className="text-lg text-gray-700 mb-8">
+            </div>
+            <div className="space-y-4">
+              <p className="text-lg text-gray-700">
                 Connect with greenhouse growers across the country and access practical tools built with growers in mind.
               </p>
-              <div className="grid grid-cols-1 gap-4 text-left">
+              <div className="grid grid-cols-1 gap-3 text-left">
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-ugga-primary rounded-full mr-3"></div>
                   <span className="text-gray-700">Network with fellow growers nationwide</span>
@@ -260,114 +291,157 @@ export default function Register() {
                 </div>
               </div>
             </div>
-            
-            {/* Right: Greenhouse Van Image */}
-            <div className="relative">
-              <img 
-                src={greenhouseVanImage} 
-                alt="Greenhouse farm with delivery van showing fresh produce" 
-                className="w-full h-auto rounded-lg shadow-lg"
-              />
-              <div className="absolute bottom-4 left-4 bg-white/90 rounded-lg p-3">
-                <p className="text-sm font-semibold text-gray-800">From greenhouse to community</p>
-                <p className="text-xs text-gray-600">Supporting growers everywhere</p>
-              </div>
+          </div>
+        );
+
+      case 'memberType':
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Choose Your Membership Type</h2>
+              <p className="text-gray-600">Select the option that best describes you</p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* National Network Section */}
-      <div className="bg-green-50 py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Join Our Growing Network</h2>
-            <p className="text-gray-600">Connect with greenhouse growers from coast to coast</p>
-          </div>
-          <div className="flex justify-center">
-            <img 
-              src={nationalNetworkImage} 
-              alt="Map showing national network of connected greenhouse growers across the United States" 
-              className="max-w-full h-auto rounded-lg shadow-lg"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Registration Form */}
-      <div className="py-16 bg-white">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-ugga-primary to-ugga-secondary text-white">
-              <CardTitle className="text-center text-xl">Create Your Account</CardTitle>
-              <p className="text-center text-green-100 text-sm">Join the community today</p>
-            </CardHeader>
-            <CardContent className="p-8">
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Member Type Selection */}
-              <div className="space-y-3">
-                <Label className="text-base font-medium">Member Type *</Label>
-                <RadioGroup
-                  value={memberType}
-                  onValueChange={handleMemberTypeChange}
-                  className="flex flex-col space-y-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="grower" id="grower" />
-                    <Label htmlFor="grower" className="cursor-pointer">
-                      Grower Member
-                    </Label>
+            <RadioGroup
+              value={watchedMemberType}
+              onValueChange={handleMemberTypeChange}
+              className="space-y-4"
+            >
+              <Card className={`cursor-pointer transition-all ${watchedMemberType === 'grower' ? 'ring-2 ring-ugga-primary' : 'hover:shadow-md'}`}>
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-3">
+                    <RadioGroupItem value="grower" id="grower" className="mt-1" />
+                    <div className="flex-1">
+                      <Label htmlFor="grower" className="cursor-pointer text-lg font-medium">
+                        Grower Member
+                      </Label>
+                      <p className="text-gray-600 mt-1">
+                        I own, manage, or work at a greenhouse operation. I'm involved in growing crops and want to connect with other growers.
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="general" id="general" />
-                    <Label htmlFor="general" className="cursor-pointer">
-                      General Member
-                    </Label>
+                </CardContent>
+              </Card>
+              <Card className={`cursor-pointer transition-all ${watchedMemberType === 'general' ? 'ring-2 ring-ugga-primary' : 'hover:shadow-md'}`}>
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-3">
+                    <RadioGroupItem value="general" id="general" className="mt-1" />
+                    <div className="flex-1">
+                      <Label htmlFor="general" className="cursor-pointer text-lg font-medium">
+                        General Member
+                      </Label>
+                      <p className="text-gray-600 mt-1">
+                        I'm interested in the greenhouse industry but don't directly grow crops. This includes researchers, suppliers, advisors, and enthusiasts.
+                      </p>
+                    </div>
                   </div>
-                </RadioGroup>
-              </div>
+                </CardContent>
+              </Card>
+            </RadioGroup>
+          </div>
+        );
 
-              {/* Basic Information - Full Name */}
+      case 'basicInfo':
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Tell Us About Yourself</h2>
+              <p className="text-gray-600">Help us get to know you better</p>
+            </div>
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name *</Label>
                 <Input
                   id="name"
                   {...form.register("name")}
-                  aria-describedby={form.formState.errors.name ? "name-error" : undefined}
+                  placeholder="Enter your full name"
                 />
                 {form.formState.errors.name && (
-                  <p id="name-error" className="text-sm text-red-600" role="alert">{form.formState.errors.name.message}</p>
+                  <p className="text-sm text-red-600">{form.formState.errors.name.message}</p>
                 )}
               </div>
-
-              {/* Email Address */}
+              <div className="space-y-2">
+                <Label htmlFor="username">Username *</Label>
+                <Input
+                  id="username"
+                  {...form.register("username")}
+                  placeholder="Choose a username"
+                />
+                {form.formState.errors.username && (
+                  <p className="text-sm text-red-600">{form.formState.errors.username.message}</p>
+                )}
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address *</Label>
                 <Input
                   id="email"
                   type="email"
                   {...form.register("email")}
+                  placeholder="your.email@example.com"
                 />
                 {form.formState.errors.email && (
                   <p className="text-sm text-red-600">{form.formState.errors.email.message}</p>
                 )}
               </div>
+            </div>
+          </div>
+        );
 
-              {/* Phone Number */}
+      case 'password':
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Secure Your Account</h2>
+              <p className="text-gray-600">Create a strong password to protect your account</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password *</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  {...form.register("password")}
+                  placeholder="Enter a secure password"
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+              {form.formState.errors.password && (
+                <p className="text-sm text-red-600">{form.formState.errors.password.message}</p>
+              )}
+              <p className="text-sm text-gray-500">Password must be at least 12 characters long</p>
+            </div>
+          </div>
+        );
+
+      case 'contact':
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">How Can We Reach You?</h2>
+              <p className="text-gray-600">We'll use this information to connect you with local growers</p>
+            </div>
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number *</Label>
                 <Input
                   id="phone"
                   type="tel"
                   {...form.register("phone")}
+                  placeholder="(555) 123-4567"
                 />
                 {form.formState.errors.phone && (
                   <p className="text-sm text-red-600">{form.formState.errors.phone.message}</p>
                 )}
               </div>
-
-              {/* Location Information */}
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="state">State *</Label>
                   <Select 
@@ -379,9 +453,7 @@ export default function Register() {
                     </SelectTrigger>
                     <SelectContent>
                       {US_STATES.map((state) => (
-                        <SelectItem key={state} value={state}>
-                          {state}
-                        </SelectItem>
+                        <SelectItem key={state} value={state}>{state}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -389,7 +461,7 @@ export default function Register() {
                     <p className="text-sm text-red-600">{form.formState.errors.state.message}</p>
                   )}
                 </div>
-                {memberType === "grower" && (
+                {watchedMemberType === "grower" && (
                   <div className="space-y-2">
                     <Label htmlFor="county">County *</Label>
                     <Input
@@ -403,284 +475,221 @@ export default function Register() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        );
 
-              {/* Professional Information */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="employer">Employer/Company</Label>
-                  <Input
-                    id="employer"
-                    {...form.register("employer")}
-                  />
-                </div>
-                {memberType === "general" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="jobTitle">Job Title</Label>
-                    <Input
-                      id="jobTitle"
-                      {...form.register("jobTitle")}
-                    />
+      case 'growerInfo':
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Your Growing Operation</h2>
+              <p className="text-gray-600">Tell us about your greenhouse operation</p>
+            </div>
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Greenhouse Role *</Label>
+                <RadioGroup
+                  value={form.watch("greenhouseRole")}
+                  onValueChange={(value) => form.setValue("greenhouseRole", value)}
+                  className="space-y-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="owner" id="owner" />
+                    <Label htmlFor="owner">I own / manage this greenhouse</Label>
                   </div>
-                )}
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="worker" id="worker" />
+                    <Label htmlFor="worker">I work at this greenhouse</Label>
+                  </div>
+                </RadioGroup>
               </div>
-
-              {/* Grower-Specific Fields */}
-              {memberType === "grower" && (
-                <>
-                  {/* Greenhouse Role */}
-                  <div className="space-y-3">
-                    <Label className="text-base font-medium">Greenhouse Role *</Label>
-                    <RadioGroup
-                      value={form.watch("greenhouseRole")}
-                      onValueChange={(value) => form.setValue("greenhouseRole", value)}
-                      className="flex flex-col space-y-2"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="owner" id="owner" />
-                        <Label htmlFor="owner" className="cursor-pointer">
-                          I own / manage this greenhouse
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="worker" id="worker" />
-                        <Label htmlFor="worker" className="cursor-pointer">
-                          I work at this greenhouse
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  {/* Greenhouse Size */}
-                  <div className="space-y-2">
-                    <Label htmlFor="ghSize">Greenhouse Size</Label>
-                    <Select 
-                      value={form.watch("ghSize")} 
-                      onValueChange={(value) => form.setValue("ghSize", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select greenhouse size" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {GREENHOUSE_SIZES.map((size) => (
-                          <SelectItem key={size} value={size}>
-                            {size}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Farm Type */}
-                  <div className="space-y-2">
-                    <Label htmlFor="farmType">Farm Type</Label>
-                    <Select 
-                      value={form.watch("farmType")} 
-                      onValueChange={(value) => form.setValue("farmType", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select farm type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {FARM_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {form.watch("farmType") === "Other" && (
-                      <div className="space-y-2">
-                        <Label htmlFor="otherFarmType">Specify Other Farm Type *</Label>
-                        <Input
-                          id="otherFarmType"
-                          {...form.register("otherFarmType")}
-                          placeholder="Enter other farm type"
-                        />
-                        {form.formState.errors.otherFarmType && (
-                          <p className="text-sm text-red-600">{form.formState.errors.otherFarmType.message}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Crop Types */}
-                  <div className="space-y-3">
-                    <Label className="text-base font-medium">Crop Types Grown (select up to 8)</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {CROP_TYPES.map((crop) => (
-                        <div key={crop} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={crop}
-                            checked={selectedCrops.includes(crop)}
-                            onCheckedChange={() => handleCropToggle(crop)}
-                            disabled={!selectedCrops.includes(crop) && selectedCrops.length >= 8}
-                          />
-                          <Label htmlFor={crop} className="cursor-pointer text-sm">
-                            {crop}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                    {selectedCrops.includes("Other") && (
-                      <div className="space-y-2">
-                        <Label htmlFor="otherCrop">Specify Other Crop Type *</Label>
-                        <Input
-                          id="otherCrop"
-                          {...form.register("otherCrop")}
-                          placeholder="Enter other crop type"
-                        />
-                        {form.formState.errors.otherCrop && (
-                          <p className="text-sm text-red-600">{form.formState.errors.otherCrop.message}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Production Method */}
-                  <div className="space-y-2">
-                    <Label htmlFor="productionMethod">Production Method</Label>
-                    <Select 
-                      value={form.watch("productionMethod")} 
-                      onValueChange={(value) => form.setValue("productionMethod", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select production method" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PRODUCTION_METHODS.map((method) => (
-                          <SelectItem key={method} value={method}>
-                            {method}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Climate Control Type - Multi-select */}
-                  <div className="space-y-3">
-                    <Label className="text-base font-medium">Climate Control Type (select at least one) *</Label>
-                    <div className="grid grid-cols-1 gap-3">
-                      {CLIMATE_CONTROL_OPTIONS.map((option) => (
-                        <div key={option.value} className="flex items-start space-x-2">
-                          <Checkbox
-                            id={option.value}
-                            checked={selectedClimateControl.includes(option.value)}
-                            onCheckedChange={() => handleClimateControlToggle(option.value)}
-                            className="mt-1"
-                          />
-                          <Label htmlFor={option.value} className="cursor-pointer text-sm flex-1">
-                            {option.label} <span aria-hidden="true" className="text-sm text-gray-500 italic">{option.blurb}</span>
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                    {form.formState.errors.climateControl && (
-                      <p className="text-sm text-red-600">{form.formState.errors.climateControl.message}</p>
-                    )}
-                  </div>
-
-                  {/* Supplemental Lighting */}
-                  <div className="space-y-2">
-                    <Label htmlFor="suppLighting">Supplemental Lighting</Label>
-                    <Select 
-                      value={form.watch("suppLighting")} 
-                      onValueChange={(value) => form.setValue("suppLighting", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select lighting option" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {LIGHTING_OPTIONS.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </>
-              )}
-
-              {/* Account Credentials */}
-              <div className="space-y-4">
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="username">Username *</Label>
-                  <Input
-                    id="username"
-                    {...form.register("username")}
-                  />
-                  {form.formState.errors.username && (
-                    <p className="text-sm text-red-600">{form.formState.errors.username.message}</p>
-                  )}
+                  <Label htmlFor="ghSize">Greenhouse Size</Label>
+                  <Select 
+                    value={form.watch("ghSize")} 
+                    onValueChange={(value) => form.setValue("ghSize", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {GREENHOUSE_SIZES.map((size) => (
+                        <SelectItem key={size} value={size}>{size}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password *</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      {...form.register("password", {
-                        onChange: (e) => setPasswordLength(e.target.value.length)
-                      })}
-                      className="pr-20"
-                    />
-                    <div className="absolute right-0 top-0 h-full flex items-center">
-                      <span className={`text-sm px-2 ${passwordLength >= 12 ? 'text-green-600' : 'text-gray-500'}`}>
-                        {passwordLength} / 12
-                      </span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                  {form.formState.errors.password && (
-                    <p className="text-sm text-red-600">{form.formState.errors.password.message}</p>
-                  )}
-                  <p className="text-xs text-gray-500">
-                    Password must be at least 12 characters long
-                  </p>
+                  <Label htmlFor="farmType">Farm Type</Label>
+                  <Select 
+                    value={form.watch("farmType")} 
+                    onValueChange={(value) => form.setValue("farmType", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FARM_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={registerMutation.isPending}
-              >
-                {registerMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Creating Account...
-                  </>
-                ) : (
-                  "Create Account"
+              <div className="space-y-3">
+                <Label className="text-base font-medium">Climate Control Type *</Label>
+                <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
+                  {CLIMATE_CONTROL_OPTIONS.slice(0, 4).map((option) => (
+                    <div key={option.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={option.value}
+                        checked={selectedClimateControl.includes(option.value)}
+                        onCheckedChange={() => handleClimateControlToggle(option.value)}
+                      />
+                      <Label htmlFor={option.value} className="text-sm">{option.label}</Label>
+                    </div>
+                  ))}
+                </div>
+                {form.formState.errors.climateControl && (
+                  <p className="text-sm text-red-600">{form.formState.errors.climateControl.message}</p>
                 )}
-              </Button>
-            </form>
+              </div>
+            </div>
+          </div>
+        );
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{" "}
-                <Link href="/login" className="text-ugga-primary hover:text-ugga-secondary font-medium">
-                  Sign in
-                </Link>
+      case 'confirmation':
+        return (
+          <div className="text-center space-y-6">
+            <div className="flex justify-center">
+              <CheckCircle className="h-16 w-16 text-green-500" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Welcome to the Community!</h2>
+              <p className="text-lg text-gray-600 mb-6">
+                Your account has been created successfully. You're now part of the growing UGGA network.
               </p>
             </div>
+            <div className="relative">
+              <img 
+                src={nationalNetworkImage} 
+                alt="National network of connected greenhouse growers across the United States" 
+                className="w-full h-auto rounded-lg shadow-lg"
+              />
+              <div className="absolute bottom-4 left-4 right-4 bg-white/95 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-900 mb-1">Join Our Growing Network</h3>
+                <p className="text-sm text-gray-700">Connect with greenhouse growers from coast to coast</p>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Button 
+                onClick={() => setLocation("/login")}
+                className="w-full"
+              >
+                Sign In to Your Account
+              </Button>
+              <p className="text-sm text-gray-600">
+                Ready to explore the platform and connect with other growers!
+              </p>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <img src={uggaLogo} alt="UGGA Logo" className="h-12 w-12 mr-3" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Join UGGA</h1>
+              <p className="text-ugga-primary font-medium">United Greenhouse Growers Association</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-700">
+              Step {currentStep + 1} of {totalSteps}
+            </span>
+            <span className="text-sm text-gray-500">
+              {steps[currentStep]?.title}
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-ugga-primary h-2 rounded-full transition-all duration-300"
+              style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Card Content */}
+        <Card className="shadow-lg">
+          <CardContent className="p-8">
+            {renderStepContent()}
           </CardContent>
+          
+          {/* Navigation */}
+          <div className="px-8 pb-8">
+            <div className="flex justify-between">
+              <Button
+                variant="outline"
+                onClick={prevStep}
+                disabled={isFirstStep}
+                className="flex items-center"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              
+              {currentStep === steps.findIndex(s => s.id === 'confirmation') ? null : (
+                <Button
+                  onClick={currentStep === totalSteps - 2 ? form.handleSubmit(onSubmit) : nextStep}
+                  disabled={registerMutation.isPending}
+                  className="flex items-center"
+                >
+                  {registerMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Creating Account...
+                    </>
+                  ) : currentStep === totalSteps - 2 ? (
+                    "Create Account"
+                  ) : (
+                    <>
+                      Next
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
         </Card>
+
+        {/* Sign In Link */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{" "}
+            <Link href="/login" className="text-ugga-primary hover:text-ugga-secondary font-medium">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
-  </div>
   );
 }
