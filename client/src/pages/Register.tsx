@@ -684,12 +684,17 @@ export default function Register() {
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <img src={uggaLogo} alt="UGGA Logo" className="h-12 w-12 mr-3" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Join UGGA</h1>
-              <p className="text-ugga-primary font-medium">United Greenhouse Growers Association</p>
+          {/* Logo with light background */}
+          <div className="flex justify-center mb-4">
+            <div className="bg-white rounded-lg p-3 shadow-sm">
+              <img src={uggaLogo} alt="UGGA Logo" className="h-12 w-12" />
             </div>
+          </div>
+          
+          {/* Title with dark green background */}
+          <div className="bg-ugga-primary rounded-lg p-4">
+            <h1 className="text-2xl font-bold text-white">Join UGGA</h1>
+            <p className="text-white font-medium">United Greenhouse Growers Association</p>
           </div>
         </div>
 
