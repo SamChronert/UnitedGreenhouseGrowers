@@ -264,7 +264,7 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
           >
             <div className="flex items-center gap-3">
               <BookOpen className="h-5 w-5" />
-              Industry Bulletins ({bulletins.length})
+              Extension ({bulletins.length})
             </div>
             {bulletinsExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </Button>
