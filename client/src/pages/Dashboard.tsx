@@ -68,14 +68,14 @@ export default function Dashboard() {
   };
 
   const memberTools = [
-    // Row 1: Find a Grower, Member Forum, Resource Library
+    // Row 1: Resource Library, Member Forum, Sales Hub
     {
-      icon: <MapPin className="h-8 w-8" style={{ color: "#1d4ed8" }} />,
-      title: "Find a Grower",
-      description: "Connect with growers by location and expertise",
-      href: "/dashboard/find-grower",
-      inDevelopment: true,
-      iconBgColor: "#dbeafe"
+      icon: <FolderOpen className="h-8 w-8" style={{ color: "#c2410c" }} />,
+      title: "Resource Library",
+      description: "Browse curated grower resources — find relevant research, organizations near you, tax incentives and rebates, upcoming events, and more.",
+      href: "/dashboard/resources",
+      inDevelopment: false,
+      iconBgColor: "#fed7aa"
     },
     {
       icon: <MessageCircle className="h-8 w-8" style={{ color: "#7c3aed" }} />,
@@ -86,29 +86,29 @@ export default function Dashboard() {
       iconBgColor: "#e9d5ff"
     },
     {
-      icon: <FolderOpen className="h-8 w-8" style={{ color: "#c2410c" }} />,
-      title: "Resource Library",
-      description: "Browse curated grower resources — find relevant research, organizations near you, tax incentives and rebates, upcoming events, and more.",
-      href: "/dashboard/resources",
-      inDevelopment: true,
-      iconBgColor: "#fed7aa"
-    },
-    // Row 2: Farm Assessment, Sales Hub, Product Hub, Member Profile
-    {
-      icon: <ClipboardList className="h-8 w-8" style={{ color: "#dc2626" }} />,
-      title: "Farm Assessment",
-      description: "Respond to the prompts to determine which areas of your farm to work on to improve yield and profitability for your operation.",
-      href: "/dashboard/assessment",
-      inDevelopment: true,
-      iconBgColor: "#fecaca"
-    },
-    {
       icon: <Store className="h-8 w-8" style={{ color: "#16a34a" }} />,
       title: "Sales Hub",
       description: "Find buyers and distributors for your products",
       href: "/dashboard/saleshub",
       inDevelopment: true,
       iconBgColor: "#bbf7d0"
+    },
+    // Row 2: Find a Grower, Farm Roadmap, Product Hub, Member Profile
+    {
+      icon: <MapPin className="h-8 w-8" style={{ color: "#1d4ed8" }} />,
+      title: "Find a Grower",
+      description: "Connect with growers by location and expertise",
+      href: "/dashboard/find-grower",
+      inDevelopment: true,
+      iconBgColor: "#dbeafe"
+    },
+    {
+      icon: <ClipboardList className="h-8 w-8" style={{ color: "#dc2626" }} />,
+      title: "Farm Roadmap",
+      description: "Respond to the prompts to determine which areas of your farm to work on to improve yield and profitability for your operation.",
+      href: "/dashboard/farm-roadmap",
+      inDevelopment: true,
+      iconBgColor: "#fecaca"
     },
     {
       icon: <ShoppingBag className="h-8 w-8" style={{ color: "#db2777" }} />,
