@@ -5,14 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useQuery } from '@tanstack/react-query';
-import { useParamState } from '@/hooks/useQueryParams';
 import { useResources } from '@/hooks/useResources';
 import { type Resource, type ResourceFilters } from '@/hooks/useResources';
 import { trackTabView, trackResourceClick } from '@/lib/analytics';
-import { useToggleView } from '@/hooks/useToggleView';
-import { ToggleGroup } from '@/features/resources/components/ToggleGroup';
 
 export interface BlogPost {
   id: string;
@@ -32,7 +29,9 @@ import {
   Loader2,
   Tag,
   Grid3X3,
-  List
+  List,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 
 interface BlogsBulletinsTabProps {
@@ -60,11 +59,12 @@ const TOPIC_TAGS = [
 ];
 
 export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTabProps) {
-  // URL state management
-  const [activeSection, setActiveSection] = useParamState('section', 'blogs');
-  const [viewMode, setViewMode] = useParamState('view', 'grid');
+  // State for collapsible sections
+  const [blogsExpanded, setBlogsExpanded] = useState(true);
+  const [bulletinsExpanded, setBulletinsExpanded] = useState(true);
   
   // State
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [bulletinSearch, setBulletinSearch] = useState('');
   const [bulletinFilters, setBulletinFilters] = useState({
     source: 'all',
@@ -76,8 +76,8 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
   // Track tab view on mount
   useEffect(() => {
     trackTabView('blogs-bulletins');
-    onAnalyticsEvent?.('tab_view', { tab: 'blogs-bulletins', section: activeSection });
-  }, [onAnalyticsEvent, activeSection]);
+    onAnalyticsEvent?.('tab_view', { tab: 'blogs-bulletins' });
+  }, [onAnalyticsEvent]);
 
   // Fetch blog posts from existing API
   const { data: blogPosts, isLoading: blogsLoading, error: blogsError } = useQuery<BlogPost[]>({
@@ -88,16 +88,11 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
   const { data: bulletinsData, isLoading: bulletinsLoading, error: bulletinsError } = useResources({
     type: 'bulletins',
     query: bulletinSearch,
-    filters: Object.fromEntries(Object.entries(bulletinFilters).filter(([_, v]) => v && v !== 'all')) as ResourceFilters,
-    enabled: activeSection === 'bulletins'
+    filters: Object.fromEntries(Object.entries(bulletinFilters).filter(([_, v]) => v && v !== 'all')) as ResourceFilters
   });
 
   const bulletins = bulletinsData?.items || [];
 
-  // Handle section change
-  const handleSectionChange = useCallback((section: string) => {
-    setActiveSection(section);
-  }, [setActiveSection]);
 
   // Handle blog click
   const handleBlogClick = useCallback((blog: BlogPost) => {
@@ -170,35 +165,30 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
 
   return (
     <div 
-      key={`blogs-${activeSection}-${viewMode}`}
       role="tabpanel" 
       id="blogs-bulletins-panel" 
       aria-labelledby="blogs-bulletins-tab"
       className="space-y-6"
     >
-      {/* Header */}
-      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <h2 className="text-lg font-semibold text-purple-900 mb-2">Blogs & Research Bulletins</h2>
-        <p className="text-purple-800">
-          Stay informed with UGGA insights and curated industry research bulletins.
-        </p>
-      </div>
 
-      {/* Section Tabs */}
-      <Tabs value={activeSection} onValueChange={handleSectionChange}>
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="blogs" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            UGGA Blogs
-          </TabsTrigger>
-          <TabsTrigger value="bulletins" className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Industry Bulletins
-          </TabsTrigger>
-        </TabsList>
-
-        {/* UGGA Blogs Section */}
-        <TabsContent value="blogs" className="space-y-6">
+      {/* UGGA Blogs Section */}
+      <Collapsible open={blogsExpanded} onOpenChange={setBlogsExpanded}>
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            style={{ backgroundColor: '#7C3AED' }}
+            className="w-full p-4 justify-between text-lg font-semibold text-white hover:opacity-90 border rounded-lg"
+          >
+            <div className="flex items-center gap-3">
+              <FileText className="h-5 w-5" />
+              UGGA Blogs ({blogPosts?.length || 0})
+            </div>
+            {blogsExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent className="space-y-4 mt-4">
+          {/* Blogs Content */}
           {blogsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -261,10 +251,26 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
               ))}
             </div>
           )}
-        </TabsContent>
+        </CollapsibleContent>
+      </Collapsible>
 
-        {/* Industry Bulletins Section */}
-        <TabsContent value="bulletins" className="space-y-6">
+      {/* Industry Bulletins Section */}
+      <Collapsible open={bulletinsExpanded} onOpenChange={setBulletinsExpanded}>
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            style={{ backgroundColor: '#059669' }}
+            className="w-full p-4 justify-between text-lg font-semibold text-white hover:opacity-90 border rounded-lg"
+          >
+            <div className="flex items-center gap-3">
+              <BookOpen className="h-5 w-5" />
+              Industry Bulletins ({bulletins.length})
+            </div>
+            {bulletinsExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </CollapsibleTrigger>
+        
+        <CollapsibleContent className="space-y-4 mt-4">
           {/* Search and Filters */}
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -488,8 +494,8 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
               ))}
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </CollapsibleContent>
+      </Collapsible>
 
       {/* Bulletin Details Modal */}
       <Dialog open={resourceModalOpen} onOpenChange={setResourceModalOpen}>
