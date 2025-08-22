@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { 
@@ -18,9 +18,7 @@ import {
   UserCircle,
   MessageCircle,
   Store,
-  ShoppingBag,
-  Settings,
-  ArrowLeft
+  ShoppingBag
 } from "lucide-react";
 
 import ChatWidget from "@/components/ChatWidget";
@@ -28,14 +26,29 @@ import ChallengeSubmissionForm from "@/components/ChallengeSubmissionForm";
 import AdminDashboardHome from "@/components/AdminDashboardHome";
 
 export default function Dashboard() {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
+  const [location] = useLocation();
   const { toast } = useToast();
   const [feedback, setFeedback] = useState({
     subject: "",
     message: "",
     type: "feedback"
   });
-  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
+  
+  // Check URL params to determine if showing admin dashboard
+  const showAdminDashboard = new URLSearchParams(location.split('?')[1] || '').get('admin') === 'true';
+  
+  // Update page title based on current view
+  useEffect(() => {
+    if (showAdminDashboard) {
+      document.title = 'Admin Dashboard - UGGA Platform';
+    } else {
+      document.title = 'Dashboard - UGGA Platform';
+    }
+    return () => {
+      document.title = 'UGGA Platform';
+    };
+  }, [showAdminDashboard]);
   
 
 
@@ -137,44 +150,15 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Welcome Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Welcome Back, {user?.profile?.name || user?.username}
-              </h1>
-              <p className="text-gray-600">
-                {showAdminDashboard 
-                  ? "Manage platform content, users, and view analytics"
-                  : "Manage your profile, connect with growers, and access member tools"
-                }
-              </p>
-            </div>
-            
-            {/* Admin Tools / Back Button */}
-            {isAdmin && (
-              <div className="flex items-center gap-3">
-                {showAdminDashboard ? (
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowAdminDashboard(false)}
-                    className="flex items-center gap-2"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Back to Dashboard
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => setShowAdminDashboard(true)}
-                    className="flex items-center gap-2 text-white"
-                    style={{backgroundColor: 'var(--color-clay)'}}
-                  >
-                    <Settings className="h-4 w-4" />
-                    Admin Tools
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome Back, {user?.profile?.name || user?.username}
+          </h1>
+          <p className="text-gray-600">
+            {showAdminDashboard 
+              ? "Manage platform content, users, and view analytics"
+              : "Manage your profile, connect with growers, and access member tools"
+            }
+          </p>
         </div>
 
         {/* Conditional Content */}

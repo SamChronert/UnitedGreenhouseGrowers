@@ -29,6 +29,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  Settings,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -45,7 +46,7 @@ interface NavigationItem {
 
 export default function Sidebar({ className }: SidebarProps) {
   const [location] = useLocation();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isAdmin } = useAuth();
   const { isDemo, showDemoAction } = useDemo();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -150,8 +151,22 @@ export default function Sidebar({ className }: SidebarProps) {
     },
   ] : [];
 
+  // Section 4: Admin Tools (only if admin)
+  const adminNavItems: NavigationItem[] = isAdmin ? [
+    {
+      id: "admin-tools",
+      label: "Admin Tools",
+      path: "/dashboard?admin=true",
+      icon: Settings,
+    },
+  ] : [];
+
   const isActive = (path: string) => {
     if (path === "#") return false;
+    // Special handling for admin dashboard
+    if (path === "/dashboard?admin=true") {
+      return location.includes("admin=true");
+    }
     return location === path || 
       (path === "/dashboard" && location === "/dashboard") ||
       (path === "/demo" && location === "/demo") ||
@@ -332,6 +347,16 @@ export default function Sidebar({ className }: SidebarProps) {
                 </div>
               </>
             )}
+
+            {adminNavItems.length > 0 && (
+              <>
+                <Separator className="my-4" />
+                {/* Section 4: Admin Tools */}
+                <div className="space-y-1">
+                  {adminNavItems.map(item => renderNavItem(item))}
+                </div>
+              </>
+            )}
           </nav>
           
           {/* Return to Website Button */}
@@ -344,7 +369,9 @@ export default function Sidebar({ className }: SidebarProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 text-white hover:opacity-90"
-                    style={{ backgroundColor: '#36533C', focusRingColor: '#36533C' }}
+                    style={{ backgroundColor: '#36533C' }}
+                    onFocus={(e) => e.target.style.outline = '2px solid #36533C'}
+                    onBlur={(e) => e.target.style.outline = 'none'}
                   >
                     <ExternalLink className="h-4 w-4 flex-shrink-0" />
                     {!isCollapsed && (
@@ -409,6 +436,16 @@ export default function Sidebar({ className }: SidebarProps) {
                 {/* Section 3: Profile */}
                 <div className="space-y-1">
                   {profileNavItems.map(item => renderNavItem(item, true))}
+                </div>
+              </>
+            )}
+
+            {adminNavItems.length > 0 && (
+              <>
+                <Separator className="my-4" />
+                {/* Section 4: Admin Tools */}
+                <div className="space-y-1">
+                  {adminNavItems.map(item => renderNavItem(item, true))}
                 </div>
               </>
             )}
