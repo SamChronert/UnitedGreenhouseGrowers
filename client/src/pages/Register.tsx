@@ -662,7 +662,7 @@ export default function Register() {
             </div>
             <div className="space-y-4">
               <Button 
-                onClick={() => setLocation("/")}
+                onClick={() => setLocation("/dashboard")}
                 className="w-full"
               >
                 Go to Your Dashboard
