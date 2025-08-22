@@ -19,8 +19,6 @@ import {
   Mail,
   BookOpen,
   Loader2,
-  Grid3X3,
-  List
 } from 'lucide-react';
 
 interface IndustryNewsTabProps {
@@ -35,8 +33,6 @@ const FREQUENCIES = [
 ];
 
 export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabProps) {
-  // URL state management
-  const [viewMode, setViewMode] = useParamState('view', 'list');
   
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,10 +42,6 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [resourceModalOpen, setResourceModalOpen] = useState(false);
   
-  // Handle view mode change
-  const handleViewModeChange = useCallback((mode: string) => {
-    setViewMode(mode);
-  }, [setViewMode]);
 
   // Track tab view on mount
   useEffect(() => {
@@ -153,20 +145,6 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
             resourceType="industry_news"
             className="max-w-md"
           />
-          
-          {/* View Toggle */}
-          <Tabs value={viewMode} onValueChange={handleViewModeChange}>
-            <TabsList className="grid w-full grid-cols-2 max-w-[200px]">
-              <TabsTrigger value="list" className="flex items-center gap-2">
-                <List className="h-4 w-4" />
-                List
-              </TabsTrigger>
-              <TabsTrigger value="grid" className="flex items-center gap-2">
-                <Grid3X3 className="h-4 w-4" />
-                Grid
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
         </div>
         
         <div className="flex items-center gap-4">
@@ -197,17 +175,24 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
 
       {/* Content */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-full"></div>
-                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="space-y-8">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i}>
+              <div className="animate-pulse h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 3 }).map((_, j) => (
+                  <Card key={j} className="animate-pulse">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-full"></div>
+                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       ) : error ? (
@@ -222,7 +207,7 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
           <h3 className="text-lg font-medium text-gray-900 mb-2">No news sources found</h3>
           <p className="text-gray-600">Try adjusting your search to find industry publications.</p>
         </div>
-      ) : viewMode === 'list' ? (
+      ) : (
         <div className="space-y-8">
           {Object.entries(groupedSources)
             .filter(([_, sources]) => sources.length > 0)
@@ -275,10 +260,10 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
                               variant="outline" 
                               size="sm" 
                               className="flex-1"
-                              onClick={() => handleNewsSourceClick(source, 'visit')}
+                              onClick={() => handleNewsSourceClick(source)}
                             >
                               <Globe className="h-4 w-4 mr-2" />
-                              Visit
+                              View Details
                             </Button>
                             
                             {source.data?.subscribeUrl && (
@@ -286,7 +271,7 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
                                 variant="default" 
                                 size="sm" 
                                 className="flex-1"
-                                onClick={() => handleNewsSourceClick(source, 'subscribe')}
+                                onClick={() => handleExternalLinkClick(source, 'subscribe')}
                               >
                                 <Mail className="h-4 w-4 mr-2" />
                                 Subscribe
@@ -301,55 +286,6 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
               </div>
             ))
           }
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {newsSources.map(source => (
-            <Card key={source.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleNewsSourceClick(source)}>
-              <CardHeader>
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-orange-100 rounded-lg flex-shrink-0">
-                    <Newspaper className="h-6 w-6 text-orange-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg line-clamp-2">{source.title}</CardTitle>
-                    {source.data?.sourceName && source.data.sourceName !== source.title && (
-                      <p className="text-sm text-gray-600 mt-1">{source.data.sourceName}</p>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                  {source.summary || source.data?.description || 'Industry publication providing news and insights.'}
-                </p>
-                
-                <div className="space-y-3">
-                  {source.data?.frequency && (
-                    <div className="flex items-center gap-2">
-                      <Badge variant={getFrequencyBadgeVariant(source.data.frequency)}>
-                        <Clock className="h-3 w-3 mr-1" />
-                        {source.data.frequency}
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => handleNewsSourceClick(source)}
-                    >
-                      <Globe className="h-4 w-4 mr-2" />
-                      View Details
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
         </div>
       )}
 
