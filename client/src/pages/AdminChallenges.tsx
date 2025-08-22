@@ -7,31 +7,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from "recharts";
-import { 
   Download, 
   Flag, 
-  Calendar, 
-  TrendingUp, 
-  Users,
-  AlertCircle,
-  CheckCircle,
-  Clock
+  MessageSquare,
+  Calendar,
+  User
 } from "lucide-react";
 import { format } from "date-fns";
-import type { GrowerChallenge, User, Profile } from "@shared/schema";
+import type { GrowerChallenge, User as UserType, Profile } from "@shared/schema";
 
-type ChallengeWithUser = GrowerChallenge & { user: User & { profile: Profile } };
+type FeedbackWithUser = GrowerChallenge & { user: UserType & { profile: Profile } };
 
 const flagOptions = [
   { value: "none", label: "No flag", color: "bg-gray-100 text-gray-600" },
@@ -40,25 +25,14 @@ const flagOptions = [
   { value: "needs_follow_up", label: "Needs Follow-Up", color: "bg-yellow-100 text-yellow-700" }
 ];
 
-const categoryColors = [
-  "#8b5cf6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", 
-  "#6366f1", "#84cc16", "#f97316", "#ec4899", "#64748b"
-];
-
 export default function AdminChallenges() {
-  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedFlag, setSelectedFlag] = useState("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch challenges
-  const { data: challenges = [], isLoading } = useQuery<ChallengeWithUser[]>({
+  // Fetch feedback
+  const { data: feedback = [], isLoading } = useQuery<FeedbackWithUser[]>({
     queryKey: ["/api/admin/challenges"],
-  });
-
-  // Fetch stats
-  const { data: stats } = useQuery<{ totalCount: number; categoryCounts: Record<string, number>; recentCount: number }>({
-    queryKey: ["/api/admin/challenges/stats"],
   });
 
   // Update flag mutation
@@ -69,53 +43,45 @@ export default function AdminChallenges() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/challenges"] });
       toast({
         title: "Flag Updated",
-        description: "Challenge flag has been updated successfully.",
+        description: "Feedback flag has been updated successfully.",
       });
     },
     onError: () => {
       toast({
         title: "Update Failed",
-        description: "Failed to update challenge flag.",
+        description: "Failed to update feedback flag.",
         variant: "destructive",
       });
     },
   });
 
-  // Filter challenges
-  const filteredChallenges = challenges.filter((challenge: ChallengeWithUser) => {
-    const categoryMatch = selectedCategory === "all" || challenge.category === selectedCategory;
+  // Filter feedback
+  const filteredFeedback = feedback.filter((item: FeedbackWithUser) => {
     const flagMatch = selectedFlag === "all" || 
-      (selectedFlag === "none" && !challenge.adminFlag) ||
-      challenge.adminFlag === selectedFlag;
-    return categoryMatch && flagMatch;
+      (selectedFlag === "none" && !item.adminFlag) ||
+      item.adminFlag === selectedFlag;
+    return flagMatch;
   });
 
-  // Prepare chart data
-  const categoryData = stats?.categoryCounts ? 
-    Object.entries(stats.categoryCounts).map(([category, count]) => ({
-      category: category.charAt(0).toUpperCase() + category.slice(1),
-      count
-    })) : [];
 
   const exportToCSV = () => {
-    if (filteredChallenges.length === 0) {
+    if (filteredFeedback.length === 0) {
       toast({
         title: "No Data",
-        description: "No challenges to export.",
+        description: "No feedback to export.",
         variant: "destructive",
       });
       return;
     }
 
     const csvContent = [
-      ["Date", "Member", "Email", "Category", "Description", "Flag"],
-      ...filteredChallenges.map((challenge: ChallengeWithUser) => [
-        format(new Date(challenge.createdAt), "yyyy-MM-dd HH:mm"),
-        challenge.user.profile?.name || challenge.user.username,
-        challenge.user.email,
-        challenge.category || "Uncategorized",
-        `"${challenge.description.replace(/"/g, '""')}"`,
-        challenge.adminFlag || "None"
+      ["Date", "Member", "Email", "Description", "Flag"],
+      ...filteredFeedback.map((item: FeedbackWithUser) => [
+        format(new Date(item.createdAt), "yyyy-MM-dd HH:mm"),
+        item.user.profile?.name || item.user.username,
+        item.user.email,
+        `"${item.description.replace(/"/g, '""')}"`,
+        item.adminFlag || "None"
       ])
     ].map(row => row.join(",")).join("\n");
 
@@ -123,7 +89,7 @@ export default function AdminChallenges() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `grower-challenges-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `grower-feedback-${format(new Date(), "yyyy-MM-dd")}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -157,9 +123,9 @@ export default function AdminChallenges() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Grower Challenges Insights</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Grower Feedback</h1>
             <p className="text-gray-600 mt-1">
-              Track and analyze challenges submitted by growers
+              View feedback submitted by growers from the dashboard
             </p>
           </div>
           <Button onClick={exportToCSV} className="flex items-center gap-2">
@@ -168,122 +134,12 @@ export default function AdminChallenges() {
           </Button>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">Total Submissions</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.totalCount || 0}</p>
-                </div>
-                <AlertCircle className="h-8 w-8 text-ugga-secondary" />
-              </div>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">Recent (30 days)</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats?.recentCount || 0}</p>
-                </div>
-                <TrendingUp className="h-8 w-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-600">Categories</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {Object.keys(stats?.categoryCounts || {}).length}
-                  </p>
-                </div>
-                <Users className="h-8 w-8 text-blue-600" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Charts */}
-        {categoryData.length > 0 && (
-          <div className="grid lg:grid-cols-2 gap-6 mb-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Challenges by Category</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={categoryData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="category" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#8b5cf6" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Category Distribution</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      dataKey="count"
-                      label={({ category, percent }) => `${category} (${(percent * 100).toFixed(0)}%)`}
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={categoryColors[index % categoryColors.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        )}
 
         {/* Filters */}
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[200px]">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Filter by Category
-                </label>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="irrigation">Irrigation</SelectItem>
-                    <SelectItem value="disease">Disease</SelectItem>
-                    <SelectItem value="labor">Labor</SelectItem>
-                    <SelectItem value="economics">Economics</SelectItem>
-                    <SelectItem value="policy">Policy</SelectItem>
-                    <SelectItem value="technology">Technology</SelectItem>
-                    <SelectItem value="energy">Energy</SelectItem>
-                    <SelectItem value="market">Market</SelectItem>
-                    <SelectItem value="research">Research</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div className="flex-1 min-w-[200px]">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Filter by Flag
@@ -305,47 +161,42 @@ export default function AdminChallenges() {
           </CardContent>
         </Card>
 
-        {/* Challenges List */}
+        {/* Feedback List */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Flag className="h-5 w-5" />
-              Challenge Submissions ({filteredChallenges.length})
+              <MessageSquare className="h-5 w-5" />
+              Feedback Submissions ({filteredFeedback.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {filteredChallenges.length === 0 ? (
+              {filteredFeedback.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  No challenges found matching the current filters.
+                  No feedback submissions found.
                 </div>
               ) : (
-                filteredChallenges.map((challenge: ChallengeWithUser) => {
-                  const flagDisplay = getFlagDisplay(challenge.adminFlag);
+                filteredFeedback.map((item: FeedbackWithUser) => {
+                  const flagDisplay = getFlagDisplay(item.adminFlag);
                   
                   return (
-                    <div key={challenge.id} className="border rounded-lg p-4 space-y-3">
+                    <div key={item.id} className="border rounded-lg p-4 space-y-3">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="font-medium text-gray-900">
-                              {challenge.user.profile?.name || challenge.user.username}
+                              {item.user.profile?.name || item.user.username}
                             </h3>
                             <span className="text-sm text-gray-500">
-                              {challenge.user.email}
+                              {item.user.email}
                             </span>
-                            {challenge.category && (
-                              <Badge variant="secondary">
-                                {challenge.category.charAt(0).toUpperCase() + challenge.category.slice(1)}
-                              </Badge>
-                            )}
                           </div>
                           <p className="text-gray-700 text-sm leading-relaxed">
-                            {challenge.description}
+                            {item.description}
                           </p>
                           <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
                             <Calendar className="h-3 w-3" />
-                            {format(new Date(challenge.createdAt), "MMM d, yyyy 'at' h:mm a")}
+                            {format(new Date(item.createdAt), "MMM d, yyyy 'at' h:mm a")}
                           </div>
                         </div>
                         
@@ -355,11 +206,11 @@ export default function AdminChallenges() {
                           </Badge>
                           
                           <Select
-                            value={challenge.adminFlag || "none"}
+                            value={item.adminFlag || "none"}
                             onValueChange={(value) => {
                               const newFlag = value === "none" ? null : value;
                               updateFlag.mutate({ 
-                                id: challenge.id, 
+                                id: item.id, 
                                 adminFlag: newFlag || "" 
                               });
                             }}
