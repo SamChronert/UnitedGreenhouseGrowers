@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ExternalLink, Download, Eye, Copy, FileSpreadsheet, DollarSign, Monitor, Smartphone, Globe, Wrench, FileText, Calculator, ChevronDown, ChevronRight } from "lucide-react";
@@ -64,6 +65,8 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
   });
   const [selectedTemplate, setSelectedTemplate] = useState<Resource | null>(null);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [resourceModalOpen, setResourceModalOpen] = useState(false);
 
   // Track tab view on mount
   useEffect(() => {
@@ -90,6 +93,8 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
 
   // Handle tool click
   const handleToolClick = useCallback((tool: Resource) => {
+    setSelectedResource(tool);
+    setResourceModalOpen(true);
     trackResourceClick(tool.id, 'tool', tool.title);
     onAnalyticsEvent?.('tool_click', {
       tool_id: tool.id,
@@ -97,10 +102,6 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
       tool_category: tool.data?.category,
       cost_type: tool.data?.costType
     });
-    
-    if (tool.url) {
-      window.open(tool.url, '_blank');
-    }
   }, [onAnalyticsEvent]);
 
   // Handle template preview
@@ -163,6 +164,24 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
       template_name: template.title
     });
   }, [onAnalyticsEvent, toast]);
+
+  // Handle modal close
+  const handleModalClose = useCallback(() => {
+    setResourceModalOpen(false);
+    setSelectedResource(null);
+  }, []);
+
+  // Handle external link click from modal
+  const handleExternalLinkClick = useCallback((resource: Resource) => {
+    if (resource.url) {
+      window.open(resource.url, '_blank');
+      onAnalyticsEvent?.('resource_external_click', {
+        resource_id: resource.id,
+        resource_type: resource.type,
+        resource_title: resource.title
+      });
+    }
+  }, [onAnalyticsEvent]);
 
   // Get platform icon
   const getPlatformIcon = (platform: string) => {
@@ -354,7 +373,7 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {templates.map(template => (
-                <Card key={template.id} className="hover:shadow-lg transition-shadow">
+                <Card key={template.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleTemplateClick(template)}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
@@ -392,7 +411,10 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                       <Button 
                         variant="outline" 
                         className="w-full"
-                        onClick={() => handleTemplatePreview(template)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTemplatePreview(template);
+                        }}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Preview Template
@@ -403,7 +425,10 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => handleTemplateDownload(template, 'csv')}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTemplateDownload(template, 'csv');
+                            }}
                           >
                             <Download className="h-3 w-3 mr-1" />
                             CSV
@@ -413,7 +438,10 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => handleTemplateDownload(template, 'xlsx')}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTemplateDownload(template, 'xlsx');
+                            }}
                           >
                             <Download className="h-3 w-3 mr-1" />
                             XLSX
@@ -437,11 +465,111 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
         </CollapsibleContent>
       </Collapsible>
 
+      {/* Resource Details Modal */}
+      <Dialog open={resourceModalOpen} onOpenChange={setResourceModalOpen}>
+        <DialogContent className="max-w-2xl z-[1000]">
+          {selectedResource && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  {selectedResource.type === 'tools' ? (
+                    <Calculator className="h-6 w-6 text-blue-600" />
+                  ) : (
+                    <FileSpreadsheet className="h-6 w-6 text-green-600" />
+                  )}
+                  {selectedResource.title}
+                </DialogTitle>
+                <DialogDescription className="flex items-center gap-2">
+                  <Badge variant="outline">
+                    {selectedResource.data?.category || 'General'}
+                  </Badge>
+                  {selectedResource.type === 'tools' && selectedResource.data?.costType && (
+                    <Badge variant={getCostBadgeVariant(selectedResource.data.costType)}>
+                      <DollarSign className="h-3 w-3 mr-1" />
+                      {selectedResource.data.costType}
+                    </Badge>
+                  )}
+                  {selectedResource.type === 'tools' && selectedResource.data?.platform && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      {getPlatformIcon(selectedResource.data.platform)}
+                      {selectedResource.data.platform}
+                    </Badge>
+                  )}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
+                  <p className="text-gray-700">{selectedResource.summary}</p>
+                </div>
+                
+                {selectedResource.type === 'templates' && selectedResource.data?.fileRefs && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Available Formats</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedResource.data.fileRefs.csv && (
+                        <Badge variant="secondary">CSV</Badge>
+                      )}
+                      {selectedResource.data.fileRefs.xlsx && (
+                        <Badge variant="secondary">XLSX</Badge>
+                      )}
+                      {selectedResource.data.fileRefs.gsheetTemplateUrl && (
+                        <Badge variant="secondary">Google Sheets</Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  {selectedResource.url && (
+                    <Button 
+                      onClick={() => handleExternalLinkClick(selectedResource)}
+                      className="flex-1"
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      {selectedResource.type === 'tools' ? 'Visit Tool' : 'Visit Website'}
+                    </Button>
+                  )}
+                  
+                  {selectedResource.type === 'templates' && (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          handleTemplatePreview(selectedResource);
+                          setResourceModalOpen(false);
+                        }}
+                        className="flex-1"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview Template
+                      </Button>
+                      
+                      {selectedResource.data?.fileRefs?.csv && (
+                        <Button
+                          variant="outline"
+                          onClick={() => handleTemplateDownload(selectedResource, 'csv')}
+                          className="flex-1"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download CSV
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Template Preview Modal */}
       {selectedTemplate && (
         <TemplatePreviewModal
           template={selectedTemplate}
-          isOpen={previewModalOpen}
+          open={previewModalOpen}
           onClose={() => {
             setPreviewModalOpen(false);
             setSelectedTemplate(null);
