@@ -156,17 +156,13 @@ export default function Sidebar({ className }: SidebarProps) {
     {
       id: "admin-tools",
       label: "Admin Tools",
-      path: "/dashboard?admin=true",
+      path: isDemo ? "/demo/admin" : "/dashboard/admin",
       icon: Settings,
     },
   ] : [];
 
   const isActive = (path: string) => {
     if (path === "#") return false;
-    // Special handling for admin dashboard
-    if (path === "/dashboard?admin=true") {
-      return location.includes("admin=true");
-    }
     return location === path || 
       (path === "/dashboard" && location === "/dashboard") ||
       (path === "/demo" && location === "/demo") ||

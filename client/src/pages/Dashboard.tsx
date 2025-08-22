@@ -171,21 +171,11 @@ export default function Dashboard() {
             Welcome Back, {user?.profile?.name || user?.username}
           </h1>
           <p className="text-gray-600">
-            {showAdminDashboard 
-              ? "Manage platform content, users, and view analytics"
-              : "Manage your profile, connect with growers, and access member tools"
-            }
+            Manage your profile, connect with growers, and access member tools
           </p>
         </div>
 
-        {/* Conditional Content */}
-        {showAdminDashboard ? (
-          /* Admin Dashboard */
-          <AdminDashboardHome />
-        ) : (
-          /* Regular Member Dashboard */
-          <>
-            {/* Challenge Submission Section */}
+        {/* Challenge Submission Section */
             <Card className="mb-10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -255,13 +245,8 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
-          </>
-        )}
 
-
-
-        {/* Contact UGGA Team Section - Only show on regular dashboard */}
-        {!showAdminDashboard && (
+        {/* Contact UGGA Team Section */
           <Card className="mb-10">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -330,10 +315,6 @@ export default function Dashboard() {
               </Button>
             </CardContent>
           </Card>
-        )}
-
-
-
 
       </div>
     </div>

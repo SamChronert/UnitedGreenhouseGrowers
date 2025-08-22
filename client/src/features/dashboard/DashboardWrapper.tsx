@@ -16,6 +16,7 @@ const Profile = lazy(() => import("@/pages/Profile"));
 const ResourceDetail = lazy(() => import("@/pages/ResourceDetail"));
 const SavedResources = lazy(() => import("@/pages/SavedResources"));
 const Favorites = lazy(() => import("@/pages/Favorites"));
+const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
 
 interface DashboardWrapperProps {
   isDemo?: boolean;
@@ -94,6 +95,12 @@ export default function DashboardWrapper({ isDemo = false }: DashboardWrapperPro
           <Route path={`${basePath}/favorites`}>
             <LazyWrapper>
               <Favorites />
+            </LazyWrapper>
+          </Route>
+          
+          <Route path={`${basePath}/admin`}>
+            <LazyWrapper>
+              <AdminDashboard />
             </LazyWrapper>
           </Route>
           
