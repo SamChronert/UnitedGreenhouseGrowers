@@ -160,7 +160,7 @@ export default function Register() {
   const steps = [
     { id: 'welcome', title: 'Welcome to UGGA!' },
     { id: 'memberType', title: 'Choose Membership Type' },
-    { id: 'basicInfo', title: 'Tell Us About Yourself' },
+    { id: 'basicInfo', title: 'Account Information' },
     { id: 'password', title: 'Secure Your Account' },
     ...(watchedMemberType === 'grower' ? [{ id: 'growerInfo', title: 'Your Growing Operation' }] : []),
     { id: 'confirmation', title: 'Welcome to the Community!' }
@@ -335,8 +335,7 @@ export default function Register() {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Tell Us About Yourself</h2>
-              <p className="text-gray-600">Help us get to know you better</p>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Account Information</h2>
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
