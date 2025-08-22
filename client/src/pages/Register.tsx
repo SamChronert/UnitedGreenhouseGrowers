@@ -657,10 +657,6 @@ export default function Register() {
                 alt="National network of connected greenhouse growers across the United States" 
                 className="w-full h-auto rounded-lg shadow-lg"
               />
-              <div className="absolute bottom-4 left-4 right-4 bg-white/95 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-1">Join Our Growing Network</h3>
-                <p className="text-sm text-gray-700">Connect with greenhouse growers from coast to coast</p>
-              </div>
             </div>
             <div className="space-y-4">
               <Button 
