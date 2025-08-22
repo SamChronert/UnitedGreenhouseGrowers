@@ -28,6 +28,7 @@ export default function BlogPostPage() {
       .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mb-4">$1</h1>')
       .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mb-3 mt-6">$1</h2>')
       .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mb-2 mt-4">$1</h3>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-ugga-primary hover:text-ugga-secondary underline">$1</a>')
       .replace(/\*\*(.*)\*\*/gim, '<strong class="font-semibold">$1</strong>')
       .replace(/\*(.*)\*/gim, '<em class="italic">$1</em>')
       .replace(/\n\n/gim, '</p><p class="mb-4">')
