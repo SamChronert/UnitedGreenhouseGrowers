@@ -64,7 +64,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { path: "/admin/blog", label: "Blog Management" },
     { path: "/admin/resources", label: "Resource Management" },
     { path: "/admin/members", label: "Member Insights" },
-    { path: "/admin/challenges", label: "Challenge Analytics" },
+    { path: "/admin/challenges", label: "Feedback" },
     { path: "/admin/assessment-trainer", label: "Assessment Trainer" },
     { path: "/admin/analytics", label: "Analytics Dashboard" },
   ];

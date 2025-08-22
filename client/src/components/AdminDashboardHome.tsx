@@ -40,8 +40,8 @@ export default function AdminDashboardHome() {
     // Row 2: Analytics & Insights
     {
       icon: <MessageSquare className="h-8 w-8" style={{ color: "#1d4ed8" }} />,
-      title: "Grower Feedback",
-      description: "View feedback and messages submitted by growers from the dashboard.",
+      title: "Feedback",
+      description: "View feedback and messages from the dashboard.",
       href: "/admin/challenges",
       iconBgColor: "#dbeafe"
     },

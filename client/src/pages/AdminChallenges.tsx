@@ -123,9 +123,9 @@ export default function AdminChallenges() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Grower Feedback</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Feedback</h1>
             <p className="text-gray-600 mt-1">
-              View feedback submitted by growers from the dashboard
+              Feedback from the dashboard
             </p>
           </div>
           <Button onClick={exportToCSV} className="flex items-center gap-2">
