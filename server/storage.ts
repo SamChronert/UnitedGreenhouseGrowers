@@ -14,6 +14,8 @@ import {
   farmAssessments,
   farmProfiles,
   farmRecommendations,
+  farmRoadmapCategories,
+  farmRoadmapQuestions,
   type User,
   type InsertUser,
   type Profile,
@@ -46,6 +48,10 @@ import {
   type InsertFarmProfile,
   type FarmRecommendation,
   type InsertFarmRecommendation,
+  type FarmRoadmapCategory,
+  type InsertFarmRoadmapCategory,
+  type FarmRoadmapQuestion,
+  type InsertFarmRoadmapQuestion,
   type ResourceType,
   Role
 } from "@shared/schema";
@@ -158,11 +164,26 @@ export interface IStorage {
   getUserVote(userId: string, entityType: 'post' | 'comment', entityId: string): Promise<ForumVote | undefined>;
   getVotesForEntity(entityType: 'post' | 'comment', entityId: string): Promise<{ upvotes: number; downvotes: number; userVote?: 1 | -1; }>;
   
-  // Assessment training data operations
-  getAllAssessmentTrainingData(): Promise<AssessmentTrainingData[]>;
-  createAssessmentTrainingData(data: InsertAssessmentTrainingData): Promise<AssessmentTrainingData>;
-  updateAssessmentTrainingData(id: string, updates: Partial<AssessmentTrainingData>): Promise<AssessmentTrainingData>;
-  deleteAssessmentTrainingData(id: string): Promise<void>;
+  // Farm Assessment operations (legacy - keeping for existing farm roadmap)
+  createFarmAssessment(assessment: InsertFarmAssessment): Promise<FarmAssessment>;
+  getFarmAssessmentsByUser(userId: string): Promise<FarmAssessment[]>;
+  createFarmProfile(profile: InsertFarmProfile): Promise<FarmProfile>;
+  getFarmProfileByUser(userId: string): Promise<FarmProfile | undefined>;
+  createFarmRecommendations(recommendations: InsertFarmRecommendation[]): Promise<FarmRecommendation[]>;
+  getFarmRecommendationsByProfile(profileId: string): Promise<FarmRecommendation[]>;
+
+  // Farm Roadmap Categories operations
+  getAllFarmRoadmapCategories(): Promise<(FarmRoadmapCategory & { questions: FarmRoadmapQuestion[] })[]>;
+  getAllFarmRoadmapCategoriesAdmin(): Promise<(FarmRoadmapCategory & { questions: FarmRoadmapQuestion[] })[]>;
+  createFarmRoadmapCategory(category: InsertFarmRoadmapCategory): Promise<FarmRoadmapCategory>;
+  updateFarmRoadmapCategory(id: string, updates: Partial<FarmRoadmapCategory>): Promise<FarmRoadmapCategory>;
+  deleteFarmRoadmapCategory(id: string): Promise<void>;
+
+  // Farm Roadmap Questions operations
+  getAllFarmRoadmapQuestionsAdmin(categoryId?: string): Promise<FarmRoadmapQuestion[]>;
+  createFarmRoadmapQuestion(question: InsertFarmRoadmapQuestion): Promise<FarmRoadmapQuestion>;
+  updateFarmRoadmapQuestion(id: string, updates: Partial<FarmRoadmapQuestion>): Promise<FarmRoadmapQuestion>;
+  deleteFarmRoadmapQuestion(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1286,6 +1307,119 @@ export class DatabaseStorage implements IStorage {
       .from(farmRecommendations)
       .where(eq(farmRecommendations.profileId, profileId))
       .orderBy(desc(farmRecommendations.priority), desc(farmRecommendations.createdAt));
+  }
+
+  // Farm Roadmap Categories operations
+  async getAllFarmRoadmapCategories(): Promise<(FarmRoadmapCategory & { questions: FarmRoadmapQuestion[] })[]> {
+    const categories = await db
+      .select()
+      .from(farmRoadmapCategories)
+      .where(eq(farmRoadmapCategories.isActive, true))
+      .orderBy(farmRoadmapCategories.displayOrder);
+
+    const categoriesWithQuestions = await Promise.all(
+      categories.map(async (category) => {
+        const questions = await db
+          .select()
+          .from(farmRoadmapQuestions)
+          .where(
+            and(
+              eq(farmRoadmapQuestions.categoryId, category.id),
+              eq(farmRoadmapQuestions.isActive, true)
+            )
+          )
+          .orderBy(farmRoadmapQuestions.displayOrder);
+        
+        return { ...category, questions };
+      })
+    );
+
+    return categoriesWithQuestions;
+  }
+
+  async getAllFarmRoadmapCategoriesAdmin(): Promise<(FarmRoadmapCategory & { questions: FarmRoadmapQuestion[] })[]> {
+    const categories = await db
+      .select()
+      .from(farmRoadmapCategories)
+      .orderBy(farmRoadmapCategories.displayOrder);
+
+    const categoriesWithQuestions = await Promise.all(
+      categories.map(async (category) => {
+        const questions = await db
+          .select()
+          .from(farmRoadmapQuestions)
+          .where(eq(farmRoadmapQuestions.categoryId, category.id))
+          .orderBy(farmRoadmapQuestions.displayOrder);
+        
+        return { ...category, questions };
+      })
+    );
+
+    return categoriesWithQuestions;
+  }
+
+  async createFarmRoadmapCategory(data: InsertFarmRoadmapCategory): Promise<FarmRoadmapCategory> {
+    const [category] = await db
+      .insert(farmRoadmapCategories)
+      .values({
+        id: randomUUID(),
+        ...data,
+      })
+      .returning();
+    return category;
+  }
+
+  async updateFarmRoadmapCategory(id: string, updates: Partial<FarmRoadmapCategory>): Promise<FarmRoadmapCategory> {
+    const [category] = await db
+      .update(farmRoadmapCategories)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(farmRoadmapCategories.id, id))
+      .returning();
+    return category;
+  }
+
+  async deleteFarmRoadmapCategory(id: string): Promise<void> {
+    // First delete all questions in this category
+    await db.delete(farmRoadmapQuestions).where(eq(farmRoadmapQuestions.categoryId, id));
+    // Then delete the category
+    await db.delete(farmRoadmapCategories).where(eq(farmRoadmapCategories.id, id));
+  }
+
+  // Farm Roadmap Questions operations
+  async getAllFarmRoadmapQuestionsAdmin(categoryId?: string): Promise<FarmRoadmapQuestion[]> {
+    const query = db.select().from(farmRoadmapQuestions);
+    
+    if (categoryId) {
+      return await query
+        .where(eq(farmRoadmapQuestions.categoryId, categoryId))
+        .orderBy(farmRoadmapQuestions.displayOrder);
+    }
+    
+    return await query.orderBy(farmRoadmapQuestions.displayOrder);
+  }
+
+  async createFarmRoadmapQuestion(data: InsertFarmRoadmapQuestion): Promise<FarmRoadmapQuestion> {
+    const [question] = await db
+      .insert(farmRoadmapQuestions)
+      .values({
+        id: randomUUID(),
+        ...data,
+      })
+      .returning();
+    return question;
+  }
+
+  async updateFarmRoadmapQuestion(id: string, updates: Partial<FarmRoadmapQuestion>): Promise<FarmRoadmapQuestion> {
+    const [question] = await db
+      .update(farmRoadmapQuestions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(farmRoadmapQuestions.id, id))
+      .returning();
+    return question;
+  }
+
+  async deleteFarmRoadmapQuestion(id: string): Promise<void> {
+    await db.delete(farmRoadmapQuestions).where(eq(farmRoadmapQuestions.id, id));
   }
 }
 

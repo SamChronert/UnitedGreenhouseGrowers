@@ -53,11 +53,11 @@ export default function AdminDashboardHome() {
       iconBgColor: "#fecaca"
     },
     {
-      icon: <Target className="h-8 w-8" style={{ color: "#db2777" }} />,
-      title: "Assessment Trainer",
-      description: "Manage and train the AI assessment system for farm roadmap recommendations.",
-      href: "/admin/assessment-trainer",
-      iconBgColor: "#fce7f3"
+      icon: <Target className="h-8 w-8" style={{ color: "#16a34a" }} />,
+      title: "Farm Roadmap Manager",
+      description: "Manage categories and questions for the farm roadmap assessment tool.",
+      href: "/admin/farm-roadmap",
+      iconBgColor: "#bbf7d0"
     }
   ];
 

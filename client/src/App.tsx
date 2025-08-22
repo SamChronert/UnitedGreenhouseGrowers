@@ -24,7 +24,7 @@ import AdminResources from "@/pages/AdminResources";
 import AdminBlog from "@/pages/AdminBlog";
 import AdminMembers from "@/pages/AdminMembers";
 import AdminChallenges from "@/pages/AdminChallenges";
-import AdminAssessmentTrainer from "@/pages/AdminAssessmentTrainer";
+import AdminFarmRoadmapManager from "@/pages/AdminFarmRoadmapManager";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -144,10 +144,10 @@ function Router() {
         </LayoutWrapper>
       </Route>
       
-      <Route path="/admin/assessment-trainer">
+      <Route path="/admin/farm-roadmap">
         <LayoutWrapper>
           <AuthGuard requireAdmin>
-            <AdminAssessmentTrainer />
+            <AdminFarmRoadmapManager />
           </AuthGuard>
         </LayoutWrapper>
       </Route>

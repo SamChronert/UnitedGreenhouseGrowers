@@ -292,6 +292,39 @@ export const farmRecommendations = pgTable("farm_recommendations", {
   priorityIdx: index("farm_recommendations_priority_idx").on(table.priority),
 }));
 
+// Farm Roadmap Questions and Categories tables
+export const farmRoadmapCategories = pgTable("farm_roadmap_categories", {
+  id: varchar("id").primaryKey().notNull(),
+  name: varchar("name").notNull(),
+  description: text("description").notNull(),
+  color: varchar("color").notNull(), // CSS color for UI
+  displayOrder: integer("display_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  displayOrderIdx: index("farm_roadmap_categories_display_order_idx").on(table.displayOrder),
+  isActiveIdx: index("farm_roadmap_categories_is_active_idx").on(table.isActive),
+}));
+
+export const farmRoadmapQuestions = pgTable("farm_roadmap_questions", {
+  id: varchar("id").primaryKey().notNull(),
+  categoryId: varchar("category_id").notNull(),
+  question: text("question").notNull(),
+  type: varchar("type").notNull(), // 'multiple-choice', 'scale', 'yes-no'
+  options: text("options").array().default([]), // For multiple-choice questions
+  scaleLabels: jsonb("scale_labels"), // For scale questions: { min: string, max: string }
+  description: text("description"), // Optional explanatory text
+  displayOrder: integer("display_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  categoryIdx: index("farm_roadmap_questions_category_idx").on(table.categoryId),
+  displayOrderIdx: index("farm_roadmap_questions_display_order_idx").on(table.displayOrder),
+  isActiveIdx: index("farm_roadmap_questions_is_active_idx").on(table.isActive),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, {
@@ -424,6 +457,17 @@ export const farmRecommendationsRelations = relations(farmRecommendations, ({ on
   }),
 }));
 
+export const farmRoadmapCategoriesRelations = relations(farmRoadmapCategories, ({ many }) => ({
+  questions: many(farmRoadmapQuestions),
+}));
+
+export const farmRoadmapQuestionsRelations = relations(farmRoadmapQuestions, ({ one }) => ({
+  category: one(farmRoadmapCategories, {
+    fields: [farmRoadmapQuestions.categoryId],
+    references: [farmRoadmapCategories.id],
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -523,6 +567,18 @@ export const insertFarmRecommendationSchema = createInsertSchema(farmRecommendat
   createdAt: true,
 });
 
+export const insertFarmRoadmapCategorySchema = createInsertSchema(farmRoadmapCategories).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertFarmRoadmapQuestionSchema = createInsertSchema(farmRoadmapQuestions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -562,3 +618,7 @@ export type FarmProfile = typeof farmProfiles.$inferSelect;
 export type InsertFarmProfile = z.infer<typeof insertFarmProfileSchema>;
 export type FarmRecommendation = typeof farmRecommendations.$inferSelect;
 export type InsertFarmRecommendation = z.infer<typeof insertFarmRecommendationSchema>;
+export type FarmRoadmapCategory = typeof farmRoadmapCategories.$inferSelect;
+export type InsertFarmRoadmapCategory = z.infer<typeof insertFarmRoadmapCategorySchema>;
+export type FarmRoadmapQuestion = typeof farmRoadmapQuestions.$inferSelect;
+export type InsertFarmRoadmapQuestion = z.infer<typeof insertFarmRoadmapQuestionSchema>;

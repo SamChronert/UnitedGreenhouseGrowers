@@ -1518,44 +1518,98 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
-  // Assessment training data routes
-  app.get("/api/admin/assessment-training", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+  // Farm Roadmap Questions Management Routes
+  // Public endpoint to get all active categories and questions
+  app.get("/api/farm-roadmap/questions", async (req, res) => {
     try {
-      const trainingData = await storage.getAllAssessmentTrainingData();
-      res.json(trainingData);
+      const categories = await storage.getAllFarmRoadmapCategories();
+      res.json(categories);
     } catch (error) {
-      console.error("Get assessment training data error:", error);
-      res.status(500).json({ message: "Failed to fetch training data" });
+      console.error("Get farm roadmap questions error:", error);
+      res.status(500).json({ message: "Failed to fetch farm roadmap questions" });
     }
   });
 
-  app.post("/api/admin/assessment-training", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+  // Admin endpoints for managing categories
+  app.get("/api/admin/farm-roadmap/categories", authenticate, requireAdmin, async (req: AuthRequest, res) => {
     try {
-      const trainingData = await storage.createAssessmentTrainingData(req.body);
-      res.status(201).json(trainingData);
+      const categories = await storage.getAllFarmRoadmapCategoriesAdmin();
+      res.json(categories);
     } catch (error) {
-      console.error("Create assessment training data error:", error);
-      res.status(500).json({ message: "Failed to create training data" });
+      console.error("Get admin categories error:", error);
+      res.status(500).json({ message: "Failed to fetch categories" });
     }
   });
 
-  app.put("/api/admin/assessment-training/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+  app.post("/api/admin/farm-roadmap/categories", authenticate, requireAdmin, async (req: AuthRequest, res) => {
     try {
-      const trainingData = await storage.updateAssessmentTrainingData(req.params.id, req.body);
-      res.json(trainingData);
+      const category = await storage.createFarmRoadmapCategory(req.body);
+      res.status(201).json(category);
     } catch (error) {
-      console.error("Update assessment training data error:", error);
-      res.status(500).json({ message: "Failed to update training data" });
+      console.error("Create category error:", error);
+      res.status(500).json({ message: "Failed to create category" });
     }
   });
 
-  app.delete("/api/admin/assessment-training/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+  app.put("/api/admin/farm-roadmap/categories/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
     try {
-      await storage.deleteAssessmentTrainingData(req.params.id);
-      res.json({ message: "Training data deleted" });
+      const category = await storage.updateFarmRoadmapCategory(req.params.id, req.body);
+      res.json(category);
     } catch (error) {
-      console.error("Delete assessment training data error:", error);
-      res.status(500).json({ message: "Failed to delete training data" });
+      console.error("Update category error:", error);
+      res.status(500).json({ message: "Failed to update category" });
+    }
+  });
+
+  app.delete("/api/admin/farm-roadmap/categories/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      await storage.deleteFarmRoadmapCategory(req.params.id);
+      res.json({ message: "Category deleted" });
+    } catch (error) {
+      console.error("Delete category error:", error);
+      res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
+
+  // Admin endpoints for managing questions
+  app.get("/api/admin/farm-roadmap/questions", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { categoryId } = req.query;
+      const questions = await storage.getAllFarmRoadmapQuestionsAdmin(categoryId as string);
+      res.json(questions);
+    } catch (error) {
+      console.error("Get admin questions error:", error);
+      res.status(500).json({ message: "Failed to fetch questions" });
+    }
+  });
+
+  app.post("/api/admin/farm-roadmap/questions", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const question = await storage.createFarmRoadmapQuestion(req.body);
+      res.status(201).json(question);
+    } catch (error) {
+      console.error("Create question error:", error);
+      res.status(500).json({ message: "Failed to create question" });
+    }
+  });
+
+  app.put("/api/admin/farm-roadmap/questions/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const question = await storage.updateFarmRoadmapQuestion(req.params.id, req.body);
+      res.json(question);
+    } catch (error) {
+      console.error("Update question error:", error);
+      res.status(500).json({ message: "Failed to update question" });
+    }
+  });
+
+  app.delete("/api/admin/farm-roadmap/questions/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      await storage.deleteFarmRoadmapQuestion(req.params.id);
+      res.json({ message: "Question deleted" });
+    } catch (error) {
+      console.error("Delete question error:", error);
+      res.status(500).json({ message: "Failed to delete question" });
     }
   });
 

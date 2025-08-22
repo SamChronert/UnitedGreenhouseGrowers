@@ -16,10 +16,29 @@ import {
   Target,
   Lightbulb
 } from "lucide-react";
-import { farmRoadmapCategories, getAllQuestions, type AssessmentQuestion } from "@/data/farmRoadmapQuestions";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import InDevelopmentBanner from "@/components/InDevelopmentBanner";
+
+interface AssessmentQuestion {
+  id: string;
+  question: string;
+  type: 'multiple-choice' | 'scale' | 'yes-no';
+  options?: string[];
+  scaleLabels?: { min: string; max: string };
+  description?: string;
+  displayOrder: number;
+  categoryId: string;
+}
+
+interface AssessmentCategory {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  displayOrder: number;
+  questions: AssessmentQuestion[];
+}
 
 interface AssessmentResponse {
   questionId: string;
@@ -54,9 +73,19 @@ export default function FarmRoadmap() {
   const [farmProfile, setFarmProfile] = useState<FarmProfile | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
-  const allQuestions = getAllQuestions();
+  // Fetch farm roadmap questions
+  const { data: categories = [], isLoading: isLoadingQuestions } = useQuery({
+    queryKey: ['/api/farm-roadmap/questions'],
+    queryFn: () => apiRequest('GET', '/api/farm-roadmap/questions'),
+  });
+
+  // Extract all questions from categories
+  const allQuestions = categories.flatMap((category: AssessmentCategory) => 
+    category.questions.map(q => ({ ...q, category: category.id }))
+  );
+  
   const currentQuestion = allQuestions[currentStep];
-  const progressPercentage = ((currentStep + 1) / allQuestions.length) * 100;
+  const progressPercentage = allQuestions.length > 0 ? ((currentStep + 1) / allQuestions.length) * 100 : 0;
 
   // Submit assessment mutation
   const submitAssessmentMutation = useMutation({
@@ -172,11 +201,45 @@ export default function FarmRoadmap() {
 
   const getCurrentCategory = () => {
     if (!currentQuestion) return null;
-    return farmRoadmapCategories.find(cat => cat.id === currentQuestion.category);
+    return categories.find((cat: AssessmentCategory) => cat.id === currentQuestion.category);
   };
 
   const currentResponse = responses[currentQuestion?.id];
   const canProceed = currentResponse !== undefined;
+
+  // Show loading state while fetching questions
+  if (isLoadingQuestions) {
+    return (
+      <div className="min-h-screen py-8 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ClipboardList className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Loading Farm Roadmap...</h1>
+            <p className="text-lg text-gray-600">Preparing your assessment questions</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if no questions loaded
+  if (!isLoadingQuestions && allQuestions.length === 0) {
+    return (
+      <div className="min-h-screen py-8 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ClipboardList className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Assessment Unavailable</h1>
+            <p className="text-lg text-gray-600">Unable to load assessment questions. Please try again later.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isCompleted && farmProfile) {
     return (
@@ -238,7 +301,7 @@ export default function FarmRoadmap() {
               <div className="mt-6">
                 <h3 className="font-semibold text-lg mb-4">Category Scores</h3>
                 <div className="grid md:grid-cols-3 gap-4">
-                  {farmRoadmapCategories.map((category) => {
+                  {categories.map((category: AssessmentCategory) => {
                     const score = farmProfile.scores[category.id] || 0;
                     const percentage = (score / 5) * 100;
                     return (
@@ -361,7 +424,7 @@ export default function FarmRoadmap() {
             <CardContent>
               {currentQuestion.type === 'multiple-choice' && (
                 <div className="space-y-3">
-                  {currentQuestion.options?.map((option, index) => (
+                  {currentQuestion.options?.map((option: string, index: number) => (
                     <button
                       key={index}
                       onClick={() => handleAnswer(option)}
