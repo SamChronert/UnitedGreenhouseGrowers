@@ -157,7 +157,7 @@ export default function AdminAiAgents() {
       });
       return;
     }
-    updateConfigMutation.mutate({ id: editingConfig.type, data: formData });
+    updateConfigMutation.mutate({ id: editingConfig.id, data: formData });
   };
 
   const handleDelete = (id: string) => {
@@ -361,7 +361,7 @@ export default function AdminAiAgents() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDelete(config.type)}
+                        onClick={() => handleDelete(config.id)}
                         className="text-red-600 hover:text-red-800"
                       >
                         <Trash2 className="h-4 w-4 mr-1" />
