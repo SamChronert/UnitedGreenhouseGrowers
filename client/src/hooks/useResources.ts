@@ -26,6 +26,7 @@ export interface Resource {
   summary: string;
   data: Record<string, any>;
   tags: string[];
+  image_url?: string | null;
   lat?: number | null;
   long?: number | null;
   ugga_verified?: boolean;

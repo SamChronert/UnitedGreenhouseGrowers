@@ -33,6 +33,7 @@ import {
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { sql, eq, and, or, like, desc, asc, count } from "drizzle-orm";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { db } from "./db";
 
 // Rate limiting for AI endpoints
@@ -1487,6 +1488,33 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     } catch (error) {
       console.error("File upload error:", error);
       res.status(500).json({ message: "Failed to upload file" });
+    }
+  });
+
+  // Resource image upload and serving routes
+  app.post("/api/resource-images/upload", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getResourceImageUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Resource image upload URL error:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+  });
+
+  app.get("/resource-images/:imagePath(*)", async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const imagePath = `/resource-images/${req.params.imagePath}`;
+      const imageFile = await objectStorageService.getResourceImageFile(imagePath);
+      objectStorageService.downloadObject(imageFile, res);
+    } catch (error) {
+      console.error("Resource image serve error:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.status(404).json({ message: "Image not found" });
+      }
+      return res.status(500).json({ message: "Failed to serve image" });
     }
   });
 

@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ExternalLink, Download, Eye, Copy, FileSpreadsheet, DollarSign, Monitor, Smartphone, Globe, Wrench, FileText, Calculator, ChevronDown, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useResources, Resource, ResourceFilters } from "@/hooks/useResources";
 import SearchBox from "@/components/SearchBox";
 import TemplatePreviewModal from "../TemplatePreviewModal";
@@ -295,8 +296,25 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <Calculator className="h-6 w-6 text-blue-600" />
+                        <div className="flex-shrink-0">
+                          {tool.image_url ? (
+                            <img 
+                              src={tool.image_url}
+                              alt={`${tool.title} logo`}
+                              className="h-10 w-10 object-cover rounded-lg border"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.nextElementSibling?.classList.remove('hidden');
+                              }}
+                            />
+                          ) : null}
+                          <div className={cn(
+                            "p-2 bg-blue-100 rounded-lg",
+                            tool.image_url ? "hidden" : "block"
+                          )}>
+                            <Calculator className="h-6 w-6 text-blue-600" />
+                          </div>
                         </div>
                         <div>
                           <CardTitle className="text-lg">{tool.title}</CardTitle>

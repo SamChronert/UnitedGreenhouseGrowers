@@ -77,6 +77,7 @@ export const resources = pgTable("resources", {
   system_type: text("system_type").array().default([]),
   region: varchar("region"),
   cost: varchar("cost"),
+  image_url: varchar("image_url"), // URL to uploaded logo/branding image
   last_verified_at: timestamp("last_verified_at"),
   review_interval_days: integer("review_interval_days"),
   ugga_verified: boolean("ugga_verified").default(false),

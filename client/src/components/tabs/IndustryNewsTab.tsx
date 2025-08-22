@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParamState } from '@/hooks/useQueryParams';
 import { useResources } from '@/hooks/useResources';
 import SearchBox from '@/components/SearchBox';
-import { type Resource, type ResourceFilters } from '@shared/schema';
+import { type Resource, type ResourceFilters } from '@/hooks/useResources';
 import { trackTabView, trackResourceClick } from '@/lib/analytics';
 import { 
   Newspaper, 
@@ -20,6 +20,7 @@ import {
   BookOpen,
   Loader2,
 } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 interface IndustryNewsTabProps {
   onAnalyticsEvent?: (eventName: string, payload: any) => void;
@@ -226,8 +227,25 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
                     <Card key={source.id} className="hover:shadow-lg transition-shadow">
                       <CardHeader>
                         <div className="flex items-start gap-3">
-                          <div className="p-2 bg-orange-100 rounded-lg flex-shrink-0">
-                            <Newspaper className="h-6 w-6 text-orange-600" />
+                          <div className="flex-shrink-0">
+                            {source.image_url ? (
+                              <img 
+                                src={source.image_url}
+                                alt={`${source.title} logo`}
+                                className="h-10 w-10 object-cover rounded-lg border"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  target.nextElementSibling?.classList.remove('hidden');
+                                }}
+                              />
+                            ) : null}
+                            <div className={cn(
+                              "p-2 bg-orange-100 rounded-lg flex-shrink-0",
+                              source.image_url ? "hidden" : "block"
+                            )}>
+                              <Newspaper className="h-6 w-6 text-orange-600" />
+                            </div>
                           </div>
                           <div className="flex-1 min-w-0">
                             <CardTitle className="text-lg line-clamp-2">{source.title}</CardTitle>

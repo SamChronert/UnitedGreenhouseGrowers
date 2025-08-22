@@ -233,7 +233,7 @@ export default function OrganizationsTab({ onAnalyticsEvent }: OrganizationsTabP
           {organizations.map((organization) => {
             const description = organization.data?.description || organization.summary;
             const website = organization.data?.urls?.site || organization.url;
-            const logoUrl = organization.data?.logoUrl;
+            const logoUrl = organization.image_url;
             const orgType = organization.data?.orgType;
             const region = organization.data?.region;
             const focusArea = organization.data?.focusArea;

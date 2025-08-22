@@ -24,6 +24,7 @@ import {
   ChevronDown,
   ChevronRight
 } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 interface LearningTabProps {
   onAnalyticsEvent?: (eventName: string, payload: any) => void;
@@ -348,8 +349,25 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                   <div className="flex items-center gap-3 mb-2">
-                                    <div className="p-2 bg-blue-100 rounded-lg">
-                                      <GraduationCap className="h-5 w-5 text-blue-600" />
+                                    <div className="flex-shrink-0">
+                                      {course.image_url ? (
+                                        <img 
+                                          src={course.image_url}
+                                          alt={`${course.title} logo`}
+                                          className="h-9 w-9 object-cover rounded-lg border"
+                                          onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                            target.nextElementSibling?.classList.remove('hidden');
+                                          }}
+                                        />
+                                      ) : null}
+                                      <div className={cn(
+                                        "p-2 bg-blue-100 rounded-lg",
+                                        course.image_url ? "hidden" : "block"
+                                      )}>
+                                        <GraduationCap className="h-5 w-5 text-blue-600" />
+                                      </div>
                                     </div>
                                     <div>
                                       <h3 className="text-lg font-semibold">{course.title}</h3>
@@ -410,7 +428,15 @@ export default function LearningTab({ onAnalyticsEvent }: LearningTabProps) {
             <>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  <GraduationCap className="h-6 w-6 text-blue-600" />
+                  {selectedResource.image_url ? (
+                    <img 
+                      src={selectedResource.image_url}
+                      alt={`${selectedResource.title} logo`}
+                      className="h-6 w-6 object-cover rounded"
+                    />
+                  ) : (
+                    <GraduationCap className="h-6 w-6 text-blue-600" />
+                  )}
                   {selectedResource.title}
                 </DialogTitle>
                 <DialogDescription className="flex items-center gap-2">

@@ -11,7 +11,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { type Resource, type ResourceType } from "@shared/schema";
-import { CalendarIcon, X } from "lucide-react";
+import { CalendarIcon, X, Upload, Image } from "lucide-react";
+import { ObjectUploader } from "@/components/ObjectUploader";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -290,7 +291,7 @@ export default function ResourceTypeForm({
       url: initialData?.url || "",
       summary: initialData?.summary || "",
       tags: Array.isArray(initialData?.tags) ? initialData.tags.join(", ") : "",
-      imageUrl: initialData?.imageUrl || "",
+      imageUrl: initialData?.image_url || "",
       ...typeFields.reduce((acc, field) => {
         const value = (initialData?.data as any)?.[field.name];
         acc[field.name] = field.type === 'multi-select' 
@@ -326,7 +327,7 @@ export default function ResourceTypeForm({
       type: resourceType,
       summary: data.summary || undefined,
       tags: data.tags ? data.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
-      imageUrl: data.imageUrl || undefined,
+      image_url: data.imageUrl || undefined,
       data: typeFields.reduce((acc, field) => {
         if (data[field.name] !== undefined && data[field.name] !== "" && data[field.name] !== false) {
           acc[field.name] = data[field.name];
@@ -411,9 +412,48 @@ export default function ResourceTypeForm({
             name="imageUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Image URL</FormLabel>
+                <FormLabel>Resource Logo/Image</FormLabel>
                 <FormControl>
-                  <Input {...field} type="url" placeholder="https://example.com/image.jpg" />
+                  <div className="space-y-3">
+                    {field.value && (
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={field.value.startsWith('/resource-images/') ? field.value : field.value} 
+                          alt="Resource preview" 
+                          className="w-12 h-12 object-cover rounded border"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => field.onChange('')}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Remove
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-2">
+                      <ObjectUploader
+                        onComplete={(imagePath) => {
+                          field.onChange(imagePath);
+                        }}
+                        buttonClassName="flex-1"
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        {field.value ? 'Replace Image' : 'Upload Image'}
+                      </ObjectUploader>
+                    </div>
+                    
+                    <Input
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      type="url"
+                      placeholder="Or enter image URL directly..."
+                      className="text-sm"
+                    />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -434,7 +474,7 @@ export default function ResourceTypeForm({
                   <FormField
                     key={fieldConfig.name}
                     control={form.control}
-                    name={fieldConfig.name}
+                    name={fieldConfig.name as any}
                     render={({ field }) => (
                       <FormItem className={fieldConfig.type === 'textarea' ? 'md:col-span-2' : ''}>
                         <FormLabel>
@@ -459,9 +499,9 @@ export default function ResourceTypeForm({
                               {fieldConfig.options?.map(option => (
                                 <div key={option.value} className="flex items-center space-x-2">
                                   <Checkbox
-                                    checked={field.value?.includes(option.value)}
+                                    checked={Array.isArray(field.value) ? field.value.includes(option.value) : false}
                                     onCheckedChange={(checked) => {
-                                      const current = field.value || [];
+                                      const current = Array.isArray(field.value) ? field.value : [];
                                       const updated = checked
                                         ? [...current, option.value]
                                         : current.filter((v: string) => v !== option.value);
@@ -497,7 +537,7 @@ export default function ResourceTypeForm({
                               <PopoverContent className="w-auto p-0">
                                 <Calendar
                                   mode="single"
-                                  selected={field.value}
+                                  selected={field.value as Date}
                                   onSelect={field.onChange}
                                   initialFocus
                                 />
@@ -505,7 +545,7 @@ export default function ResourceTypeForm({
                             </Popover>
                           ) : fieldConfig.type === 'checkbox' ? (
                             <Checkbox
-                              checked={field.value}
+                              checked={!!field.value}
                               onCheckedChange={field.onChange}
                             />
                           ) : fieldConfig.type === 'number' ? (
