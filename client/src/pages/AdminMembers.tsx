@@ -1,21 +1,53 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { type User, type Profile } from "@shared/schema";
-import { Search, Users, MapPin, Calendar, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { type User, type Profile, Role } from "@shared/schema";
+import { Search, Users, MapPin, Calendar, Loader2, Plus, Edit2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 interface MemberWithProfile extends User {
   profile: Profile;
 }
 
+const memberFormSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(12, "Password must be at least 12 characters").optional(),
+  role: z.enum(["MEMBER", "ADMIN"]),
+  profile: z.object({
+    name: z.string().min(1, "Name is required"),
+    phone: z.string(),
+    state: z.string(),
+    employer: z.string().optional(),
+    jobTitle: z.string().optional(),
+    farmType: z.string().optional(),
+    memberType: z.enum(["grower", "general"]).default("grower"),
+    county: z.string().optional(),
+    greenhouseRole: z.string().optional(),
+  })
+});
+
+type MemberFormData = z.infer<typeof memberFormSchema>;
+
 export default function AdminMembers() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedState, setSelectedState] = useState<string>("all");
   const [selectedFarmType, setSelectedFarmType] = useState<string>("all");
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingMember, setEditingMember] = useState<MemberWithProfile | null>(null);
+  const { toast } = useToast();
 
   const { data: members, isLoading, error } = useQuery<MemberWithProfile[]>({
     queryKey: ["/api/admin/members", searchTerm, selectedState, selectedFarmType],
@@ -34,6 +66,55 @@ export default function AdminMembers() {
       }
       
       return response.json();
+    },
+  });
+
+  const createMemberMutation = useMutation({
+    mutationFn: async (data: MemberFormData) => {
+      const response = await fetch("/api/admin/members", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create member");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Member created successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/members"] });
+      setIsAddDialogOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const updateMemberMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<MemberFormData> }) => {
+      const response = await fetch(`/api/admin/members/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update member");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Member updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/members"] });
+      setIsEditDialogOpen(false);
+      setEditingMember(null);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
@@ -93,14 +174,34 @@ export default function AdminMembers() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-ugga-primary rounded-full flex items-center justify-center">
-              <Users className="h-6 w-6 text-white" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-ugga-primary rounded-full flex items-center justify-center">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Member Management</h1>
+                <p className="text-gray-600">View, edit, and manage UGGA member accounts</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Member Directory</h1>
-              <p className="text-gray-600">View and search UGGA member information</p>
-            </div>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Member
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add New Member</DialogTitle>
+                </DialogHeader>
+                <MemberForm
+                  onSubmit={(data) => createMemberMutation.mutate(data)}
+                  isSubmitting={createMemberMutation.isPending}
+                  isCreate={true}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
@@ -205,6 +306,7 @@ export default function AdminMembers() {
                       <TableHead>Professional</TableHead>
                       <TableHead>Role</TableHead>
                       <TableHead>Joined</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -259,6 +361,18 @@ export default function AdminMembers() {
                             {formatDate(new Date(member.createdAt).toISOString())}
                           </div>
                         </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setEditingMember(member);
+                              setIsEditDialogOpen(true);
+                            }}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -267,7 +381,289 @@ export default function AdminMembers() {
             )}
           </CardContent>
         </Card>
+
+        {/* Edit Member Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Member</DialogTitle>
+            </DialogHeader>
+            {editingMember && (
+              <MemberForm
+                member={editingMember}
+                onSubmit={(data) => updateMemberMutation.mutate({ id: editingMember.id, data })}
+                isSubmitting={updateMemberMutation.isPending}
+                isCreate={false}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
+  );
+}
+
+interface MemberFormProps {
+  member?: MemberWithProfile;
+  onSubmit: (data: MemberFormData) => void;
+  isSubmitting: boolean;
+  isCreate: boolean;
+}
+
+function MemberForm({ member, onSubmit, isSubmitting, isCreate }: MemberFormProps) {
+  const form = useForm<MemberFormData>({
+    resolver: zodResolver(memberFormSchema),
+    defaultValues: {
+      username: member?.username || "",
+      email: member?.email || "",
+      password: "",
+      role: (member?.role as "MEMBER" | "ADMIN") || "MEMBER",
+      profile: {
+        name: member?.profile?.name || "",
+        phone: member?.profile?.phone || "",
+        state: member?.profile?.state || "",
+        employer: member?.profile?.employer || "",
+        jobTitle: member?.profile?.jobTitle || "",
+        farmType: member?.profile?.farmType || "",
+        memberType: (member?.profile?.memberType as "grower" | "general") || "grower",
+        county: member?.profile?.county || "",
+        greenhouseRole: member?.profile?.greenhouseRole || "",
+      },
+    },
+  });
+
+  const handleSubmit = (data: MemberFormData) => {
+    // Remove password field if it's empty for edit
+    if (!isCreate && !data.password) {
+      const { password, ...dataWithoutPassword } = data;
+      onSubmit(dataWithoutPassword as MemberFormData);
+    } else {
+      onSubmit(data);
+    }
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input {...field} disabled={!isCreate} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input type="email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{isCreate ? "Password" : "New Password (leave blank to keep current)"}</FormLabel>
+                <FormControl>
+                  <Input type="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Role</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="MEMBER">Member</SelectItem>
+                    <SelectItem value="ADMIN">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="profile.name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Full Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="profile.phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="profile.state"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>State</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="profile.memberType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Member Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="grower">Grower</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="profile.employer"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Employer</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="profile.jobTitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Job Title</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="profile.farmType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Farm Type</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="profile.county"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>County</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="profile.greenhouseRole"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Greenhouse Role</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end gap-2 pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => form.reset()}
+            disabled={isSubmitting}
+          >
+            Reset
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {isCreate ? "Create Member" : "Update Member"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

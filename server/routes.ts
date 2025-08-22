@@ -1098,6 +1098,76 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     }
   });
 
+  app.post("/api/admin/members", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { password, ...userData } = req.body;
+      
+      // Validate required fields
+      if (!userData.username || !userData.email || !password) {
+        return res.status(400).json({ message: "Username, email, and password are required" });
+      }
+
+      // Validate password strength
+      if (password.length < 12) {
+        return res.status(400).json({ message: "Password must be at least 12 characters long" });
+      }
+
+      // Check if user exists
+      const existingUser = await storage.getUserByEmail(userData.email) || 
+                          await storage.getUserByUsername(userData.username);
+      
+      if (existingUser) {
+        return res.status(409).json({ message: "User already exists" });
+      }
+
+      // Create user
+      const passwordHash = await hashPassword(password);
+      const user = await storage.createUser({
+        username: userData.username,
+        email: userData.email,
+        passwordHash,
+        role: userData.role || Role.MEMBER,
+      });
+
+      // Create profile if profile data is provided
+      if (userData.profile) {
+        await storage.createProfile(user.id, userData.profile);
+      }
+
+      res.status(201).json({ message: "Member created successfully", userId: user.id });
+    } catch (error) {
+      console.error("Member creation error:", error);
+      res.status(500).json({ message: "Failed to create member" });
+    }
+  });
+
+  app.put("/api/admin/members/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { id } = req.params;
+      const { profile, ...userData } = req.body;
+
+      // Update user data
+      if (Object.keys(userData).length > 0) {
+        await storage.updateUser(id, userData);
+      }
+
+      // Update profile data if provided
+      if (profile) {
+        const existingProfile = await storage.getProfile(id);
+        if (existingProfile) {
+          await storage.updateProfile(id, profile);
+        } else {
+          await storage.createProfile(id, profile);
+        }
+      }
+
+      res.json({ message: "Member updated successfully" });
+    } catch (error) {
+      console.error("Member update error:", error);
+      res.status(500).json({ message: "Failed to update member" });
+    }
+  });
+
   app.post("/api/admin/blog", authenticate, requireAdmin, async (req: AuthRequest, res) => {
     try {
       const post = await storage.createBlogPost(req.body);
