@@ -159,7 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Generate token and set cookie for automatic login
-      const token = generateToken(user.id);
+      const token = generateToken(user);
       setAuthCookie(res, token);
 
       // Send verification email (simplified for MVP)
