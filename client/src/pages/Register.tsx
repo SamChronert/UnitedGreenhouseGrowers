@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff, ArrowRight, ArrowLeft, CheckCircle } from "lucide-react";
 import uggaLogo from "@assets/2_1750100657577.png";
@@ -238,8 +238,10 @@ export default function Register() {
       setCurrentStep(totalSteps - 1); // Go to confirmation step
       toast({
         title: "Welcome to UGGA!",
-        description: "Your account has been created successfully.",
+        description: "Your account has been created and you're now signed in.",
       });
+      // Update auth state to reflect that user is now logged in
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
     onError: (error: Error) => {
       toast({
@@ -660,10 +662,10 @@ export default function Register() {
             </div>
             <div className="space-y-4">
               <Button 
-                onClick={() => setLocation("/login")}
+                onClick={() => setLocation("/")}
                 className="w-full"
               >
-                Sign In to Your Account
+                Go to Your Dashboard
               </Button>
               <p className="text-sm text-gray-600">
                 Ready to explore the platform and connect with other growers!

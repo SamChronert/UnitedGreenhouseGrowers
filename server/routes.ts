@@ -158,6 +158,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         otherFarmType: memberType === "grower" ? otherFarmType : null,
       });
 
+      // Generate token and set cookie for automatic login
+      const token = generateToken(user.id);
+      setAuthCookie(res, token);
+
       // Send verification email (simplified for MVP)
       const fromEmail = process.env.FROM_EMAIL || "info@greenhousegrowers.org";
       await sendEmail({
