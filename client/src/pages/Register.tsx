@@ -682,7 +682,7 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Full-width Header with dark green background */}
-      <div className="bg-ugga-primary w-full">
+      <div className="bg-primary w-full">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
           {/* Logo with light background */}
           <div className="flex justify-center mb-4">
