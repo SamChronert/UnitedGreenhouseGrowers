@@ -104,6 +104,18 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
     });
   }, [onAnalyticsEvent]);
 
+  // Handle template click for details modal
+  const handleTemplateClick = useCallback((template: Resource) => {
+    setSelectedResource(template);
+    setResourceModalOpen(true);
+    trackResourceClick(template.id, 'template', template.title);
+    onAnalyticsEvent?.('template_click', {
+      template_id: template.id,
+      template_name: template.title,
+      template_category: template.data?.category
+    });
+  }, [onAnalyticsEvent]);
+
   // Handle template preview
   const handleTemplatePreview = useCallback((template: Resource) => {
     setSelectedTemplate(template);
@@ -574,8 +586,9 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
             setPreviewModalOpen(false);
             setSelectedTemplate(null);
           }}
-          onDownload={(format) => handleTemplateDownload(selectedTemplate, format)}
-          onGoogleSheetsOpen={() => handleGoogleSheetsOpen(selectedTemplate)}
+          onDownload={(template, format) => handleTemplateDownload(template, format)}
+          onGoogleSheetsOpen={(template) => handleGoogleSheetsOpen(template)}
+          onCopyLink={(template) => handleCopyLink(template)}
         />
       )}
     </div>
