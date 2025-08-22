@@ -29,14 +29,31 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [location] = useLocation();
   const { toast } = useToast();
+  const [showAdminDashboard, setShowAdminDashboard] = useState(false);
   const [feedback, setFeedback] = useState({
     subject: "",
     message: "",
     type: "feedback"
   });
   
-  // Check URL params to determine if showing admin dashboard
-  const showAdminDashboard = new URLSearchParams(location.split('?')[1] || '').get('admin') === 'true';
+  // Check URL params and listen for changes
+  useEffect(() => {
+    const checkUrlParams = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdmin = urlParams.get('admin') === 'true';
+      setShowAdminDashboard(isAdmin);
+    };
+    
+    // Check on mount
+    checkUrlParams();
+    
+    // Listen for popstate events (back/forward navigation)
+    window.addEventListener('popstate', checkUrlParams);
+    
+    return () => {
+      window.removeEventListener('popstate', checkUrlParams);
+    };
+  }, []);
   
   // Update page title based on current view
   useEffect(() => {
