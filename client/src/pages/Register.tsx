@@ -276,20 +276,6 @@ export default function Register() {
               <p className="text-lg text-gray-700">
                 Connect with greenhouse growers across the country and access practical tools built with growers in mind.
               </p>
-              <div className="grid grid-cols-1 gap-3 text-left">
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-ugga-primary rounded-full mr-3"></div>
-                  <span className="text-gray-700">Network with fellow growers nationwide</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-ugga-primary rounded-full mr-3"></div>
-                  <span className="text-gray-700">Access curated resources and tools</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-ugga-primary rounded-full mr-3"></div>
-                  <span className="text-gray-700">Help shape the industry's future</span>
-                </div>
-              </div>
             </div>
           </div>
         );
