@@ -15,6 +15,8 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import uggaLogo from "@assets/2_1750100657577.png";
+import greenhouseVanImage from "@assets/ProduceVanGreenhouse_1755900251902.png";
+import nationalNetworkImage from "@assets/NationalNetwork_1755900255831.png";
 
 const registerSchema = z.object({
   // Basic fields for all members
@@ -226,19 +228,120 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen py-16 bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <img src={uggaLogo} alt="United Greenhouse Growers Association Logo" className="h-12 w-12 mx-auto mb-4" loading="lazy" />
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Join UGGA</h1>
-          <p className="text-gray-600">Connect with greenhouse growers across the country and access practical tools built with growers in mind.</p>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-white">
+        <div className="absolute inset-0">
+          <img 
+            src={greenhouseVanImage} 
+            alt="Greenhouse farm with delivery van" 
+            className="w-full h-full object-cover opacity-10"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/90 to-transparent"></div>
         </div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-8 items-center">
+            {/* Left side - Welcome content */}
+            <div className="text-center lg:text-left mb-12 lg:mb-0">
+              <div className="flex items-center justify-center lg:justify-start mb-6">
+                <img src={uggaLogo} alt="United Greenhouse Growers Association Logo" className="h-16 w-16 mr-4" loading="lazy" />
+                <div>
+                  <h1 className="text-4xl font-bold text-gray-900 mb-2">Join UGGA</h1>
+                  <p className="text-lg text-ugga-primary font-semibold">United Greenhouse Growers Association</p>
+                </div>
+              </div>
+              <p className="text-xl text-gray-700 mb-6 leading-relaxed">
+                Connect with greenhouse growers across the country and access practical tools built with growers in mind.
+              </p>
+              <div className="flex items-center justify-center lg:justify-start space-x-4 text-sm text-gray-600">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-ugga-primary rounded-full mr-2"></div>
+                  <span>Grower-first network</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-ugga-primary rounded-full mr-2"></div>
+                  <span>Practical tools</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-ugga-primary rounded-full mr-2"></div>
+                  <span>Knowledge sharing</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Right side - National network visualization */}
+            <div className="hidden lg:block">
+              <div className="relative">
+                <img 
+                  src={nationalNetworkImage} 
+                  alt="National network of connected greenhouse growers" 
+                  className="w-full h-auto rounded-lg shadow-lg"
+                  loading="lazy"
+                />
+                <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg p-3">
+                  <p className="text-sm font-semibold text-gray-800">Join growers nationwide</p>
+                  <p className="text-xs text-gray-600">Building a connected community</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Create Your Account</CardTitle>
-          </CardHeader>
-          <CardContent>
+      {/* Form Section */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
+          {/* Left side - Community info (mobile: show national network image) */}
+          <div className="lg:col-span-1 mb-8 lg:mb-0">
+            <div className="sticky top-8">
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Why Join UGGA?</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <div className="w-2 h-2 bg-ugga-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">Connect & Collaborate</h4>
+                      <p className="text-sm text-gray-600">Network with fellow growers, share experiences, and learn from each other</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="w-2 h-2 bg-ugga-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">Access Resources</h4>
+                      <p className="text-sm text-gray-600">Curated library of tools, grants, and industry insights</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="w-2 h-2 bg-ugga-primary rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">Shape the Future</h4>
+                      <p className="text-sm text-gray-600">Help build tools and advocate for the greenhouse industry</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Mobile: Show national network image */}
+              <div className="lg:hidden mb-6">
+                <img 
+                  src={nationalNetworkImage} 
+                  alt="National network of connected greenhouse growers" 
+                  className="w-full h-auto rounded-lg shadow-lg"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+          </div>
+          
+          {/* Right side - Registration form */}
+          <div className="lg:col-span-2">
+            <Card className="shadow-xl border-0">
+              <CardHeader className="bg-gradient-to-r from-ugga-primary to-ugga-secondary text-white rounded-t-lg">
+                <CardTitle className="text-xl text-center">Create Your Account</CardTitle>
+                <p className="text-center text-green-100 text-sm">Join the growing community of greenhouse growers</p>
+              </CardHeader>
+              <CardContent className="p-8">
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Member Type Selection */}
               <div className="space-y-3">
@@ -605,16 +708,18 @@ export default function Register() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{" "}
-                <Link href="/login" className="text-ugga-primary hover:text-ugga-secondary font-medium">
-                  Sign in
-                </Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+                <div className="mt-6 text-center">
+                  <p className="text-sm text-gray-600">
+                    Already have an account?{" "}
+                    <Link href="/login" className="text-ugga-primary hover:text-ugga-secondary font-medium">
+                      Sign in
+                    </Link>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
