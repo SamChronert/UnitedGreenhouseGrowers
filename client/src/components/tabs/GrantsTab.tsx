@@ -248,7 +248,7 @@ export default function GrantsTab({ onAnalyticsEvent }: GrantsTabProps) {
         <h2 className="text-lg font-semibold text-blue-900 mb-2">Grant Opportunities for Greenhouse Operations</h2>
         <p className="text-blue-800">
           Federal and state grant opportunities for greenhouse operations, infrastructure, and research. 
-          New to grants? Read our <a href="/blog/grants-101" className="text-blue-600 hover:text-blue-800 underline">Grants 101 Guide</a>.
+          New to grants? Read our <a href="/blog/grants-for-greenhouses-101" className="text-blue-600 hover:text-blue-800 underline">Grants 101 Guide</a>.
         </p>
       </div>
 
