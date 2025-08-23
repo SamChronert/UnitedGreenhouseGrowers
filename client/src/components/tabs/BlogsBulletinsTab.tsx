@@ -28,8 +28,6 @@ import {
   Clock,
   Loader2,
   Tag,
-  Grid3X3,
-  List,
   ChevronDown,
   ChevronRight
 } from 'lucide-react';
@@ -64,7 +62,6 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
   const [bulletinsExpanded, setBulletinsExpanded] = useState(true);
   
   // State
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [bulletinSearch, setBulletinSearch] = useState('');
   const [bulletinFilters, setBulletinFilters] = useState({
     source: 'all',
@@ -190,14 +187,17 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
         <CollapsibleContent className="space-y-4 mt-4">
           {/* Blogs Content */}
           {blogsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <Card key={i} className="animate-pulse">
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-full"></div>
-                      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 bg-gray-200 rounded-lg"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-5 bg-gray-200 rounded w-1/2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -216,35 +216,38 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
               <p className="text-gray-600">Check back soon for UGGA insights and updates.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-3">
               {blogPosts.map(blog => (
                 <Card 
                   key={blog.id} 
-                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                  className="hover:shadow-md transition-shadow cursor-pointer"
                   onClick={() => handleBlogClick(blog)}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                          <FileText className="h-6 w-6 text-purple-600" />
+                        </div>
+                      </div>
                       <div className="flex-1">
-                        <CardTitle className="text-lg line-clamp-2 mb-2">{blog.title}</CardTitle>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold text-gray-900 line-clamp-2">{blog.title}</h3>
+                          <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0 ml-2" />
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                           <Calendar className="h-4 w-4" />
                           <span>{formatDate(blog.publishedAt)}</span>
                         </div>
+                        <p className="text-gray-600 text-sm line-clamp-2 mb-3">
+                          {getExcerpt(blog.contentMd)}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-xs">
+                            UGGA Blog
+                          </Badge>
+                        </div>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <p className="text-gray-600 text-sm line-clamp-3">
-                      {getExcerpt(blog.contentMd)}
-                    </p>
-                    
-                    <div className="mt-4">
-                      <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                        UGGA Blog
-                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -285,27 +288,6 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
                 />
               </div>
               
-              {/* View Toggle */}
-              <div className="flex gap-2">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="flex items-center gap-2"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                  Grid
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="flex items-center gap-2"
-                >
-                  <List className="h-4 w-4" />
-                  List
-                </Button>
-              </div>
             </div>
             
             <div className="flex flex-wrap gap-4">
@@ -375,95 +357,45 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
               <h3 className="text-lg font-medium text-gray-900 mb-2">No bulletins found</h3>
               <p className="text-gray-600">Try adjusting your search or filters to find research bulletins.</p>
             </div>
-          ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          ) : (
+            <div className="space-y-3">
               {bulletins.map(bulletin => (
                 <Card 
                   key={bulletin.id} 
-                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                  className="hover:shadow-md transition-shadow cursor-pointer"
                   onClick={() => handleBulletinClick(bulletin)}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
                         <div className="p-2 bg-green-100 rounded-lg">
                           <BookOpen className="h-6 w-6 text-green-600" />
                         </div>
-                        <div className="flex-1">
-                          <CardTitle className="text-lg line-clamp-2">{bulletin.title}</CardTitle>
-                          <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
-                            {(bulletin.data as any)?.source && (
-                              <div className="flex items-center gap-1">
-                                <Building className="h-3 w-3" />
-                                <span>{(bulletin.data as any).source}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                      {bulletin.summary || 'Bulletin description not available.'}
-                    </p>
-                    
-                    {/* Topic Tags */}
-                    {(bulletin.data as any)?.topicTags && (bulletin.data as any).topicTags.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {((bulletin.data as any).topicTags as string[]).slice(0, 3).map((tag: string) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            <Tag className="h-3 w-3 mr-1" />
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {bulletins.map(bulletin => (
-                <Card 
-                  key={bulletin.id} 
-                  className="hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => handleBulletinClick(bulletin)}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="p-2 bg-green-100 rounded-lg">
-                            <BookOpen className="h-5 w-5 text-green-600" />
-                          </div>
-                          <div>
-                            <h3 
-                              className="text-lg font-semibold"
-                              dangerouslySetInnerHTML={{
-                                __html: highlightSearchTerms(bulletin.title, bulletinSearch)
-                              }}
-                            />
-                            <div className="flex items-center gap-4 text-sm text-gray-600">
-                              {bulletin.data?.source && (
-                                <div className="flex items-center gap-1">
-                                  <Building className="h-3 w-3" />
-                                  <span>{bulletin.data.source}</span>
-                                </div>
-                              )}
-                              {bulletin.data?.publishedAt && (
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" />
-                                  <span>{formatDate(bulletin.data.publishedAt)}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 
+                            className="font-semibold text-gray-900 line-clamp-2"
+                            dangerouslySetInnerHTML={{
+                              __html: highlightSearchTerms(bulletin.title, bulletinSearch)
+                            }}
+                          />
+                          <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0 ml-2" />
                         </div>
-                        
+                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                          {bulletin.data?.source && (
+                            <div className="flex items-center gap-1">
+                              <Building className="h-4 w-4" />
+                              <span>{bulletin.data.source}</span>
+                            </div>
+                          )}
+                          {bulletin.data?.publishedAt && (
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              <span>{formatDate(bulletin.data.publishedAt)}</span>
+                            </div>
+                          )}
+                        </div>
                         <p 
                           className="text-gray-600 text-sm mb-3 line-clamp-2"
                           dangerouslySetInnerHTML={{
@@ -486,8 +418,6 @@ export default function BlogsBulletinsTab({ onAnalyticsEvent }: BlogsBulletinsTa
                           </div>
                         )}
                       </div>
-                      
-                      <ExternalLink className="h-4 w-4 text-gray-400 flex-shrink-0 ml-4" />
                     </div>
                   </CardContent>
                 </Card>

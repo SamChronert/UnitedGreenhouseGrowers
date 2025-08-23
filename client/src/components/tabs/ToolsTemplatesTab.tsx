@@ -276,65 +276,68 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
 
           {/* Tools List */}
           {toolsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <Card key={i} className="animate-pulse">
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-full"></div>
-                      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 bg-gray-200 rounded-lg"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-5 bg-gray-200 rounded w-1/2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-3">
               {tools.map(tool => (
-                <Card key={tool.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleToolClick(tool)}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0">
-                          {tool.image_url ? (
-                            <img 
-                              src={tool.image_url}
-                              alt={`${tool.title} logo`}
-                              className="h-10 w-10 object-cover rounded-lg border"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                target.nextElementSibling?.classList.remove('hidden');
-                              }}
-                            />
-                          ) : null}
-                          <div className={cn(
-                            "p-2 bg-blue-100 rounded-lg",
-                            tool.image_url ? "hidden" : "block"
-                          )}>
-                            <Calculator className="h-6 w-6 text-blue-600" />
-                          </div>
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">{tool.title}</CardTitle>
-                          <div className="flex items-center gap-2 mt-1">
-                            {getPlatformIcon(tool.data?.platform || 'Web')}
-                            <span className="text-sm text-gray-600">{tool.data?.platform || 'Web'}</span>
-                          </div>
+                <Card key={tool.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleToolClick(tool)}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-shrink-0">
+                        {tool.image_url ? (
+                          <img 
+                            src={tool.image_url}
+                            alt={`${tool.title} logo`}
+                            className="h-12 w-12 object-cover rounded-lg border"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              target.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={cn(
+                          "p-2 bg-blue-100 rounded-lg",
+                          tool.image_url ? "hidden" : "block"
+                        )}>
+                          <Calculator className="h-6 w-6 text-blue-600" />
                         </div>
                       </div>
-                      <ExternalLink className="h-4 w-4 text-gray-400" />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 mb-4 line-clamp-3">{tool.summary}</p>
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline">{tool.data?.category || 'General'}</Badge>
-                      <Badge variant={getCostBadgeVariant(tool.data?.costType)}>
-                        <DollarSign className="h-3 w-3 mr-1" />
-                        {tool.data?.costType || 'Unknown'}
-                      </Badge>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{tool.title}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              {getPlatformIcon(tool.data?.platform || 'Web')}
+                              <span className="text-sm text-gray-600">{tool.data?.platform || 'Web'}</span>
+                            </div>
+                          </div>
+                          <ExternalLink className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{tool.summary}</p>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">{tool.data?.category || 'General'}</Badge>
+                          <Badge variant={getCostBadgeVariant(tool.data?.costType)} className="text-xs">
+                            <DollarSign className="h-3 w-3 mr-1" />
+                            {tool.data?.costType || 'Unknown'}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -387,96 +390,99 @@ export default function ToolsTemplatesTab({ onAnalyticsEvent }: ToolsTemplatesTa
 
           {/* Templates List */}
           {templatesLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <Card key={i} className="animate-pulse">
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-full"></div>
-                      <div className="h-20 bg-gray-200 rounded"></div>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 bg-gray-200 rounded-lg"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-5 bg-gray-200 rounded w-1/2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-8 bg-gray-200 rounded w-full"></div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-3">
               {templates.map(template => (
-                <Card key={template.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleTemplateClick(template)}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
+                <Card key={template.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleTemplateClick(template)}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0">
                         <div className="p-2 bg-green-100 rounded-lg">
                           <FileSpreadsheet className="h-6 w-6 text-green-600" />
                         </div>
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">{template.title}</CardTitle>
-                          <Badge variant="outline" className="mt-1">
-                            {template.data?.category || 'General'}
-                          </Badge>
-                        </div>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 mb-4 line-clamp-2">{template.summary}</p>
-                    
-                    {/* Format Icons */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-sm text-gray-500">Formats:</span>
-                      {template.data?.fileRefs?.csv && (
-                        <Badge variant="secondary" className="text-xs">CSV</Badge>
-                      )}
-                      {template.data?.fileRefs?.xlsx && (
-                        <Badge variant="secondary" className="text-xs">XLSX</Badge>
-                      )}
-                      {template.data?.fileRefs?.gsheetTemplateUrl && (
-                        <Badge variant="secondary" className="text-xs">Google Sheets</Badge>
-                      )}
-                    </div>
-                    
-                    {/* Action Buttons */}
-                    <div className="space-y-2">
-                      <Button 
-                        variant="outline" 
-                        className="w-full"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleTemplatePreview(template);
-                        }}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview Template
-                      </Button>
-                      
-                      <div className="grid grid-cols-2 gap-2">
-                        {template.data?.fileRefs?.csv && (
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{template.title}</h3>
+                            <Badge variant="outline" className="text-xs mt-1">
+                              {template.data?.category || 'General'}
+                            </Badge>
+                          </div>
+                        </div>
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{template.summary}</p>
+                        
+                        {/* Format Icons */}
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-sm text-gray-500">Formats:</span>
+                          {template.data?.fileRefs?.csv && (
+                            <Badge variant="secondary" className="text-xs">CSV</Badge>
+                          )}
+                          {template.data?.fileRefs?.xlsx && (
+                            <Badge variant="secondary" className="text-xs">XLSX</Badge>
+                          )}
+                          {template.data?.fileRefs?.gsheetTemplateUrl && (
+                            <Badge variant="secondary" className="text-xs">Google Sheets</Badge>
+                          )}
+                        </div>
+                        
+                        {/* Action Buttons */}
+                        <div className="flex items-center gap-2">
                           <Button 
-                            variant="ghost" 
+                            variant="outline" 
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleTemplateDownload(template, 'csv');
+                              handleTemplatePreview(template);
                             }}
                           >
-                            <Download className="h-3 w-3 mr-1" />
-                            CSV
+                            <Eye className="h-3 w-3 mr-1" />
+                            Preview
                           </Button>
-                        )}
-                        {template.data?.fileRefs?.xlsx && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleTemplateDownload(template, 'xlsx');
-                            }}
-                          >
-                            <Download className="h-3 w-3 mr-1" />
-                            XLSX
-                          </Button>
-                        )}
+                          
+                          {template.data?.fileRefs?.csv && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleTemplateDownload(template, 'csv');
+                              }}
+                            >
+                              <Download className="h-3 w-3 mr-1" />
+                              CSV
+                            </Button>
+                          )}
+                          {template.data?.fileRefs?.xlsx && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleTemplateDownload(template, 'xlsx');
+                              }}
+                            >
+                              <Download className="h-3 w-3 mr-1" />
+                              XLSX
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </CardContent>

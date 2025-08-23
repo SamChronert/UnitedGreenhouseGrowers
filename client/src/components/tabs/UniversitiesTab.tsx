@@ -172,7 +172,7 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
                       <h4 className="text-md font-medium text-gray-800 mb-4 border-l-4 border-ugga-primary pl-3">
                         {regionName} ({regionUniversities.length})
                       </h4>
-                      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                      <div className="space-y-3">
                         {regionUniversities.map((university) => (
                           <Card 
                             key={university.id} 
@@ -180,36 +180,34 @@ export default function UniversitiesTab({ onAnalyticsEvent }: UniversitiesTabPro
                             onClick={() => handleUniversityClick(university)}
                           >
                             <CardContent className="p-4">
-                              <div className="space-y-3">
-                                <div className="flex items-start gap-3">
-                                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 border-2 border-dashed border-gray-300">
-                                    {university.image_url ? (
-                                      <img
-                                        src={university.image_url}
-                                        alt={`${university.title} logo`}
-                                        className="w-full h-full object-contain rounded-lg"
-                                        onError={(e) => {
-                                          e.currentTarget.style.display = 'none';
-                                          e.currentTarget.nextElementSibling!.classList.remove('hidden');
-                                        }}
-                                      />
-                                    ) : null}
-                                    <GraduationCap className={`h-6 w-6 text-gray-400 ${university.image_url ? 'hidden' : 'block'}`} />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <h5 className="font-medium text-gray-900 line-clamp-2 text-sm">
-                                      {university.title}
-                                    </h5>
-                                    <div className="flex items-center gap-1 text-xs text-gray-600 mt-1">
-                                      <MapPin className="h-3 w-3" />
-                                      {university.data?.city}, {university.data?.state}
-                                      {university.data?.country !== 'USA' && `, ${university.data?.country}`}
-                                    </div>
-                                  </div>
+                              <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 border-2 border-dashed border-gray-300">
+                                  {university.image_url ? (
+                                    <img
+                                      src={university.image_url}
+                                      alt={`${university.title} logo`}
+                                      className="w-full h-full object-contain rounded-lg"
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                        e.currentTarget.nextElementSibling!.classList.remove('hidden');
+                                      }}
+                                    />
+                                  ) : null}
+                                  <GraduationCap className={`h-6 w-6 text-gray-400 ${university.image_url ? 'hidden' : 'block'}`} />
                                 </div>
-                                <p className="text-xs text-gray-600 line-clamp-2">
-                                  {university.summary}
-                                </p>
+                                <div className="flex-1 min-w-0">
+                                  <h5 className="font-semibold text-gray-900 line-clamp-2">
+                                    {university.title}
+                                  </h5>
+                                  <div className="flex items-center gap-1 text-sm text-gray-600 mt-1 mb-2">
+                                    <MapPin className="h-4 w-4" />
+                                    {university.data?.city}, {university.data?.state}
+                                    {university.data?.country !== 'USA' && `, ${university.data?.country}`}
+                                  </div>
+                                  <p className="text-sm text-gray-600 line-clamp-2">
+                                    {university.summary}
+                                  </p>
+                                </div>
                               </div>
                             </CardContent>
                           </Card>

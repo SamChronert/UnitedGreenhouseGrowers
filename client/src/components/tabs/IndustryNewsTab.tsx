@@ -46,7 +46,7 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
 
   // Track tab view on mount
   useEffect(() => {
-    trackTabView('industry-news', 'Industry News');
+    trackTabView('industry-news');
     onAnalyticsEvent?.('tab_view', { tab: 'industry-news' });
   }, [onAnalyticsEvent]);
 
@@ -180,14 +180,17 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i}>
               <div className="animate-pulse h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, j) => (
                   <Card key={j} className="animate-pulse">
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-4 bg-gray-200 rounded w-full"></div>
-                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 bg-gray-200 rounded-lg"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-5 bg-gray-200 rounded w-1/2"></div>
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -222,17 +225,17 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
                   </Badge>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-3">
                   {sources.map(source => (
-                    <Card key={source.id} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-start gap-3">
+                    <Card key={source.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleNewsSourceClick(source)}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-4">
                           <div className="flex-shrink-0">
                             {source.image_url ? (
                               <img 
                                 src={source.image_url}
                                 alt={`${source.title} logo`}
-                                className="h-10 w-10 object-cover rounded-lg border"
+                                className="h-12 w-12 object-cover rounded-lg border"
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
                                   target.style.display = 'none';
@@ -248,53 +251,58 @@ export default function IndustryNewsTab({ onAnalyticsEvent }: IndustryNewsTabPro
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <CardTitle className="text-lg line-clamp-2">{source.title}</CardTitle>
-                            {source.data?.sourceName && source.data.sourceName !== source.title && (
-                              <p className="text-sm text-gray-600 mt-1">{source.data.sourceName}</p>
-                            )}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      
-                      <CardContent>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                          {source.summary || source.data?.description || 'Industry publication providing news and insights.'}
-                        </p>
-                        
-                        <div className="space-y-3">
-                          {/* Frequency Badge */}
-                          {source.data?.frequency && (
-                            <div className="flex items-center gap-2">
-                              <Badge variant={getFrequencyBadgeVariant(source.data.frequency)}>
-                                <Clock className="h-3 w-3 mr-1" />
-                                {source.data.frequency}
-                              </Badge>
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <h3 className="font-semibold text-gray-900 line-clamp-2">{source.title}</h3>
+                                {source.data?.sourceName && source.data.sourceName !== source.title && (
+                                  <p className="text-sm text-gray-600 mt-1">{source.data.sourceName}</p>
+                                )}
+                              </div>
                             </div>
-                          )}
-                          
-                          {/* Action Buttons */}
-                          <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="flex-1"
-                              onClick={() => handleNewsSourceClick(source)}
-                            >
-                              <Globe className="h-4 w-4 mr-2" />
-                              View Details
-                            </Button>
+                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                              {source.summary || source.data?.description || 'Industry publication providing news and insights.'}
+                            </p>
                             
-                            {source.data?.subscribeUrl && (
-                              <Button 
-                                variant="default" 
-                                size="sm" 
-                                className="flex-1"
-                                onClick={() => handleExternalLinkClick(source, 'subscribe')}
-                              >
-                                <Mail className="h-4 w-4 mr-2" />
-                                Subscribe
-                              </Button>
-                            )}
+                            <div className="flex items-center justify-between">
+                              {/* Frequency Badge */}
+                              <div className="flex items-center gap-2">
+                                {source.data?.frequency && (
+                                  <Badge variant={getFrequencyBadgeVariant(source.data.frequency)} className="text-xs">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    {source.data.frequency}
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              {/* Action Buttons */}
+                              <div className="flex items-center gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleNewsSourceClick(source);
+                                  }}
+                                >
+                                  <Globe className="h-3 w-3 mr-1" />
+                                  Details
+                                </Button>
+                                
+                                {source.data?.subscribeUrl && (
+                                  <Button 
+                                    variant="default" 
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleExternalLinkClick(source, 'subscribe');
+                                    }}
+                                  >
+                                    <Mail className="h-3 w-3 mr-1" />
+                                    Subscribe
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
