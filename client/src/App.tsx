@@ -19,6 +19,7 @@ import ResourceDetail from "@/pages/ResourceDetail";
 import SavedResources from "@/pages/SavedResources";
 import Register from "@/pages/Register";
 import Login from "@/pages/Login";
+import ResetPassword from "@/pages/ResetPassword";
 import DashboardWrapper from "@/features/dashboard/DashboardWrapper";
 import AdminResources from "@/pages/AdminResources";
 import AdminBlog from "@/pages/AdminBlog";
@@ -109,6 +110,12 @@ function Router() {
       <Route path="/login">
         <LayoutWrapper>
           <Login />
+        </LayoutWrapper>
+      </Route>
+      
+      <Route path="/reset-password">
+        <LayoutWrapper>
+          <ResetPassword />
         </LayoutWrapper>
       </Route>
 

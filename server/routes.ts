@@ -15,6 +15,7 @@ import {
   hashPassword, 
   verifyPassword, 
   generateToken, 
+  verifyToken,
   setAuthCookie, 
   clearAuthCookie,
   type AuthRequest 
@@ -234,6 +235,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch user data" });
+    }
+  });
+
+  // Password reset routes
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      // Find user by email
+      const user = await storage.getUserByEmail(email);
+      
+      // Always return success to prevent email enumeration
+      if (!user) {
+        return res.json({ message: "If an account with that email exists, a password reset link has been sent." });
+      }
+
+      // Generate reset token (valid for 1 hour)
+      const resetToken = generateToken({
+        id: user.id,
+        email: user.email,
+        type: 'password-reset'
+      }, '1h');
+
+      // Send reset email
+      const fromEmail = process.env.FROM_EMAIL || "info@greenhousegrowers.org";
+      const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
+      
+      await sendEmail({
+        to: user.email,
+        from: fromEmail,
+        subject: "Reset Your UGGA Password",
+        html: `
+          <h1>Reset Your Password</h1>
+          <p>You requested a password reset for your UGGA account.</p>
+          <p>Click the link below to reset your password (link expires in 1 hour):</p>
+          <p><a href="${resetUrl}" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Reset Password</a></p>
+          <p>If the button doesn't work, copy and paste this link into your browser:</p>
+          <p>${resetUrl}</p>
+          <p>If you didn't request this reset, you can safely ignore this email.</p>
+        `,
+        text: `
+Reset Your Password
+
+You requested a password reset for your UGGA account.
+
+Click this link to reset your password (link expires in 1 hour):
+${resetUrl}
+
+If you didn't request this reset, you can safely ignore this email.
+        `
+      });
+
+      res.json({ message: "If an account with that email exists, a password reset link has been sent." });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ message: "Failed to process password reset request" });
+    }
+  });
+
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      
+      if (!token || !password) {
+        return res.status(400).json({ message: "Token and password are required" });
+      }
+
+      // Validate password strength
+      if (password.length < 12) {
+        return res.status(400).json({ message: "Password must be at least 12 characters long" });
+      }
+
+      // Verify reset token
+      const decoded = verifyToken(token);
+      if (!decoded || decoded.type !== 'password-reset') {
+        return res.status(400).json({ message: "Invalid or expired reset token" });
+      }
+
+      // Find user
+      const user = await storage.getUserByEmail(decoded.email);
+      if (!user) {
+        return res.status(400).json({ message: "Invalid reset token" });
+      }
+
+      // Update password
+      const passwordHash = await hashPassword(password);
+      await storage.updateUserPassword(user.id, passwordHash);
+
+      res.json({ message: "Password reset successful" });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      if (error instanceof Error && error.name === 'TokenExpiredError') {
+        return res.status(400).json({ message: "Reset token has expired" });
+      }
+      res.status(500).json({ message: "Failed to reset password" });
     }
   });
 

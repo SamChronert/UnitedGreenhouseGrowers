@@ -24,16 +24,17 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return await bcrypt.compare(password, hash);
 }
 
-export function generateToken(user: { id: string; username: string; email: string; role: Role }): string {
+export function generateToken(user: { id: string; username?: string; email: string; role?: Role; type?: string }, expiresIn: string = "7d"): string {
   return jwt.sign(
     {
       id: user.id,
       username: user.username,
       email: user.email,
       role: user.role,
+      type: user.type,
     },
     JWT_SECRET,
-    { expiresIn: "7d" }
+    { expiresIn: expiresIn }
   );
 }
 
