@@ -1,0 +1,87 @@
+Hey! Please revamp our About page to feel more polished and professional while staying on-brand for UGGA. Work within the current stack/styles (no heavy new deps). Tweak copy lightly only if needed for scannability.
+
+Targets & Changes
+
+Hero (top of About)
+
+Add a simple visual hero (subtle greenhouse photo or abstract texture) with a clear page title + one-line subheading.
+
+Increase top/bottom spacing so it feels like a real section header.
+
+Mission
+
+Keep the green “Our Mission” band but give it more breathing room (padding) and slightly larger type.
+
+Make the line length shorter for better readability.
+
+The Problem We’re Solving
+
+Differentiate this visually from Mission (e.g., two-column layout: short blurb + supporting image/illustration).
+
+Pull 2–3 key phrases into bold to aid scanning.
+
+We’re Just Getting Started (highlight box)
+
+Elevate this into a true highlight: soft accent background, subtle icon, and tighter copy.
+
+Optionally show a simple roadmap/progress cue (Phase 1/2/3 labels—no complex logic).
+
+Our Values
+
+Keep the three principles, but use consistent icon cards with uniform sizing and spacing.
+
+Trim text if needed so each card is ~3 short lines max.
+
+Founding Members
+
+Convert to clean profile cards: consistent circular headshots, name, title/role, 2–3 sentence bio.
+
+Add a “Read more” link/modal if longer bios exist; keep the page scannable.
+
+Ensure equal card widths/heights and predictable spacing.
+
+How We’re Building UGGA Together (near page bottom)
+
+Use a 3-across grid of action cards on desktop, single column on mobile (icons + bold verb headings + short blurbs).
+
+Light green section background to separate from neighbors.
+
+Color-emphasize the verbs in headings (Share, Give, Connect, Raise).
+
+Calls-to-Action
+
+Repeat a consistent CTA after 2–3 sections (e.g., “Join UGGA” / “Become a Member”).
+
+Keep the final green CTA block, but ensure the earlier CTAs match its style.
+
+Typography, Spacing, Color
+
+Strengthen hierarchy: bigger H2s, consistent H3s, comfortable line-height, more white space between sections.
+
+Alternate subtle background tints (white / light gray / pale green) to improve rhythm.
+
+Keep iconography consistent with the “Built by growers” section.
+
+Acceptance Checklist
+
+Clear visual hierarchy from top → bottom; sections feel distinct.
+
+Cards/grids look consistent on desktop and stack cleanly on mobile.
+
+CTAs are visible in multiple places and use consistent styling.
+
+Copy is succinct and scannable; key verbs/actions stand out in green.
+
+No layout shifts or visual regressions on mobile.
+
+Deliverables (please reply with):
+
+A brief before/after summary per section (bullet list).
+
+The list of files you touched and a short note on why.
+
+Any new asset filenames/paths you added (images/icons).
+
+Quick screenshots or preview links of the updated About page.
+
+If anything is ambiguous, choose the simplest, clean implementation that matches the site’s current design system
