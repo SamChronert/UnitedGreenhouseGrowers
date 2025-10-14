@@ -73,16 +73,7 @@ export default function DashboardHome() {
   };
 
   const memberTools = [
-    // Row 1: Resource Library, Ask an Expert, Member Forum, Sales Hub
-    {
-      icon: <FolderOpen className="h-8 w-8" />,
-      title: "Resource Library",
-      description: "Browse curated grower resources — find relevant research, organizations near you, tax incentives and rebates, upcoming events, and more.",
-      href: isDemo ? "/demo/resources" : "/dashboard/resources",
-      inDevelopment: false,
-      iconColor: "text-orange-600",
-      bgColor: "bg-orange-100"
-    },
+    // Row 1: Ask an Expert, Resource Library, Member Forum, Sales Hub
     {
       icon: <HelpCircle className="h-8 w-8" />,
       title: "Ask an Expert",
@@ -91,6 +82,15 @@ export default function DashboardHome() {
       inDevelopment: false,
       iconColor: "text-cyan-600",
       bgColor: "bg-cyan-100"
+    },
+    {
+      icon: <FolderOpen className="h-8 w-8" />,
+      title: "Resource Library",
+      description: "Browse curated grower resources — find relevant research, organizations near you, tax incentives and rebates, upcoming events, and more.",
+      href: isDemo ? "/demo/resources" : "/dashboard/resources",
+      inDevelopment: false,
+      iconColor: "text-orange-600",
+      bgColor: "bg-orange-100"
     },
     {
       icon: <MessageCircle className="h-8 w-8" />,

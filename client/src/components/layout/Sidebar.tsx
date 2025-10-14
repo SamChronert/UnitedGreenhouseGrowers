@@ -105,16 +105,16 @@ export default function Sidebar({ className }: SidebarProps) {
   // Section 2: Main features
   const mainNavItems: NavigationItem[] = [
     {
-      id: "resources",
-      label: "Resource Library",
-      path: isDemo ? "/demo/resources" : "/dashboard/resources",
-      icon: FolderOpen,
-    },
-    {
       id: "ask-expert",
       label: "Ask an Expert",
       path: isDemo ? "/demo/ask-expert" : "/dashboard/ask-expert",
       icon: HelpCircle,
+    },
+    {
+      id: "resources",
+      label: "Resource Library",
+      path: isDemo ? "/demo/resources" : "/dashboard/resources",
+      icon: FolderOpen,
     },
     {
       id: "forum",
