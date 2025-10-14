@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { Handshake, BookOpen, Wrench, MessageSquare, Users, Megaphone, Eye } from "lucide-react";
+import { Handshake, BookOpen, Wrench, Users, Megaphone, Eye, GraduationCap } from "lucide-react";
 import uggaLogo from "@assets/2_1750100657577.png";
 
 export default function Home() {
@@ -28,33 +28,28 @@ export default function Home() {
 
   const buildingTogether = [
     {
-      icon: <MessageSquare className="h-12 w-12" />,
-      title: "Share Challenges",
-      verb: "Share",
-      description: "Your input helps us identify pain points across the industry"
-    },
-    {
-      icon: <Wrench className="h-12 w-12" />,
-      title: "Co-Design Tools",
-      verb: "Co-Design",
-      description: "Features are tested and refined with direct grower feedback"
+      icon: <GraduationCap className="h-12 w-12" />,
+      title: "Connect with Experts",
+      description: "Access our network of experts from academia and industry who can answer your questions and provide guidance"
     },
     {
       icon: <Users className="h-12 w-12" />,
       title: "Connect with Peers",
-      verb: "Connect",
       description: "Ideas and solutions often come from fellow members"
+    },
+    {
+      icon: <Wrench className="h-12 w-12" />,
+      title: "Co-Design Tools",
+      description: "Features are tested and refined with direct grower feedback"
     },
     {
       icon: <Megaphone className="h-12 w-12" />,
       title: "Raise Your Voice",
-      verb: "Raise",
       description: "We bring your insights to researchers and policymakers"
     },
     {
       icon: <Eye className="h-12 w-12" />,
       title: "Preview What's Coming",
-      verb: "Preview",
       description: (
         <>Explore what's in development through the <Link href="/demo" className="font-medium hover:underline" style={{color: 'var(--color-sage)'}}>Demo Dashboard</Link></>
       )
@@ -172,7 +167,7 @@ export default function Home() {
                     {item.icon}
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    <span style={{color: 'var(--color-sage)'}}>{item.verb}</span>{item.title.replace(item.verb, '')}
+                    {item.title}
                   </h3>
                   <p className="text-gray-600 leading-relaxed">{item.description}</p>
                 </CardContent>
