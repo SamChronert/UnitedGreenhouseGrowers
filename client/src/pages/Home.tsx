@@ -128,7 +128,7 @@ export default function Home() {
               UGGA is a grower-driven platform — built with input from the people who use it. Here's how you shape what we build next:
             </p>
             
-            <div className="space-y-6 text-left max-w-2xl mx-auto">
+            <div className="space-y-6 text-center max-w-2xl mx-auto">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Share Challenges</h3>
                 <p className="text-gray-600">Your input helps us identify pain points across the industry</p>
