@@ -1886,6 +1886,88 @@ If you didn't request this reset, you can safely ignore this email.
     }
   });
 
+  // Smart search endpoint with AI-powered query interpretation
+  app.get("/api/search", authenticate, aiRateLimit, async (req: AuthRequest, res) => {
+    try {
+      const { q: query } = req.query;
+      
+      if (!query || typeof query !== 'string' || query.trim().length === 0) {
+        return res.status(400).json({ message: "Search query is required" });
+      }
+
+      const searchQuery = query.trim();
+      
+      // Use OpenAI to interpret the search query and extract keywords/intent
+      const interpretationPrompt = `You are a search query analyzer for a greenhouse growers association platform. 
+Analyze this search query and extract:
+1. Primary keywords (comma-separated)
+2. Content types the user might be looking for (one or more of: resources, blog, forum, products)
+3. Specific resource categories if mentioned (universities, organizations, grants, tools, templates, learning, bulletins, industry_news)
+
+Search query: "${searchQuery}"
+
+Respond in JSON format:
+{
+  "keywords": ["keyword1", "keyword2"],
+  "contentTypes": ["resources", "blog"],
+  "resourceTypes": ["universities"]
+}`;
+
+      const interpretation = await findGrowerAI(interpretationPrompt, []);
+      let searchIntent;
+      
+      try {
+        searchIntent = JSON.parse(interpretation);
+      } catch {
+        // Fallback if AI response isn't valid JSON
+        searchIntent = {
+          keywords: [searchQuery],
+          contentTypes: ["resources", "blog", "forum", "products"],
+          resourceTypes: []
+        };
+      }
+
+      const results: any = {
+        query: searchQuery,
+        results: {
+          resources: [],
+          blog: [],
+          forum: [],
+          products: []
+        }
+      };
+
+      // Search resources if requested or by default
+      if (!searchIntent.contentTypes || searchIntent.contentTypes.includes("resources")) {
+        const resourceResults = await storage.searchResources(searchQuery, searchIntent.resourceTypes);
+        results.results.resources = resourceResults.slice(0, 5); // Limit to top 5
+      }
+
+      // Search blog posts if requested or by default
+      if (!searchIntent.contentTypes || searchIntent.contentTypes.includes("blog")) {
+        const blogResults = await storage.searchBlogPosts(searchQuery);
+        results.results.blog = blogResults.slice(0, 5);
+      }
+
+      // Search forum posts if requested or by default
+      if (!searchIntent.contentTypes || searchIntent.contentTypes.includes("forum")) {
+        const forumResults = await storage.searchForumPosts(searchQuery);
+        results.results.forum = forumResults.slice(0, 5);
+      }
+
+      // Search products if requested or by default
+      if (!searchIntent.contentTypes || searchIntent.contentTypes.includes("products")) {
+        const productResults = await storage.searchProducts(searchQuery);
+        results.results.products = productResults.slice(0, 5);
+      }
+
+      res.json(results);
+    } catch (error) {
+      console.error("Search error:", error);
+      res.status(500).json({ message: "Search failed" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

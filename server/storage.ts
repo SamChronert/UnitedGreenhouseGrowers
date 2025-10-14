@@ -12,6 +12,7 @@ import {
   forumComments,
   forumVotes,
   assessmentTrainingData,
+  products,
   farmAssessments,
   farmProfiles,
   farmRecommendations,
@@ -135,6 +136,12 @@ export interface IStorage {
     eventsByTab: { tab: string; count: number }[];
     dailyEvents: { date: string; count: number }[];
   }>;
+  
+  // Search operations
+  searchResources(query: string, types?: string[]): Promise<Resource[]>;
+  searchBlogPosts(query: string): Promise<BlogPost[]>;
+  searchForumPosts(query: string): Promise<any[]>;
+  searchProducts(query: string): Promise<any[]>;
   
   // Chat log operations
   createChatLog(chatLog: InsertChatLog): Promise<ChatLog>;
@@ -798,6 +805,117 @@ export class DatabaseStorage implements IStorage {
         dailyEvents: []
       };
     }
+  }
+
+  // Search operations
+  async searchResources(query: string, types?: string[]): Promise<Resource[]> {
+    const searchTerm = `%${query.toLowerCase()}%`;
+    const conditions = [];
+    
+    // Search in title, summary, tags, topics, crop, system_type
+    conditions.push(
+      or(
+        sql`LOWER(${resources.title}) LIKE ${searchTerm}`,
+        sql`LOWER(${resources.summary}) LIKE ${searchTerm}`,
+        sql`LOWER(array_to_string(${resources.tags}, ',')) LIKE ${searchTerm}`,
+        sql`LOWER(array_to_string(${resources.topics}, ',')) LIKE ${searchTerm}`,
+        sql`LOWER(array_to_string(${resources.crop}, ',')) LIKE ${searchTerm}`,
+        sql`LOWER(array_to_string(${resources.system_type}, ',')) LIKE ${searchTerm}`
+      )
+    );
+    
+    // Filter by types if provided
+    if (types && types.length > 0) {
+      conditions.push(sql`${resources.type} IN (${sql.join(types.map(t => sql`${t}`), sql`, `)})`);
+    }
+    
+    const results = await db
+      .select()
+      .from(resources)
+      .where(and(...conditions))
+      .limit(10);
+    
+    return results;
+  }
+
+  async searchBlogPosts(query: string): Promise<BlogPost[]> {
+    const searchTerm = `%${query.toLowerCase()}%`;
+    
+    const results = await db
+      .select()
+      .from(blogPosts)
+      .where(
+        or(
+          sql`LOWER(${blogPosts.title}) LIKE ${searchTerm}`,
+          sql`LOWER(${blogPosts.contentMd}) LIKE ${searchTerm}`
+        )
+      )
+      .limit(10);
+    
+    return results;
+  }
+
+  async searchForumPosts(query: string): Promise<any[]> {
+    const searchTerm = `%${query.toLowerCase()}%`;
+    
+    const results = await db
+      .select({
+        id: forumPosts.id,
+        title: forumPosts.title,
+        content: forumPosts.content,
+        category: forumPosts.category,
+        createdAt: forumPosts.createdAt,
+        username: users.username,
+        name: profiles.name
+      })
+      .from(forumPosts)
+      .leftJoin(users, eq(forumPosts.userId, users.id))
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .where(
+        and(
+          or(
+            sql`LOWER(${forumPosts.title}) LIKE ${searchTerm}`,
+            sql`LOWER(${forumPosts.content}) LIKE ${searchTerm}`,
+            sql`LOWER(array_to_string(${forumPosts.tags}, ',')) LIKE ${searchTerm}`
+          ),
+          eq(forumPosts.isDeleted, false)
+        )
+      )
+      .limit(10);
+    
+    // Format results to match expected structure
+    return results.map(r => ({
+      id: r.id,
+      title: r.title,
+      content: r.content,
+      category: r.category,
+      createdAt: r.createdAt,
+      user: {
+        username: r.username,
+        profile: {
+          name: r.name
+        }
+      }
+    }));
+  }
+
+  async searchProducts(query: string): Promise<any[]> {
+    const searchTerm = `%${query.toLowerCase()}%`;
+    
+    const results = await db
+      .select()
+      .from(products)
+      .where(
+        or(
+          sql`LOWER(${products.productName}) LIKE ${searchTerm}`,
+          sql`LOWER(${products.description}) LIKE ${searchTerm}`,
+          sql`LOWER(${products.category}) LIKE ${searchTerm}`,
+          sql`LOWER(${products.vendorName}) LIKE ${searchTerm}`
+        )
+      )
+      .limit(10);
+    
+    return results;
   }
 
   // Chat log operations
