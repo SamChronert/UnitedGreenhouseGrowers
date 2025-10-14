@@ -32,7 +32,7 @@ export default function Home() {
     <div className="min-h-screen">
       {/* Development Banner */}
       <div style={{backgroundColor: '#e6f2e6'}} className="text-gray-800 py-2 text-center text-sm">
-        🚧 UGGA is a nonprofit in its early stages. <Link href="/register" className="underline hover:no-underline font-medium">Join the pilot group</Link> and help us develop a community that supports you and your operation.
+        UGGA is a nonprofit in its early stages. <Link href="/register" className="underline hover:no-underline font-medium">Join the pilot group</Link> and help us develop a community that supports you and your operation.
       </div>
 
       {/* Hero Section */}
@@ -129,49 +129,34 @@ export default function Home() {
             </p>
             
             <div className="space-y-6 text-left max-w-2xl mx-auto">
-              <div className="flex items-start space-x-4">
-                <span className="text-2xl">🧠</span>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Share Challenges</h3>
-                  <p className="text-gray-600">Your input helps us identify pain points across the industry</p>
-                </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Share Challenges</h3>
+                <p className="text-gray-600">Your input helps us identify pain points across the industry</p>
               </div>
               
-              <div className="flex items-start space-x-4">
-                <span className="text-2xl">🛠</span>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Co-Design Tools</h3>
-                  <p className="text-gray-600">Features are tested and refined with direct grower feedback</p>
-                </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Co-Design Tools</h3>
+                <p className="text-gray-600">Features are tested and refined with direct grower feedback</p>
               </div>
               
-              <div className="flex items-start space-x-4">
-                <span className="text-2xl">👥</span>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Connect with Peers</h3>
-                  <p className="text-gray-600">Ideas and solutions often come from fellow members</p>
-                </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Connect with Peers</h3>
+                <p className="text-gray-600">Ideas and solutions often come from fellow members</p>
               </div>
               
-              <div className="flex items-start space-x-4">
-                <span className="text-2xl">📢</span>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Raise Your Voice</h3>
-                  <p className="text-gray-600">We bring your insights to researchers and policymakers</p>
-                </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Raise Your Voice</h3>
+                <p className="text-gray-600">We bring your insights to researchers and policymakers</p>
               </div>
               
-              <div className="flex items-start space-x-4">
-                <span className="text-2xl">🚧</span>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Preview What's Coming</h3>
-                  <p className="text-gray-600">Explore what's in development through the <Link href="/demo" className="text-ugga-primary hover:underline font-medium">Demo Dashboard</Link></p>
-                </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Preview What's Coming</h3>
+                <p className="text-gray-600">Explore what's in development through the <Link href="/demo" className="text-ugga-primary hover:underline font-medium">Demo Dashboard</Link></p>
               </div>
             </div>
             
             <p className="text-gray-600 mt-8 text-center">
-              🔄 This space evolves as you help us identify needs — the roadmap is shaped by your priorities.
+              This space evolves as you help us identify needs — the roadmap is shaped by your priorities.
             </p>
           </div>
         </div>
