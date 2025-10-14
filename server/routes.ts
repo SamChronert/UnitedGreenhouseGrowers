@@ -1337,6 +1337,22 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       });
       
       const challenge = await storage.createGrowerChallenge(validatedData);
+      
+      // Send notification to all admins
+      const user = await storage.getUser(req.user!.id);
+      const profile = await storage.getProfile(req.user!.id);
+      
+      const emailData = formatChallengeEmail({
+        userName: profile?.name || user?.username || 'Unknown User',
+        userEmail: user?.email || 'Unknown Email',
+        category: validatedData.category,
+        farmSize: validatedData.farmSize || 'Not specified',
+        description: validatedData.description,
+        challengeId: challenge.id,
+      });
+      
+      await notifyAllAdmins(emailData);
+      
       res.status(201).json(challenge);
     } catch (error) {
       console.error("Create challenge error:", error);
@@ -1396,8 +1412,8 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
         userName: profile?.name || user?.username || 'Unknown User',
         userEmail: user?.email || 'Unknown Email',
         userPhone: profile?.phone || 'Not provided',
-        topic: validatedData.topic,
-        description: validatedData.description,
+        topic: validatedData.subject,
+        description: validatedData.message,
         preferredContactMethod: validatedData.preferredContactMethod,
         requestId: request.id,
       });
