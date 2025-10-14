@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import uggaLogo from "@assets/2_1750100657577.png";
+import SearchModal from "@/components/SearchModal";
 import {
   Search,
   Home,
@@ -480,36 +481,7 @@ export default function Sidebar({ className }: SidebarProps) {
       )}
 
       {/* Search Modal */}
-      {showSearchModal && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Search</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSearchModal(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search with natural language..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-ugga-primary focus:border-transparent"
-                  autoFocus
-                />
-              </div>
-              <p className="text-sm text-gray-500">
-                This feature is coming soon! You'll be able to search across all UGGA resources using natural language.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      <SearchModal open={showSearchModal} onOpenChange={setShowSearchModal} />
     </>
   );
 }
