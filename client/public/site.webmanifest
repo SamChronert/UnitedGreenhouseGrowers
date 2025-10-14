@@ -1,0 +1,20 @@
+{
+  "name": "United Greenhouse Growers Association",
+  "short_name": "UGGA",
+  "description": "A comprehensive digital platform empowering agricultural professionals through intelligent resource management, community networking, and data-driven insights",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#1e5631",
+  "background_color": "#f5f5f0",
+  "display": "standalone"
+}
