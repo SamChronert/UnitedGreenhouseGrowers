@@ -21,13 +21,7 @@ import Register from "@/pages/Register";
 import Login from "@/pages/Login";
 import ResetPassword from "@/pages/ResetPassword";
 import DashboardWrapper from "@/features/dashboard/DashboardWrapper";
-import AdminResources from "@/pages/AdminResources";
-import AdminBlog from "@/pages/AdminBlog";
-import AdminMembers from "@/pages/AdminMembers";
-import AdminChallenges from "@/pages/AdminChallenges";
-import AdminFarmRoadmapManager from "@/pages/AdminFarmRoadmapManager";
-import AdminAnalytics from "@/pages/AdminAnalytics";
-import AdminAiAgents from "@/pages/AdminAiAgents";
+import AdminWrapper from "@/features/admin/AdminWrapper";
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -119,61 +113,17 @@ function Router() {
         </LayoutWrapper>
       </Route>
 
-      {/* Admin routes with Layout */}
-      <Route path="/admin/resources">
-        <LayoutWrapper>
-          <AuthGuard requireAdmin>
-            <AdminResources />
-          </AuthGuard>
-        </LayoutWrapper>
+      {/* Admin routes - bypass main Layout */}
+      <Route path="/admin">
+        <AuthGuard requireAdmin>
+          <AdminWrapper />
+        </AuthGuard>
       </Route>
       
-      <Route path="/admin/blog">
-        <LayoutWrapper>
-          <AuthGuard requireAdmin>
-            <AdminBlog />
-          </AuthGuard>
-        </LayoutWrapper>
-      </Route>
-      
-      <Route path="/admin/members">
-        <LayoutWrapper>
-          <AuthGuard requireAdmin>
-            <AdminMembers />
-          </AuthGuard>
-        </LayoutWrapper>
-      </Route>
-      
-      <Route path="/admin/challenges">
-        <LayoutWrapper>
-          <AuthGuard requireAdmin>
-            <AdminChallenges />
-          </AuthGuard>
-        </LayoutWrapper>
-      </Route>
-      
-      <Route path="/admin/farm-roadmap">
-        <LayoutWrapper>
-          <AuthGuard requireAdmin>
-            <AdminFarmRoadmapManager />
-          </AuthGuard>
-        </LayoutWrapper>
-      </Route>
-      
-      <Route path="/admin/analytics">
-        <LayoutWrapper>
-          <AuthGuard requireAdmin>
-            <AdminAnalytics />
-          </AuthGuard>
-        </LayoutWrapper>
-      </Route>
-      
-      <Route path="/admin/ai-agents">
-        <LayoutWrapper>
-          <AuthGuard requireAdmin>
-            <AdminAiAgents />
-          </AuthGuard>
-        </LayoutWrapper>
+      <Route path="/admin/*">
+        <AuthGuard requireAdmin>
+          <AdminWrapper />
+        </AuthGuard>
       </Route>
 
       {/* Fallback to 404 */}
