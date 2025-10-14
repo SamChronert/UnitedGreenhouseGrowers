@@ -402,42 +402,19 @@ This message was sent through the UGGA contact form. Reply directly to respond t
       const user = await storage.getUser(req.user!.id);
       const profile = await storage.getProfile(req.user!.id);
       
-      const fromEmail = process.env.FROM_EMAIL || "sam@growbig.ag";
-      const toEmail = "sam@growbig.ag";
-      
-      const emailSent = await sendEmail({
-        to: toEmail,
-        from: fromEmail,
-        subject: `[UGGA ${type.toUpperCase()}] ${subject}`,
-        html: `
-          <h2>New ${type} from UGGA Member</h2>
-          <p><strong>From:</strong> ${profile?.name || user?.username} (${user?.email})</p>
-          <p><strong>Member Since:</strong> ${user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}</p>
-          <p><strong>Organization:</strong> ${profile?.employer || 'Not specified'}</p>
-          <p><strong>State:</strong> ${profile?.state || 'Not specified'}</p>
-          <p><strong>Type:</strong> ${type}</p>
-          <p><strong>Subject:</strong> ${subject}</p>
-          <p><strong>Message:</strong></p>
-          <p>${message.replace(/\n/g, '<br>')}</p>
-          <hr>
-          <p><em>This message was sent through the UGGA member dashboard. Reply directly to respond to the member.</em></p>
-        `,
-        text: `
-New ${type} from UGGA Member
-
-From: ${profile?.name || user?.username} (${user?.email})
-Member Since: ${user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
-Organization: ${profile?.employer || 'Not specified'}
-State: ${profile?.state || 'Not specified'}
-Type: ${type}
-Subject: ${subject}
-
-Message:
-${message}
-
-This message was sent through the UGGA member dashboard. Reply directly to respond to the member.
-        `
+      // Send notification to all admins
+      const emailData = formatFeedbackEmail({
+        userName: profile?.name || user?.username || 'Unknown User',
+        userEmail: user?.email || 'Unknown Email',
+        memberSince: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown',
+        organization: profile?.employer || 'Not specified',
+        state: profile?.state || 'Not specified',
+        type,
+        subject,
+        message,
       });
+      
+      const emailSent = await notifyAllAdmins(emailData);
 
       if (!emailSent) {
         return res.status(500).json({ message: "Failed to send email" });
@@ -1345,8 +1322,8 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       const emailData = formatChallengeEmail({
         userName: profile?.name || user?.username || 'Unknown User',
         userEmail: user?.email || 'Unknown Email',
-        category: validatedData.category,
-        farmSize: validatedData.farmSize || 'Not specified',
+        category: validatedData.category || 'Not specified',
+        farmSize: 'Not specified',
         description: validatedData.description,
         challengeId: challenge.id,
       });
