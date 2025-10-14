@@ -9,6 +9,7 @@ const AdminResources = lazy(() => import("@/pages/AdminResources"));
 const AdminBlog = lazy(() => import("@/pages/AdminBlog"));
 const AdminMembers = lazy(() => import("@/pages/AdminMembers"));
 const AdminChallenges = lazy(() => import("@/pages/AdminChallenges"));
+const AdminExpertRequests = lazy(() => import("@/pages/AdminExpertRequests"));
 const AdminFarmRoadmapManager = lazy(() => import("@/pages/AdminFarmRoadmapManager"));
 const AdminAnalytics = lazy(() => import("@/pages/AdminAnalytics"));
 const AdminAiAgents = lazy(() => import("@/pages/AdminAiAgents"));
@@ -41,6 +42,12 @@ export default function AdminWrapper() {
         <Route path="/admin/challenges">
           <LazyWrapper>
             <AdminChallenges />
+          </LazyWrapper>
+        </Route>
+        
+        <Route path="/admin/expert-requests">
+          <LazyWrapper>
+            <AdminExpertRequests />
           </LazyWrapper>
         </Route>
         

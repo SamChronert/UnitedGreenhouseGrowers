@@ -11,7 +11,8 @@ import {
   MessageSquare,
   TrendingUp,
   Target,
-  Bot
+  Bot,
+  HelpCircle
 } from "lucide-react";
 
 export default function AdminDashboardHome() {
@@ -45,6 +46,13 @@ export default function AdminDashboardHome() {
       description: "View feedback and messages from the dashboard.",
       href: "/admin/challenges",
       iconBgColor: "#dbeafe"
+    },
+    {
+      icon: <HelpCircle className="h-8 w-8" style={{ color: "#0891b2" }} />,
+      title: "Expert Requests",
+      description: "Manage and respond to member requests for expert assistance.",
+      href: "/admin/expert-requests",
+      iconBgColor: "#cffafe"
     },
     {
       icon: <TrendingUp className="h-8 w-8" style={{ color: "#dc2626" }} />,
@@ -121,9 +129,9 @@ export default function AdminDashboardHome() {
           ))}
         </div>
 
-        {/* Third row - 1 tool */}
+        {/* Third row - 2 tools */}
         <div className="grid md:grid-cols-3 gap-6">
-          {adminTools.slice(6, 7).map((tool, index) => (
+          {adminTools.slice(6, 8).map((tool, index) => (
             <Link key={index + 6} href={tool.href}>
               <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full group focus:outline-none focus:ring-2 focus:ring-red-500">
                 <CardContent className="p-6 text-center">

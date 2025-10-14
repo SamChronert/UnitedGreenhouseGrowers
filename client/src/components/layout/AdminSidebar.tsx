@@ -25,6 +25,7 @@ import {
   Menu,
   X,
   LayoutDashboard,
+  HelpCircle,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -89,6 +90,12 @@ export default function AdminSidebar({ className }: AdminSidebarProps) {
       label: "Feedback",
       path: "/admin/challenges",
       icon: MessageSquare,
+    },
+    {
+      id: "expert-requests",
+      label: "Expert Requests",
+      path: "/admin/expert-requests",
+      icon: HelpCircle,
     },
     {
       id: "analytics",
