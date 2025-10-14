@@ -1,0 +1,76 @@
+Hey! I want to refactor our Admin experience so it mirrors the standard user dashboard, with a persistent left sidebar and nested pages for each admin tool.
+What I want (high level)
+* Create a separate Admin Dashboard (own layout + persistent left sidebar) that feels like the member dashboard.
+* All Admin Tools live inside this Admin Dashboard as nested routes/pages (no more ejecting to standalone pages).
+* Admins can toggle between the Member Dashboard and the Admin Dashboard via the left sidebar.
+* Update navbar + dropdown so “Admin Dashboard” sends admins to the new dashboard root (not to a one-off tools page).
+* Review and fix routing so URLs are clean, predictable, and backward-compatible (redirects where needed).
+Behavior & UX
+* When an Admin is logged in:
+    * Navbar: “Admin Dashboard” opens /admin (new admin dashboard home).
+    * Sidebar (Admin): Always visible across admin tool pages; shows links for all tools.
+    * Admin Home (/admin): Replicates the current “Admin Tools” tile grid (cards/links), but now it’s the dashboard home, not a dead-end page.
+    * Tool Pages: Open within the admin dashboard layout (sidebar stays). Examples:
+        * /admin/resources
+        * /admin/blog
+        * /admin/members
+        * /admin/feedback
+        * /admin/analytics
+        * /admin/farm-roadmap
+        * /admin/ai-agent
+* Toggle between dashboards:
+    * Add a sidebar item (or segmented control) to jump between Member Dashboard (/dashboard) and Admin Dashboard (/admin).
+* Keep styling consistent with the current dashboard system (cards, icons, spacing).
+Routing & Access (auto-detect framework and apply best practice)
+* Introduce nested admin routes under /admin with a shared AdminLayout (left sidebar + top header if needed).
+* Add role guard for all /admin/** routes: only users with role Admin (or admin flag) can access.
+* Redirects from old admin-tool URLs to new ones (301 or in-app redirects). Examples (adjust to match current paths):
+    * /dashboard/admin or /admin-tools → /admin
+    * /admin/resources* → /admin/resources* (ensure nested path consistency)
+* Ensure any deep links still work.
+* Remove Navbar drop-down and instead have the Navbar navigate to the admin dashboard home
+Sidebar (Admin)
+* Sections/links (use current naming & icons):
+    * Admin Home
+    * Resource Management
+    * Blog Management
+    * Member Management
+    * Feedback
+    * Platform Analytics
+    * Farm Roadmap Manager
+    * AI Agent Manager
+    * (Divider) Switch to Member Dashboard
+* Show active states, keyboard focus states, and collapse on mobile.
+URL plan (propose & implement)
+* /admin → Admin Home (cards)
+* /admin/resources → Resource Management
+* /admin/blog → Blog Management
+* /admin/members → Member Management
+* /admin/challenges → Feedback
+* /admin/analytics → Platform Analytics
+* /admin/farm-roadmap → Farm Roadmap Manager
+* /admin/ai-agent → AI Agent Manager
+* Keep /dashboard/** for member area. Provide a clean toggle between /dashboard and /admin.
+Keep/Reuse
+* Reuse existing admin tool pages/components; just wrap them in the new AdminLayout so the sidebar stays.
+* Don’t break existing API calls or data models.
+* Preserve current card grid from “Admin Tools” page; move it to /admin and tidy spacing/typography.
+Error/Edge
+* If a non-admin hits /admin/**, show a 403 screen with a safe link back to /dashboard.
+* Handle old bookmarks via redirects.
+* Ensure mobile works (sidebar collapses into a drawer).
+Acceptance checklist
+* /admin exists with a persistent sidebar and card grid home.
+* All admin tools render inside /admin/** and keep the sidebar visible.
+* Navbar “Admin Dashboard” goes to /admin.
+* Sidebar includes a toggle link to /dashboard; member dashboard includes a link back to /admin (for admins).
+* Old admin URLs redirect to the new nested routes.
+* Role-guard enforced; 403 for non-admins.
+* Mobile/desktop responsive; no layout jumps.
+* No regressions in existing member dashboard.
+Deliverables (please reply with)
+* List of files created/updated (layouts, routes, components).
+* Routing map (old → new) and redirect rules implemented.
+* Screenshots/preview links: Admin Home, one tool page, 403 screen, mobile sidebar.
+* Brief notes on any assumptions made and where to change menu items in the future.
+If anything is ambiguous, choose the simplest approach that matches our current dashboard patterns and keeps URLs clean and consistent
