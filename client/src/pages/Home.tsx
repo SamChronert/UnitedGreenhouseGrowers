@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { Handshake, BookOpen, Wrench } from "lucide-react";
+import { Handshake, BookOpen, Wrench, MessageSquare, Users, Megaphone, Eye } from "lucide-react";
 import uggaLogo from "@assets/2_1750100657577.png";
 
 export default function Home() {
@@ -23,6 +23,41 @@ export default function Home() {
       icon: <BookOpen className="h-12 w-12" />,
       title: "Share Knowledge",
       description: "Access peer-reviewed resources tested and approved by your fellow growers."
+    }
+  ];
+
+  const buildingTogether = [
+    {
+      icon: <MessageSquare className="h-12 w-12" />,
+      title: "Share Challenges",
+      verb: "Share",
+      description: "Your input helps us identify pain points across the industry"
+    },
+    {
+      icon: <Wrench className="h-12 w-12" />,
+      title: "Co-Design Tools",
+      verb: "Co-Design",
+      description: "Features are tested and refined with direct grower feedback"
+    },
+    {
+      icon: <Users className="h-12 w-12" />,
+      title: "Connect with Peers",
+      verb: "Connect",
+      description: "Ideas and solutions often come from fellow members"
+    },
+    {
+      icon: <Megaphone className="h-12 w-12" />,
+      title: "Raise Your Voice",
+      verb: "Raise",
+      description: "We bring your insights to researchers and policymakers"
+    },
+    {
+      icon: <Eye className="h-12 w-12" />,
+      title: "Preview What's Coming",
+      verb: "Preview",
+      description: (
+        <>Explore what's in development through the <Link href="/demo" className="font-medium hover:underline" style={{color: 'var(--color-sage)'}}>Demo Dashboard</Link></>
+      )
     }
   ];
 
@@ -118,47 +153,36 @@ export default function Home() {
       </section>
 
       {/* How We're Building UGGA Together Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16" style={{backgroundColor: '#f0f7f0'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
               How We're Building UGGA Together
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               UGGA is a grower-driven platform — built with input from the people who use it. Here's how you shape what we build next:
             </p>
-            
-            <div className="space-y-6 text-center max-w-2xl mx-auto">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Share Challenges</h3>
-                <p className="text-gray-600">Your input helps us identify pain points across the industry</p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Co-Design Tools</h3>
-                <p className="text-gray-600">Features are tested and refined with direct grower feedback</p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Connect with Peers</h3>
-                <p className="text-gray-600">Ideas and solutions often come from fellow members</p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Raise Your Voice</h3>
-                <p className="text-gray-600">We bring your insights to researchers and policymakers</p>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Preview What's Coming</h3>
-                <p className="text-gray-600">Explore what's in development through the <Link href="/demo" className="text-ugga-primary hover:underline font-medium">Demo Dashboard</Link></p>
-              </div>
-              
-              <p className="text-gray-600 mt-8 text-center">
-                This space evolves as you help us identify needs — the roadmap is shaped by your priorities.
-              </p>
-            </div>
           </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            {buildingTogether.map((item, index) => (
+              <Card key={index} className="text-center shadow-sm bg-white hover:shadow-md transition-shadow duration-200">
+                <CardContent className="p-8">
+                  <div className="flex justify-center mb-6" style={{color: 'var(--color-sage)'}}>
+                    {item.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    <span style={{color: 'var(--color-sage)'}}>{item.verb}</span>{item.title.replace(item.verb, '')}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">{item.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          <p className="text-gray-600 text-center max-w-3xl mx-auto">
+            This space evolves as you help us identify needs — the roadmap is shaped by your priorities.
+          </p>
         </div>
       </section>
 
