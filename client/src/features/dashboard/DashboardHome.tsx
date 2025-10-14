@@ -19,7 +19,8 @@ import {
   UserCircle,
   MessageCircle,
   Store,
-  ShoppingBag
+  ShoppingBag,
+  HelpCircle
 } from "lucide-react";
 
 import ChallengeSubmissionForm from "@/components/ChallengeSubmissionForm";
@@ -72,7 +73,7 @@ export default function DashboardHome() {
   };
 
   const memberTools = [
-    // Row 1: Resource Library, Member Forum, Sales Hub
+    // Row 1: Resource Library, Ask an Expert, Member Forum, Sales Hub
     {
       icon: <FolderOpen className="h-8 w-8" />,
       title: "Resource Library",
@@ -81,6 +82,15 @@ export default function DashboardHome() {
       inDevelopment: false,
       iconColor: "text-orange-600",
       bgColor: "bg-orange-100"
+    },
+    {
+      icon: <HelpCircle className="h-8 w-8" />,
+      title: "Ask an Expert",
+      description: "Get expert help from our network of industry professionals and researchers",
+      href: isDemo ? "/demo/ask-expert" : "/dashboard/ask-expert",
+      inDevelopment: false,
+      iconColor: "text-cyan-600",
+      bgColor: "bg-cyan-100"
     },
     {
       icon: <MessageCircle className="h-8 w-8" />,
@@ -226,8 +236,8 @@ export default function DashboardHome() {
       {/* Member Tools Grid */}
       <div className="mb-10">
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Member Tools</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {memberTools.slice(0, 3).map((tool, index) => (
+        <div className="grid md:grid-cols-4 gap-6">
+          {memberTools.slice(0, 4).map((tool, index) => (
             <div key={index} onClick={() => handleToolClick(tool.href)}>
               {isDemo && tool.href === "/dashboard/profile" ? (
                 <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full relative group focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -270,8 +280,8 @@ export default function DashboardHome() {
           ))}
         </div>
         <div className="grid md:grid-cols-4 gap-6 mt-6">
-          {memberTools.slice(3, 7).map((tool, index) => (
-            <div key={index + 3} onClick={() => handleToolClick(tool.href)}>
+          {memberTools.slice(4, 8).map((tool, index) => (
+            <div key={index + 4} onClick={() => handleToolClick(tool.href)}>
               {isDemo && tool.href === "/dashboard/profile" ? (
                 <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full relative group focus:outline-none focus:ring-2 focus:ring-green-500">
                   {tool.inDevelopment && (
