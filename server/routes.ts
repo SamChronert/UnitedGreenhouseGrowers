@@ -29,6 +29,7 @@ import {
   insertBlogPostSchema, 
   insertResourceSchema,
   insertGrowerChallengeSchema,
+  insertExpertRequestSchema,
   Role,
   resources
 } from "@shared/schema";
@@ -1373,6 +1374,54 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
     } catch (error) {
       console.error("Get challenge stats error:", error);
       res.status(500).json({ message: "Failed to fetch challenge statistics" });
+    }
+  });
+
+  // Expert request routes
+  app.post("/api/expert-requests", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const validatedData = insertExpertRequestSchema.parse({
+        ...req.body,
+        userId: req.user!.id,
+      });
+      
+      const request = await storage.createExpertRequest(validatedData);
+      res.status(201).json(request);
+    } catch (error) {
+      console.error("Create expert request error:", error);
+      res.status(500).json({ message: "Failed to submit expert request" });
+    }
+  });
+
+  app.get("/api/expert-requests", authenticate, requireMember, async (req: AuthRequest, res) => {
+    try {
+      const requests = await storage.getUserExpertRequests(req.user!.id);
+      res.json(requests);
+    } catch (error) {
+      console.error("Get expert requests error:", error);
+      res.status(500).json({ message: "Failed to fetch expert requests" });
+    }
+  });
+
+  // Admin expert request routes
+  app.get("/api/admin/expert-requests", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const requests = await storage.getAllExpertRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Get all expert requests error:", error);
+      res.status(500).json({ message: "Failed to fetch expert requests" });
+    }
+  });
+
+  app.patch("/api/admin/expert-requests/:id", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const { status, adminNotes } = req.body;
+      const request = await storage.updateExpertRequestStatus(req.params.id, status, adminNotes);
+      res.json(request);
+    } catch (error) {
+      console.error("Update expert request error:", error);
+      res.status(500).json({ message: "Failed to update expert request" });
     }
   });
 

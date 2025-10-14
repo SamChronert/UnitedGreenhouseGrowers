@@ -18,7 +18,8 @@ import {
   UserCircle,
   MessageCircle,
   Store,
-  ShoppingBag
+  ShoppingBag,
+  HelpCircle
 } from "lucide-react";
 
 import ChatWidget from "@/components/ChatWidget";
@@ -102,7 +103,7 @@ export default function Dashboard() {
   };
 
   const memberTools = [
-    // Row 1: Resource Library, Member Forum, Sales Hub
+    // Row 1: Resource Library, Ask an Expert, Member Forum, Sales Hub
     {
       icon: <FolderOpen className="h-8 w-8" style={{ color: "#c2410c" }} />,
       title: "Resource Library",
@@ -110,6 +111,14 @@ export default function Dashboard() {
       href: "/dashboard/resources",
       inDevelopment: false,
       iconBgColor: "#fed7aa"
+    },
+    {
+      icon: <HelpCircle className="h-8 w-8" style={{ color: "#0891b2" }} />,
+      title: "Ask an Expert",
+      description: "Get expert help from our network of industry professionals and researchers",
+      href: "/dashboard/ask-expert",
+      inDevelopment: false,
+      iconBgColor: "#cffafe"
     },
     {
       icon: <MessageCircle className="h-8 w-8" style={{ color: "#7c3aed" }} />,
@@ -175,8 +184,8 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Challenge Submission Section */
-            <Card className="mb-10">
+        {/* Challenge Submission Section */}
+        <Card className="mb-10">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MessageSquare className="h-5 w-5 text-ugga-secondary" />
@@ -188,14 +197,14 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <ChallengeSubmissionForm />
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
 
-            {/* Member Tools Grid */}
-            <div className="mb-10">
+        {/* Member Tools Grid */}
+        <div className="mb-10">
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Member Tools</h2>
-              <div className="grid md:grid-cols-3 gap-6">
-                {memberTools.slice(0, 3).map((tool, index) => (
+              <div className="grid md:grid-cols-4 gap-6">
+                {memberTools.slice(0, 4).map((tool, index) => (
                   <Link key={index} href={tool.href}>
                     <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full relative group focus:outline-none focus:ring-2 focus:ring-green-500">
                       {tool.inDevelopment && (
@@ -220,8 +229,8 @@ export default function Dashboard() {
                 ))}
               </div>
               <div className="grid md:grid-cols-4 gap-6 mt-6">
-                {memberTools.slice(3, 7).map((tool, index) => (
-                  <Link key={index + 3} href={tool.href}>
+                {memberTools.slice(4, 8).map((tool, index) => (
+                  <Link key={index + 4} href={tool.href}>
                     <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full relative group focus:outline-none focus:ring-2 focus:ring-green-500">
                       {tool.inDevelopment && (
                         <div className="absolute top-3 right-3 z-10">
@@ -243,22 +252,22 @@ export default function Dashboard() {
                     </Card>
                   </Link>
                 ))}
-              </div>
-            </div>
+          </div>
+        </div>
 
-        {/* Contact UGGA Team Section */
-          <Card className="mb-10">
-            <CardHeader>
-              <CardTitle className="text-2xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                <Mail className="h-5 w-5 text-ugga-secondary" />
-                Contact UGGA Team
-              </CardTitle>
-              <p className="text-gray-600 dark:text-gray-300">
-                Share feedback, request features, or message the UGGA team directly
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Contact UGGA Team Section */}
+        <Card className="mb-10">
+          <CardHeader>
+            <CardTitle className="text-2xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <Mail className="h-5 w-5 text-ugga-secondary" />
+              Contact UGGA Team
+            </CardTitle>
+            <p className="text-gray-600 dark:text-gray-300">
+              Share feedback, request features, or message the UGGA team directly
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Subject
@@ -284,20 +293,20 @@ export default function Dashboard() {
                     <option value="question">Question</option>
                     <option value="suggestion">Suggestion</option>
                   </select>
-                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Message
-                </label>
-                <Textarea
-                  placeholder="Tell us what's on your mind..."
-                  value={feedback.message}
-                  onChange={(e) => setFeedback({ ...feedback, message: e.target.value })}
-                  rows={4}
-                />
-              </div>
-              <Button 
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Message
+              </label>
+              <Textarea
+                placeholder="Tell us what's on your mind..."
+                value={feedback.message}
+                onChange={(e) => setFeedback({ ...feedback, message: e.target.value })}
+                rows={4}
+              />
+            </div>
+            <Button 
                 onClick={handleFeedbackSubmit}
                 disabled={submitFeedbackMutation.isPending}
                 className="text-white rounded-lg font-medium shadow-lg hover:opacity-90 transition-all duration-300"
@@ -311,10 +320,10 @@ export default function Dashboard() {
                     <Send className="h-4 w-4 mr-2" />
                     Send Message
                   </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
 
       </div>
     </div>

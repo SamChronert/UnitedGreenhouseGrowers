@@ -7,6 +7,7 @@ import {
   analytics_events,
   chatLogs,
   growerChallenges,
+  expertRequests,
   forumPosts,
   forumComments,
   forumVotes,
@@ -33,6 +34,8 @@ import {
   type InsertChatLog,
   type GrowerChallenge,
   type InsertGrowerChallenge,
+  type ExpertRequest,
+  type InsertExpertRequest,
   type ForumPost,
   type InsertForumPost,
   type ForumComment,
@@ -145,6 +148,12 @@ export interface IStorage {
   getAllGrowerChallenges(): Promise<(GrowerChallenge & { user: User & { profile: Profile } })[]>;
   updateGrowerChallengeFlag(id: string, adminFlag: string): Promise<GrowerChallenge>;
   getGrowerChallengeStats(): Promise<{ totalCount: number; categoryCounts: Record<string, number>; recentCount: number }>;
+  
+  // Expert request operations
+  createExpertRequest(request: InsertExpertRequest): Promise<ExpertRequest>;
+  getUserExpertRequests(userId: string): Promise<(ExpertRequest & { user: User & { profile: Profile } })[]>;
+  getAllExpertRequests(): Promise<(ExpertRequest & { user: User & { profile: Profile } })[]>;
+  updateExpertRequestStatus(id: string, status: string, adminNotes?: string): Promise<ExpertRequest>;
   
   // Forum operations
   getAllForumPosts(filters?: {
@@ -929,6 +938,70 @@ export class DatabaseStorage implements IStorage {
     
     console.log("Final stats:", stats);
     return stats;
+  }
+
+  // Expert request operations
+  async createExpertRequest(requestData: InsertExpertRequest): Promise<ExpertRequest> {
+    const [request] = await db
+      .insert(expertRequests)
+      .values({
+        id: randomUUID(),
+        ...requestData,
+      })
+      .returning();
+    return request;
+  }
+
+  async getUserExpertRequests(userId: string): Promise<(ExpertRequest & { user: User & { profile: Profile } })[]> {
+    const results = await db
+      .select()
+      .from(expertRequests)
+      .leftJoin(users, eq(expertRequests.userId, users.id))
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .where(eq(expertRequests.userId, userId))
+      .orderBy(desc(expertRequests.createdAt));
+    
+    return results.map((result: any) => ({
+      ...result.expert_requests,
+      user: {
+        ...result.users,
+        profile: result.profiles || null
+      }
+    }));
+  }
+
+  async getAllExpertRequests(): Promise<(ExpertRequest & { user: User & { profile: Profile } })[]> {
+    const results = await db
+      .select()
+      .from(expertRequests)
+      .leftJoin(users, eq(expertRequests.userId, users.id))
+      .leftJoin(profiles, eq(users.id, profiles.userId))
+      .orderBy(desc(expertRequests.createdAt));
+    
+    return results.map((result: any) => ({
+      ...result.expert_requests,
+      user: {
+        ...result.users,
+        profile: result.profiles || null
+      }
+    }));
+  }
+
+  async updateExpertRequestStatus(id: string, status: string, adminNotes?: string): Promise<ExpertRequest> {
+    const updates: any = { status };
+    if (adminNotes !== undefined) {
+      updates.adminNotes = adminNotes;
+    }
+    if (status === 'resolved') {
+      updates.resolvedAt = new Date();
+    }
+    
+    const [request] = await db
+      .update(expertRequests)
+      .set(updates)
+      .where(eq(expertRequests.id, id))
+      .returning();
+    return request;
   }
 
   // Forum operations

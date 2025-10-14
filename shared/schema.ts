@@ -248,6 +248,26 @@ export const analytics_events = pgTable("analytics_events", {
   sessionIdx: index("analytics_session_idx").on(table.session_id),
 }));
 
+export const expertRequests = pgTable("expert_requests", {
+  id: varchar("id").primaryKey().notNull(),
+  userId: varchar("user_id").notNull(),
+  subject: varchar("subject").notNull(),
+  category: varchar("category").notNull(),
+  message: text("message").notNull(),
+  preferredContactMethod: varchar("preferred_contact_method").notNull(),
+  urgency: varchar("urgency").notNull(),
+  status: varchar("status").default("pending").notNull(),
+  adminNotes: text("admin_notes"),
+  assignedTo: varchar("assigned_to"),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdx: index("expert_requests_user_idx").on(table.userId),
+  statusIdx: index("expert_requests_status_idx").on(table.status),
+  createdAtIdx: index("expert_requests_created_at_idx").on(table.createdAt),
+  categoryIdx: index("expert_requests_category_idx").on(table.category),
+}));
+
 // Farm Roadmap tables
 export const farmAssessments = pgTable("farm_assessments", {
   id: varchar("id").primaryKey().notNull(),
@@ -445,6 +465,13 @@ export const forumPostFavoritesRelations = relations(forumPostFavorites, ({ one 
   }),
 }));
 
+export const expertRequestsRelations = relations(expertRequests, ({ one }) => ({
+  user: one(users, {
+    fields: [expertRequests.userId],
+    references: [users.id],
+  }),
+}));
+
 // Farm Roadmap relations
 export const farmAssessmentsRelations = relations(farmAssessments, ({ one }) => ({
   user: one(users, {
@@ -526,6 +553,15 @@ export const insertForumPostFavoriteSchema = createInsertSchema(forumPostFavorit
 export const insertAnalyticsEventSchema = createInsertSchema(analytics_events).omit({
   id: true,
   created_at: true,
+});
+
+export const insertExpertRequestSchema = createInsertSchema(expertRequests).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+  adminNotes: true,
+  assignedTo: true,
+  resolvedAt: true,
 });
 
 export const insertChatLogSchema = createInsertSchema(chatLogs).omit({
@@ -642,6 +678,8 @@ export type ForumPostFavorite = typeof forumPostFavorites.$inferSelect;
 export type InsertForumPostFavorite = z.infer<typeof insertForumPostFavoriteSchema>;
 export type AnalyticsEvent = typeof analytics_events.$inferSelect;
 export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
+export type ExpertRequest = typeof expertRequests.$inferSelect;
+export type InsertExpertRequest = z.infer<typeof insertExpertRequestSchema>;
 
 // Farm Roadmap types
 export type FarmAssessment = typeof farmAssessments.$inferSelect;

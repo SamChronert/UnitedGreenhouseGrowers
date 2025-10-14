@@ -30,6 +30,7 @@ import {
   Menu,
   X,
   Settings,
+  HelpCircle,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -108,6 +109,12 @@ export default function Sidebar({ className }: SidebarProps) {
       label: "Resource Library",
       path: isDemo ? "/demo/resources" : "/dashboard/resources",
       icon: FolderOpen,
+    },
+    {
+      id: "ask-expert",
+      label: "Ask an Expert",
+      path: isDemo ? "/demo/ask-expert" : "/dashboard/ask-expert",
+      icon: HelpCircle,
     },
     {
       id: "forum",

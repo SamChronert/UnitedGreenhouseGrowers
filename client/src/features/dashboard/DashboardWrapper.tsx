@@ -7,6 +7,7 @@ import DashboardHome from "@/features/dashboard/DashboardHome";
 
 // Lazy load feature components
 const Resources = lazy(() => import("@/pages/Resources"));
+const AskExpert = lazy(() => import("@/pages/AskExpert"));
 const Forum = lazy(() => import("@/pages/Forum"));
 const SalesHub = lazy(() => import("@/pages/SalesHub"));
 const ProductHub = lazy(() => import("@/pages/ProductHub"));
@@ -46,6 +47,12 @@ export default function DashboardWrapper({ isDemo = false }: DashboardWrapperPro
           <Route path={`${basePath}/resources/:id`}>
             <LazyWrapper>
               <ResourceDetail />
+            </LazyWrapper>
+          </Route>
+          
+          <Route path={`${basePath}/ask-expert`}>
+            <LazyWrapper>
+              <AskExpert />
             </LazyWrapper>
           </Route>
           
