@@ -9,7 +9,22 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 - Avoid: Highlighting "AI" directly, flashy tech-forward language
 - Emphasize: Community, usefulness, grower empowerment, peer collaboration
 
-## Recent Changes (August 2025)
+## Recent Changes (October 2025)
+### Admin Email Notifications for Form Submissions
+- **Date**: October 14, 2025
+- **Change**: Implemented automated email notifications to all admin users for form submissions
+- **Details**: Created centralized email notification system that sends emails to all admin users when any of these forms are submitted:
+  - Contact form (/contact)
+  - Dashboard feedback form ("Contact UGGA Team")
+  - Challenge submission form ("We need your feedback!")
+  - Ask an Expert requests
+- **Implementation**: 
+  - New `server/emailNotifications.ts` utility with admin query and email formatting functions
+  - Graceful handling when no admins exist (logs warning but allows submission to succeed)
+  - Email failures don't block form submissions - data is always saved to database
+- **Impact**: Admins receive immediate notifications of user submissions via email, improving response times
+- **Status**: ✅ Complete - All form endpoints updated and tested
+
 ### Major Documentation Update
 - **Date**: August 20, 2025
 - **Change**: Comprehensive README.md rewrite with complete feature documentation
