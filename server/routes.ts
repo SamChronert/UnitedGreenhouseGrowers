@@ -348,36 +348,15 @@ If you didn't request this reset, you can safely ignore this email.
         return res.status(400).json({ message: "All fields are required" });
       }
 
-      const fromEmail = process.env.FROM_EMAIL || "sam@growbig.ag";
-      const toEmail = "sam@growbig.ag";
-      
-      const emailSent = await sendEmail({
-        to: toEmail,
-        from: fromEmail,
-        subject: `UGGA Contact Form: ${subject}`,
-        html: `
-          <h2>New Contact Form Submission</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Subject:</strong> ${subject}</p>
-          <p><strong>Message:</strong></p>
-          <p>${message.replace(/\n/g, '<br>')}</p>
-          <hr>
-          <p><em>This message was sent through the UGGA contact form. Reply directly to respond to the sender.</em></p>
-        `,
-        text: `
-New Contact Form Submission
-
-Name: ${name}
-Email: ${email}
-Subject: ${subject}
-
-Message:
-${message}
-
-This message was sent through the UGGA contact form. Reply directly to respond to the sender.
-        `
+      // Send notification to all admins
+      const emailData = formatContactFormEmail({
+        name,
+        email,
+        subject,
+        message,
       });
+      
+      const emailSent = await notifyAllAdmins(emailData);
 
       if (!emailSent) {
         return res.status(500).json({ message: "Failed to send email" });
