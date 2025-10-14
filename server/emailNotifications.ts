@@ -26,8 +26,8 @@ export async function notifyAllAdmins(emailData: AdminEmailData): Promise<boolea
       .where(eq(users.role, Role.ADMIN));
 
     if (adminUsers.length === 0) {
-      console.warn("No admin users found to send notification");
-      return false;
+      console.warn("No admin users found to send notification - skipping email notification");
+      return true; // Return true to allow form submission to succeed
     }
 
     const fromEmail = process.env.FROM_EMAIL || "sam@growbig.ag";
@@ -50,12 +50,15 @@ export async function notifyAllAdmins(emailData: AdminEmailData): Promise<boolea
     
     if (!allSuccessful) {
       console.error("Some admin emails failed to send:", results.filter(r => r.status === 'rejected'));
+      // Still return true - email failure shouldn't break form submission
+      return true;
     }
     
-    return allSuccessful;
+    return true;
   } catch (error) {
     console.error("Error sending admin notifications:", error);
-    return false;
+    // Return true to allow form submission to succeed even if email fails
+    return true;
   }
 }
 
