@@ -100,11 +100,11 @@ export default function Home() {
                   </Button>
                 </Link>
               )}
-              <Link href="#features">
-                <Button size="lg" variant="ghost" className="border-white text-white hover:bg-white hover:text-gray-900 bg-transparent px-6 py-3 text-lg font-medium shadow-lg border-2 transition-all duration-300">
+              <a href="#features">
+                <Button size="lg" variant="ghost" className="border-white text-white hover:bg-white hover:text-gray-900 bg-transparent px-6 py-3 text-lg font-medium shadow-lg border-2 transition-all duration-300" data-testid="button-hero-learn-more">
                   Learn More
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>
