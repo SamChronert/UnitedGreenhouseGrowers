@@ -153,11 +153,11 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Preview What's Coming</h3>
                 <p className="text-gray-600">Explore what's in development through the <Link href="/demo" className="text-ugga-primary hover:underline font-medium">Demo Dashboard</Link></p>
               </div>
+              
+              <p className="text-gray-600 mt-8 text-center">
+                This space evolves as you help us identify needs — the roadmap is shaped by your priorities.
+              </p>
             </div>
-            
-            <p className="text-gray-600 mt-8 text-center">
-              This space evolves as you help us identify needs — the roadmap is shaped by your priorities.
-            </p>
           </div>
         </div>
       </section>
