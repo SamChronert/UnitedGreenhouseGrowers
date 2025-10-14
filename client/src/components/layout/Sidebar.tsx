@@ -158,12 +158,12 @@ export default function Sidebar({ className }: SidebarProps) {
     },
   ] : [];
 
-  // Section 4: Admin Tools (only if admin)
+  // Section 4: Admin Dashboard Toggle (only if admin)
   const adminNavItems: NavigationItem[] = isAdmin ? [
     {
-      id: "admin-tools",
-      label: "Admin Tools",
-      path: isDemo ? "/demo/admin" : "/dashboard/admin",
+      id: "admin-dashboard",
+      label: "Switch to Admin Dashboard",
+      path: "/admin",
       icon: Settings,
     },
   ] : [];
