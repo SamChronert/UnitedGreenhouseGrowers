@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { Handshake, BookOpen, Wrench, Users, Megaphone, Eye, GraduationCap } from "lucide-react";
+import { Handshake, BookOpen, Wrench, Users, Megaphone, Eye, GraduationCap, MessageSquare } from "lucide-react";
 import uggaLogo from "@assets/2_1750100657577.png";
 
 export default function Home() {
@@ -41,6 +41,11 @@ export default function Home() {
       icon: <Wrench className="h-12 w-12" />,
       title: "Co-Design Tools",
       description: "Features are tested and refined with direct grower feedback"
+    },
+    {
+      icon: <MessageSquare className="h-12 w-12" />,
+      title: "Share Challenges",
+      description: "Your input helps us identify pain points across the industry"
     },
     {
       icon: <Megaphone className="h-12 w-12" />,
