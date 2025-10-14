@@ -22,6 +22,7 @@ import {
 } from "./auth";
 import { sendEmail } from "./sendgrid";
 import { findGrowerAI, assessmentAI } from "./openai";
+import { notifyAllAdmins, formatExpertRequestEmail, formatChallengeEmail, formatFeedbackEmail, formatContactFormEmail } from "./emailNotifications";
 import { calculateFarmProfile, generateRecommendations } from "./farmRoadmapLogic";
 import { 
   insertUserSchema, 
@@ -1386,6 +1387,23 @@ This message was sent through the UGGA member dashboard. Reply directly to respo
       });
       
       const request = await storage.createExpertRequest(validatedData);
+      
+      // Send notification to all admins
+      const user = await storage.getUser(req.user!.id);
+      const profile = await storage.getProfile(req.user!.id);
+      
+      const emailData = formatExpertRequestEmail({
+        userName: profile?.name || user?.username || 'Unknown User',
+        userEmail: user?.email || 'Unknown Email',
+        userPhone: profile?.phone || 'Not provided',
+        topic: validatedData.topic,
+        description: validatedData.description,
+        preferredContactMethod: validatedData.preferredContactMethod,
+        requestId: request.id,
+      });
+      
+      await notifyAllAdmins(emailData);
+      
       res.status(201).json(request);
     } catch (error) {
       console.error("Create expert request error:", error);
