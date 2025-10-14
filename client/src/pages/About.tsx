@@ -158,7 +158,7 @@ export default function About() {
       {/* CTA Section 1 */}
       <section className="py-12" style={{backgroundColor: '#f0f7f0'}}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-lg text-gray-700 mb-6">
+          <p className="text-lg text-gray-700 mb-6 mx-auto">
             Join growers, researchers, and industry professionals shaping the future of greenhouse agriculture
           </p>
           <Link href="/register">
@@ -202,7 +202,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Values</h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 mx-auto">
               Everything we do is guided by these core principles
             </p>
           </div>
@@ -227,7 +227,7 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Founding Members</h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 mx-auto">
               Meet the team bringing growers, researchers, and industry together
             </p>
           </div>
@@ -259,7 +259,7 @@ export default function About() {
           <h3 className="text-2xl font-bold text-gray-900 mb-4">
             Ready to Help Shape UGGA?
           </h3>
-          <p className="text-lg text-gray-700 mb-6">
+          <p className="text-lg text-gray-700 mb-6 mx-auto">
             Your feedback will directly influence our member dashboard, resource library, and grower network
           </p>
           <Link href="/register">
