@@ -20,7 +20,7 @@ import {
   clearAuthCookie,
   type AuthRequest 
 } from "./auth";
-import { sendEmail } from "./sendgrid";
+import { sendUserEmail } from "./email/userEmail";
 import { findGrowerAI, assessmentAI } from "./openai";
 import { notifyAllAdmins, formatExpertRequestEmail, formatChallengeEmail, formatFeedbackEmail, formatContactFormEmail } from "./emailNotifications";
 import { calculateFarmProfile, generateRecommendations } from "./farmRoadmapLogic";
@@ -165,16 +165,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const token = generateToken(user);
       setAuthCookie(res, token);
 
-      // Send verification email (simplified for MVP)
-      const fromEmail = process.env.FROM_EMAIL || "info@greenhousegrowers.org";
-      await sendEmail({
+      // Send welcome email via Brevo SMTP
+      await sendUserEmail({
         to: user.email,
-        from: fromEmail,
-        subject: "Welcome to UGGA - Email Verification",
+        subject: "Welcome to UGGA",
         html: `
           <h1>Welcome to United Greenhouse Growers Association!</h1>
           <p>Thank you for joining our community. Your account has been created successfully.</p>
           <p>You can now log in and access all member features.</p>
+        `,
+        text: `
+Welcome to United Greenhouse Growers Association!
+
+Thank you for joining our community. Your account has been created successfully.
+
+You can now log in and access all member features.
         `,
       });
 
@@ -264,13 +269,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'password-reset'
       }, '1h');
 
-      // Send reset email
-      const fromEmail = process.env.FROM_EMAIL || "info@greenhousegrowers.org";
+      // Send reset email via Brevo SMTP
       const resetUrl = `${req.protocol}://${req.get('host')}/reset-password?token=${resetToken}`;
       
-      await sendEmail({
+      await sendUserEmail({
         to: user.email,
-        from: fromEmail,
         subject: "Reset Your UGGA Password",
         html: `
           <h1>Reset Your Password</h1>

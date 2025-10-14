@@ -1,8 +1,4 @@
-import { db } from "./db";
-import { users, profiles } from "@shared/schema";
-import { eq } from "drizzle-orm";
-import { sendEmail } from "./sendgrid";
-import { Role } from "@shared/schema";
+import { sendAdminNotification } from "./email/adminEmail";
 
 interface AdminEmailData {
   subject: string;
@@ -11,49 +7,22 @@ interface AdminEmailData {
 }
 
 /**
- * Send an email notification to all admin users
+ * Send an email notification to admins@greenhousegrowers.org
+ * DreamHost will forward this to all admin users
  */
 export async function notifyAllAdmins(emailData: AdminEmailData): Promise<boolean> {
   try {
-    // Query all admin users
-    const adminUsers = await db
-      .select({
-        id: users.id,
-        email: users.email,
-        username: users.username,
-      })
-      .from(users)
-      .where(eq(users.role, Role.ADMIN));
-
-    if (adminUsers.length === 0) {
-      console.warn("No admin users found to send notification - skipping email notification");
-      return true; // Return true to allow form submission to succeed
-    }
-
-    const fromEmail = process.env.FROM_EMAIL || "sam@growbig.ag";
+    const emailSent = await sendAdminNotification({
+      subject: emailData.subject,
+      html: emailData.htmlContent,
+      text: emailData.textContent,
+    });
     
-    // Send email to each admin
-    const emailPromises = adminUsers.map(admin =>
-      sendEmail({
-        to: admin.email,
-        from: fromEmail,
-        subject: emailData.subject,
-        html: emailData.htmlContent,
-        text: emailData.textContent,
-      })
-    );
-
-    const results = await Promise.allSettled(emailPromises);
-    
-    // Check if all emails were sent successfully
-    const allSuccessful = results.every(result => result.status === 'fulfilled' && result.value === true);
-    
-    if (!allSuccessful) {
-      console.error("Some admin emails failed to send:", results.filter(r => r.status === 'rejected'));
-      // Still return true - email failure shouldn't break form submission
-      return true;
+    if (!emailSent) {
+      console.warn("Admin notification email failed to send - form submission will still succeed");
     }
     
+    // Always return true - email failure shouldn't break form submission
     return true;
   } catch (error) {
     console.error("Error sending admin notifications:", error);

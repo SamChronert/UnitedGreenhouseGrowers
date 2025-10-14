@@ -10,19 +10,24 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 - Emphasize: Community, usefulness, grower empowerment, peer collaboration
 
 ## Recent Changes (October 2025)
+### SMTP Email System Migration
+- **Date**: October 14, 2025
+- **Change**: Migrated from SendGrid to dual SMTP-based email system
+- **Details**: 
+  - **DreamHost SMTP** (forms@greenhousegrowers.org): Handles all admin notifications (contact forms, feedback, expert requests, challenge submissions) → sends to admins@greenhousegrowers.org
+  - **Brevo SMTP** (noreply@greenhousegrowers.org): Handles user-facing transactional emails (password resets, welcome emails)
+  - Environment variables: DREAMHOST_SMTP_USER, DREAMHOST_SMTP_PASS, BREVO_SMTP_USER, BREVO_SMTP_PASS
+- **Implementation**: 
+  - New email utilities: `server/email/adminEmail.ts` (DreamHost), `server/email/userEmail.ts` (Brevo)
+  - Using nodemailer for SMTP connections (replaced SendGrid)
+  - Graceful error handling - email failures don't block form submissions
+- **Impact**: More reliable email delivery with dedicated SMTP providers for admin vs. user emails
+- **Status**: ✅ Complete - All email functionality migrated and tested
+
 ### Admin Email Notifications for Form Submissions
 - **Date**: October 14, 2025
-- **Change**: Implemented automated email notifications to all admin users for form submissions
-- **Details**: Created centralized email notification system that sends emails to all admin users when any of these forms are submitted:
-  - Contact form (/contact)
-  - Dashboard feedback form ("Contact UGGA Team")
-  - Challenge submission form ("We need your feedback!")
-  - Ask an Expert requests
-- **Implementation**: 
-  - New `server/emailNotifications.ts` utility with admin query and email formatting functions
-  - Graceful handling when no admins exist (logs warning but allows submission to succeed)
-  - Email failures don't block form submissions - data is always saved to database
-- **Impact**: Admins receive immediate notifications of user submissions via email, improving response times
+- **Change**: Implemented automated email notifications for form submissions
+- **Details**: All form submissions (contact, feedback, expert requests, challenges) trigger admin notifications via DreamHost SMTP
 - **Status**: ✅ Complete - All form endpoints updated and tested
 
 ### Major Documentation Update
@@ -74,7 +79,9 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 ### Core Services
 - **Database**: PostgreSQL (via DATABASE_URL)
 - **AI Services**: OpenAI API (for intelligent features)
-- **Email**: SendGrid (optional, for transactional emails)
+- **Email Services**: 
+  - DreamHost SMTP (forms@greenhousegrowers.org) for admin notifications
+  - Brevo SMTP (noreply@greenhousegrowers.org) for user transactional emails
 
 ### Development Tools
 - **Replit Integration**: Cartographer plugin

@@ -144,11 +144,11 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 - **Error handling**: Graceful degradation when API unavailable
 - **Cost optimization**: Efficient prompt engineering and caching
 
-**SendGrid Email Service:**
-- **Transactional emails**: Registration confirmations, notifications
-- **Template system**: Branded email templates
-- **Delivery tracking**: Open rates and engagement metrics
-- **Fallback graceful**: Platform works without email service
+**SMTP Email Services:**
+- **DreamHost SMTP** (forms@greenhousegrowers.org): Admin notifications sent to admins@greenhousegrowers.org
+- **Brevo SMTP** (noreply@greenhousegrowers.org): User transactional emails (password resets, welcome emails)
+- **Reliable delivery**: Dedicated SMTP providers for different email types
+- **Graceful fallback**: Platform works without email service configured
 
 **PostgreSQL Cloud:**
 - **Connection pooling**: Optimized for Replit deployment
@@ -177,7 +177,9 @@ The United Greenhouse Growers Association (UGGA) is a nonprofit, grower-first ne
 - **Node.js 20+** (recommended for optimal performance)
 - **PostgreSQL 14+** database instance
 - **OpenAI API key** (optional, for AI features)
-- **SendGrid API key** (optional, for email features)
+- **SMTP credentials** (optional, for email features):
+  - DreamHost SMTP for admin notifications
+  - Brevo SMTP for user transactional emails
 
 ### Quick Start
 
@@ -217,7 +219,13 @@ DATABASE_URL=postgresql://user:password@host:port/database
 OPENAI_API_KEY=sk-your-openai-key
 
 # Email Services (Optional)
-SENDGRID_API_KEY=SG.your-sendgrid-key
+# DreamHost SMTP for admin notifications
+DREAMHOST_SMTP_USER=forms@greenhousegrowers.org
+DREAMHOST_SMTP_PASS=your-dreamhost-password
+
+# Brevo SMTP for user transactional emails
+BREVO_SMTP_USER=your-brevo-login
+BREVO_SMTP_PASS=your-brevo-password
 
 # Security (Auto-generated if not provided)
 JWT_SECRET=your-secret-key-minimum-32-characters

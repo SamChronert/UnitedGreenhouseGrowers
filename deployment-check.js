@@ -34,7 +34,10 @@ const requiredEnvVars = [
   { key: 'DATABASE_URL', required: true },
   { key: 'JWT_SECRET', required: false, fallback: 'default provided' },
   { key: 'OPENAI_API_KEY', required: false, fallback: 'AI features disabled' },
-  { key: 'SENDGRID_API_KEY', required: false, fallback: 'Email features disabled' }
+  { key: 'DREAMHOST_SMTP_USER', required: false, fallback: 'Admin email disabled' },
+  { key: 'DREAMHOST_SMTP_PASS', required: false, fallback: 'Admin email disabled' },
+  { key: 'BREVO_SMTP_USER', required: false, fallback: 'User email disabled' },
+  { key: 'BREVO_SMTP_PASS', required: false, fallback: 'User email disabled' }
 ];
 
 let envOk = true;

@@ -14,7 +14,8 @@ Ensure these environment variables are configured in your deployment:
 
 **Optional (with graceful fallbacks):**
 - `OPENAI_API_KEY` - For AI features (Find a Grower, Farm Assessment)
-- `SENDGRID_API_KEY` - For email functionality
+- `DREAMHOST_SMTP_USER` & `DREAMHOST_SMTP_PASS` - For admin notification emails
+- `BREVO_SMTP_USER` & `BREVO_SMTP_PASS` - For user transactional emails
 - `JWT_SECRET` - Authentication secret (defaults to secure fallback)
 
 ### 2. Build Process
@@ -33,7 +34,7 @@ The application includes a health check endpoint at `/health` that returns:
 
 ### Graceful Error Handling
 - **Missing OpenAI API Key:** AI features show helpful messages instead of crashing
-- **Missing SendGrid API Key:** Email features disabled with console warnings
+- **Missing SMTP Credentials:** Email features disabled with console warnings, form submissions still succeed
 - **Database Connection Issues:** Proper error logging and connection testing
 - **Static File Serving:** Fallback handling for missing build files
 
@@ -58,7 +59,8 @@ npm run build
 Configure the following in your deployment environment:
 - `DATABASE_URL` (required)
 - `OPENAI_API_KEY` (optional)
-- `SENDGRID_API_KEY` (optional)
+- `DREAMHOST_SMTP_USER` & `DREAMHOST_SMTP_PASS` (optional - admin emails)
+- `BREVO_SMTP_USER` & `BREVO_SMTP_PASS` (optional - user emails)
 - `JWT_SECRET` (optional - uses secure default)
 
 ### 3. Start the Application
@@ -86,9 +88,9 @@ npm start
 - Review server logs for OpenAI API errors
 
 **Email Features Not Working:**
-- Verify SENDGRID_API_KEY is configured
-- Check from email address is verified in SendGrid
-- Review server logs for SendGrid API errors
+- Verify SMTP credentials are configured (DreamHost and/or Brevo)
+- Check SMTP server connectivity (smtp.dreamhost.com:587 or smtp-relay.brevo.com:587)
+- Review server logs for SMTP errors
 
 ### Debug Commands
 
@@ -112,7 +114,10 @@ Check the deployment logs in Replit for detailed error messages.
 DATABASE_URL=postgresql://user:pass@localhost:5432/ugga_dev
 NODE_ENV=development
 OPENAI_API_KEY=sk-...
-SENDGRID_API_KEY=SG....
+DREAMHOST_SMTP_USER=forms@greenhousegrowers.org
+DREAMHOST_SMTP_PASS=...
+BREVO_SMTP_USER=...
+BREVO_SMTP_PASS=...
 ```
 
 ### Production
@@ -120,7 +125,10 @@ SENDGRID_API_KEY=SG....
 DATABASE_URL=postgresql://user:pass@production-db:5432/ugga_prod
 NODE_ENV=production
 OPENAI_API_KEY=sk-...
-SENDGRID_API_KEY=SG....
+DREAMHOST_SMTP_USER=forms@greenhousegrowers.org
+DREAMHOST_SMTP_PASS=...
+BREVO_SMTP_USER=...
+BREVO_SMTP_PASS=...
 JWT_SECRET=your-production-secret
 ```
 

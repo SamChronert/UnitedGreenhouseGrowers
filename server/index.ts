@@ -24,7 +24,8 @@ console.log(`Starting UGGA Platform in ${process.env.NODE_ENV || 'development'} 
 console.log(`Environment check:`);
 console.log(`- DATABASE_URL: ${process.env.DATABASE_URL ? 'configured' : 'missing'}`);
 console.log(`- OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? 'configured' : 'missing'}`);
-console.log(`- SENDGRID_API_KEY: ${process.env.SENDGRID_API_KEY ? 'configured' : 'missing'}`);
+console.log(`- DREAMHOST_SMTP: ${process.env.DREAMHOST_SMTP_USER && process.env.DREAMHOST_SMTP_PASS ? 'configured' : 'missing'}`);
+console.log(`- BREVO_SMTP: ${process.env.BREVO_SMTP_USER && process.env.BREVO_SMTP_PASS ? 'configured' : 'missing'}`);
 console.log(`- JWT_SECRET: ${process.env.JWT_SECRET ? 'configured' : 'using default'}`);
 
 // Set environment defaults for production
