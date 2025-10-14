@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useDemo } from "@/contexts/DemoContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Check } from "lucide-react";
@@ -23,6 +24,7 @@ export default function ChallengeSubmissionForm() {
   const [description, setDescription] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
+  const { isDemo, showDemoAction } = useDemo();
   const queryClient = useQueryClient();
 
   const submitChallenge = useMutation({
@@ -53,6 +55,11 @@ export default function ChallengeSubmissionForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isDemo) {
+      showDemoAction();
+      return;
+    }
     
     if (!description.trim()) {
       toast({

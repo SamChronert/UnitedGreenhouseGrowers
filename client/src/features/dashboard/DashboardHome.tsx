@@ -181,55 +181,7 @@ export default function DashboardHome() {
           </p>
         </CardHeader>
         <CardContent>
-          {isDemo ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Challenge Category
-                  </label>
-                  <select 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ugga-primary bg-gray-100"
-                    disabled
-                  >
-                    <option>Select a category...</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Farm Size
-                  </label>
-                  <select 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-ugga-primary bg-gray-100"
-                    disabled
-                  >
-                    <option>Select farm size...</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Challenge Description
-                </label>
-                <Textarea
-                  placeholder="Describe the challenge you're facing..."
-                  rows={4}
-                  className="bg-gray-100"
-                  disabled
-                />
-              </div>
-              <Button 
-                onClick={showDemoAction}
-                className="text-white rounded-lg font-medium shadow-lg hover:opacity-90 transition-all duration-300"
-                style={{backgroundColor: 'var(--color-clay)'}}
-              >
-                <Send className="h-4 w-4 mr-2" />
-                Submit Challenge (Demo)
-              </Button>
-            </div>
-          ) : (
-            <ChallengeSubmissionForm />
-          )}
+          <ChallengeSubmissionForm />
         </CardContent>
       </Card>
 
