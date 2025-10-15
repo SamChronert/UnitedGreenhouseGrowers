@@ -80,7 +80,7 @@ export default function SearchModal({ open, onOpenChange }: SearchModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Smart Search
+            Search
           </DialogTitle>
         </DialogHeader>
 
@@ -113,17 +113,6 @@ export default function SearchModal({ open, onOpenChange }: SearchModalProps) {
               </div>
             )}
 
-            {!debouncedQuery && (
-              <div className="text-center py-8 text-gray-500">
-                <p className="mb-2">Try searching for:</p>
-                <ul className="text-sm space-y-1">
-                  <li>"tomato pest management"</li>
-                  <li>"universities offering greenhouse courses"</li>
-                  <li>"grants for hydroponic systems"</li>
-                  <li>"irrigation discussion"</li>
-                </ul>
-              </div>
-            )}
 
             {/* Resources Results */}
             {searchResults && searchResults.results.resources.length > 0 && (
