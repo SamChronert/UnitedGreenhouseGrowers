@@ -355,22 +355,22 @@ export default function AdminResources() {
                 {searchTerm ? "No resources found matching your search." : "No resources available."}
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="w-full">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-12">
+                      <TableHead className="w-[40px]">
                         <Checkbox
                           checked={selectedResources.size === filteredResources.length && filteredResources.length > 0}
                           onCheckedChange={toggleSelectAll}
                         />
                       </TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>URL</TableHead>
-                      <TableHead>Summary</TableHead>
-                      <TableHead>Tags</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="min-w-[150px]">Title</TableHead>
+                      <TableHead className="hidden md:table-cell min-w-[120px]">URL</TableHead>
+                      <TableHead className="hidden lg:table-cell">Summary</TableHead>
+                      <TableHead className="hidden xl:table-cell min-w-[100px]">Tags</TableHead>
+                      <TableHead className="min-w-[100px]">Status</TableHead>
+                      <TableHead className="text-right w-[100px]">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -388,29 +388,29 @@ export default function AdminResources() {
                             onCheckedChange={() => toggleResourceSelection(resource.id)}
                           />
                         </TableCell>
-                        <TableCell className="font-medium max-w-xs">
-                          <div className="truncate">{resource.title}</div>
+                        <TableCell className="font-medium">
+                          <div className="truncate max-w-[200px] md:max-w-[250px]">{resource.title}</div>
                         </TableCell>
-                        <TableCell className="max-w-xs">
+                        <TableCell className="hidden md:table-cell">
                           {resource.url && (
                             <a 
                               href={resource.url} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="text-ugga-primary hover:text-ugga-secondary flex items-center gap-1 truncate"
+                              className="text-ugga-primary hover:text-ugga-secondary flex items-center gap-1"
                             >
                               <ExternalLink className="h-3 w-3 flex-shrink-0" />
-                              <span className="truncate">{new URL(resource.url).hostname}</span>
+                              <span className="truncate max-w-[150px]">{new URL(resource.url).hostname}</span>
                             </a>
                           )}
                         </TableCell>
-                        <TableCell className="max-w-md">
-                          <div className="truncate text-sm text-gray-600">
+                        <TableCell className="hidden lg:table-cell">
+                          <div className="truncate text-sm text-gray-600 max-w-[250px]">
                             {resource.summary || '—'}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1 max-w-xs">
+                        <TableCell className="hidden xl:table-cell">
+                          <div className="flex flex-wrap gap-1">
                             {resource.tags?.slice(0, 2).map((tag: string) => (
                               <Badge key={tag} variant="outline" className="text-xs">
                                 {tag}
@@ -425,7 +425,7 @@ export default function AdminResources() {
                         </TableCell>
                         <TableCell>
                           {resource.ugga_verified ? (
-                            <Badge variant="default" className="bg-green-100 text-green-800">
+                            <Badge variant="default" className="bg-green-100 text-green-800 whitespace-nowrap">
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Verified
                             </Badge>
