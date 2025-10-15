@@ -10,7 +10,6 @@ import {
   FolderOpen, 
   Newspaper, 
   MessageCircle, 
-  ShoppingBag,
   Loader2,
   ArrowRight
 } from "lucide-react";
@@ -26,7 +25,6 @@ interface SearchResults {
     resources: any[];
     blog: any[];
     forum: any[];
-    products: any[];
   };
 }
 
@@ -62,8 +60,7 @@ export default function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const hasResults = searchResults && (
     searchResults.results.resources.length > 0 ||
     searchResults.results.blog.length > 0 ||
-    searchResults.results.forum.length > 0 ||
-    searchResults.results.products.length > 0
+    searchResults.results.forum.length > 0
   );
 
   const handleLinkClick = (href: string) => {
@@ -209,38 +206,6 @@ export default function SearchModal({ open, onOpenChange }: SearchModalProps) {
               </div>
             )}
 
-            {/* Products Results */}
-            {searchResults && searchResults.results.products.length > 0 && (
-              <div className="space-y-3" data-testid="section-products-results">
-                <div className="flex items-center gap-2 text-pink-600">
-                  <ShoppingBag className="h-4 w-4" />
-                  <h3 className="font-semibold">Products</h3>
-                </div>
-                <div className="space-y-2">
-                  {searchResults.results.products.map((product: any) => (
-                    <Link
-                      key={product.id}
-                      href={isDemo ? `/demo/producthub` : `/dashboard/producthub`}
-                      onClick={() => handleLinkClick(isDemo ? `/demo/producthub` : `/dashboard/producthub`)}
-                    >
-                      <div 
-                        className="p-3 bg-pink-50 hover:bg-pink-100 rounded-lg cursor-pointer transition-colors"
-                        data-testid={`result-product-${product.id}`}
-                      >
-                        <h4 className="font-medium text-gray-900">{product.productName}</h4>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-pink-600">
-                          <span>{product.category}</span>
-                          <span>• {product.vendorName}</span>
-                        </div>
-                        {product.description && (
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-1">{product.description}</p>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </DialogContent>

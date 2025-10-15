@@ -1932,8 +1932,7 @@ Respond in JSON format:
         results: {
           resources: [],
           blog: [],
-          forum: [],
-          products: []
+          forum: []
         }
       };
 
@@ -1953,12 +1952,6 @@ Respond in JSON format:
       if (!searchIntent.contentTypes || searchIntent.contentTypes.includes("forum")) {
         const forumResults = await storage.searchForumPosts(searchQuery);
         results.results.forum = forumResults.slice(0, 5);
-      }
-
-      // Search products if requested or by default
-      if (!searchIntent.contentTypes || searchIntent.contentTypes.includes("products")) {
-        const productResults = await storage.searchProducts(searchQuery);
-        results.results.products = productResults.slice(0, 5);
       }
 
       res.json(results);
