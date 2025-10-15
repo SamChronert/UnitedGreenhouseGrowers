@@ -30,6 +30,21 @@ const RESOURCE_TYPES = [
 
 type ResourceTypeId = typeof RESOURCE_TYPES[number]['id'];
 
+// Helper function to properly singularize resource type labels
+const getSingularLabel = (label: string): string => {
+  const singularMap: Record<string, string> = {
+    'Universities': 'University',
+    'Organizations': 'Organization',
+    'Grants': 'Grant',
+    'Tools': 'Tool',
+    'Templates': 'Template',
+    'Learning': 'Learning',
+    'Bulletins': 'Bulletin',
+    'Industry News': 'Industry News'
+  };
+  return singularMap[label] || label.slice(0, -1);
+};
+
 export default function AdminResources() {
   const [selectedResourceType, setSelectedResourceType] = useState<ResourceTypeId>('universities');
   const [searchTerm, setSearchTerm] = useState("");
@@ -336,7 +351,7 @@ export default function AdminResources() {
               }}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add {currentResourceType.label.slice(0, -1)}
+              Add {getSingularLabel(currentResourceType.label)}
             </Button>
           </div>
         </div>
@@ -468,7 +483,7 @@ export default function AdminResources() {
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {editingResource ? `Edit ${currentResourceType.label.slice(0, -1)}` : `Add New ${currentResourceType.label.slice(0, -1)}`}
+                {editingResource ? `Edit ${getSingularLabel(currentResourceType.label)}` : `Add New ${getSingularLabel(currentResourceType.label)}`}
               </DialogTitle>
             </DialogHeader>
             <ResourceTypeForm
