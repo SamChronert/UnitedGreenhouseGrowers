@@ -22,17 +22,26 @@ export default function BlogPostPage() {
     });
   };
 
-  const renderMarkdown = (content: string) => {
-    // Simple markdown rendering - in production, use a proper markdown parser
-    return content
-      .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mb-4">$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mb-3 mt-6">$1</h2>')
-      .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mb-2 mt-4">$1</h3>')
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-ugga-primary hover:text-ugga-secondary underline">$1</a>')
-      .replace(/\*\*(.*)\*\*/gim, '<strong class="font-semibold">$1</strong>')
-      .replace(/\*(.*)\*/gim, '<em class="italic">$1</em>')
-      .replace(/\n\n/gim, '</p><p class="mb-4">')
-      .replace(/\n/gim, '<br />');
+  const renderContent = (post: BlogPost) => {
+    // Use HTML content if available, otherwise fall back to markdown
+    if (post.contentHtml) {
+      return post.contentHtml;
+    }
+    
+    // Fallback to markdown rendering for old posts
+    if (post.contentMd) {
+      return post.contentMd
+        .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mb-4">$1</h1>')
+        .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mb-3 mt-6">$1</h2>')
+        .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mb-2 mt-4">$1</h3>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-ugga-primary hover:text-ugga-secondary underline">$1</a>')
+        .replace(/\*\*(.*)\*\*/gim, '<strong class="font-semibold">$1</strong>')
+        .replace(/\*(.*)\*/gim, '<em class="italic">$1</em>')
+        .replace(/\n\n/gim, '</p><p class="mb-4">')
+        .replace(/\n/gim, '<br />');
+    }
+    
+    return '';
   };
 
   if (isLoading) {
@@ -82,30 +91,45 @@ export default function BlogPostPage() {
         </div>
 
         {/* Article Header */}
-        <article className="bg-white rounded-xl shadow-sm border p-8 mb-8">
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <Badge className="bg-ugga-primary/10 text-ugga-primary">
-                Article
-              </Badge>
-              <div className="flex items-center text-sm text-gray-500">
-                <Calendar className="h-4 w-4 mr-1" />
-                {formatDate(post.publishedAt)}
-              </div>
+        <article className="bg-white rounded-xl shadow-sm border overflow-hidden mb-8">
+          {/* Header Image */}
+          {post.headerImageUrl && (
+            <div className="w-full h-64 md:h-96 overflow-hidden">
+              <img 
+                src={post.headerImageUrl} 
+                alt={post.title}
+                className="w-full h-full object-cover"
+                data-testid="img-blog-header"
+              />
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              {post.title}
-            </h1>
-          </div>
+          )}
+          
+          <div className="p-8">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <Badge className="bg-ugga-primary/10 text-ugga-primary">
+                  Article
+                </Badge>
+                <div className="flex items-center text-sm text-gray-500">
+                  <Calendar className="h-4 w-4 mr-1" />
+                  {formatDate(post.publishedAt)}
+                </div>
+              </div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                {post.title}
+              </h1>
+            </div>
 
-          {/* Article Content */}
-          <div className="prose prose-lg max-w-none">
-            <div
-              className="text-gray-700 leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: `<p class="mb-4">${renderMarkdown(post.contentMd)}</p>`
-              }}
-            />
+            {/* Article Content */}
+            <div className="prose prose-lg max-w-none">
+              <div
+                className="text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{
+                  __html: renderContent(post)
+                }}
+                data-testid="content-blog-body"
+              />
+            </div>
           </div>
         </article>
 

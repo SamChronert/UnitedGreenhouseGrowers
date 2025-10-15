@@ -57,7 +57,9 @@ export const blogPosts = pgTable("blog_posts", {
   id: varchar("id").primaryKey().notNull(),
   title: varchar("title").notNull(),
   slug: varchar("slug").unique().notNull(),
-  contentMd: text("content_md").notNull(),
+  contentMd: text("content_md"),
+  contentHtml: text("content_html"),
+  headerImageUrl: varchar("header_image_url"),
   publishedAt: timestamp("published_at").defaultNow().notNull(),
 });
 

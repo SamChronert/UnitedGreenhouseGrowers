@@ -1734,6 +1734,33 @@ If you didn't request this reset, you can safely ignore this email.
     }
   });
 
+  // Blog image upload and serving routes
+  app.post("/api/blog-images/upload", authenticate, requireAdmin, async (req: AuthRequest, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getBlogImageUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Blog image upload URL error:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+  });
+
+  app.get("/blog-images/:imagePath(*)", async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const imagePath = `/blog-images/${req.params.imagePath}`;
+      const imageFile = await objectStorageService.getBlogImageFile(imagePath);
+      objectStorageService.downloadObject(imageFile, res);
+    } catch (error) {
+      console.error("Blog image serve error:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.status(404).json({ message: "Image not found" });
+      }
+      return res.status(500).json({ message: "Failed to serve image" });
+    }
+  });
+
   // Farm Roadmap Questions Management Routes
   // Public endpoint to get all active categories and questions
   app.get("/api/farm-roadmap/questions", async (req, res) => {

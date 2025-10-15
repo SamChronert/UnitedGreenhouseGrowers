@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -11,7 +10,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type BlogPost } from "@shared/schema";
-import { Plus, Edit, Trash2, Search, Loader2, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Loader2, Calendar, Upload as UploadIcon } from "lucide-react";
+import RichTextEditor from "@/components/RichTextEditor";
 
 export default function AdminBlog() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,8 +20,10 @@ export default function AdminBlog() {
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
-    contentMd: ""
+    contentHtml: "",
+    headerImageUrl: ""
   });
+  const [isHeaderImageUploading, setIsHeaderImageUploading] = useState(false);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -31,7 +33,7 @@ export default function AdminBlog() {
   });
 
   const createPostMutation = useMutation({
-    mutationFn: (data: { title: string; slug: string; contentMd: string }) =>
+    mutationFn: (data: { title: string; slug: string; contentHtml?: string; headerImageUrl?: string }) =>
       apiRequest("POST", "/api/admin/blog", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blog"] });
@@ -52,7 +54,7 @@ export default function AdminBlog() {
   });
 
   const updatePostMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { title: string; slug: string; contentMd: string } }) =>
+    mutationFn: ({ id, data }: { id: string; data: { title: string; slug: string; contentHtml?: string; headerImageUrl?: string } }) =>
       apiRequest("PUT", `/api/admin/blog/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blog"] });
@@ -94,11 +96,12 @@ export default function AdminBlog() {
   const filteredPosts = posts?.filter(post =>
     post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     post.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.contentMd.toLowerCase().includes(searchTerm.toLowerCase())
+    (post.contentMd?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+    (post.contentHtml?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
   ) || [];
 
   const resetForm = () => {
-    setFormData({ title: "", slug: "", contentMd: "" });
+    setFormData({ title: "", slug: "", contentHtml: "", headerImageUrl: "" });
   };
 
   const generateSlug = (title: string) => {
@@ -120,10 +123,10 @@ export default function AdminBlog() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.slug || !formData.contentMd) {
+    if (!formData.title || !formData.slug || !formData.contentHtml) {
       toast({
         title: "Error",
-        description: "All fields are required.",
+        description: "Title, slug, and content are required.",
         variant: "destructive",
       });
       return;
@@ -141,8 +144,80 @@ export default function AdminBlog() {
     setFormData({
       title: post.title,
       slug: post.slug,
-      contentMd: post.contentMd
+      contentHtml: post.contentHtml || "",
+      headerImageUrl: post.headerImageUrl || ""
     });
+  };
+
+  const handleHeaderImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Error",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsHeaderImageUploading(true);
+      
+      // Get upload URL
+      const { uploadURL } = await apiRequest('POST', '/api/blog-images/upload');
+      
+      // Upload image
+      const uploadResponse = await fetch(uploadURL, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Upload failed');
+      }
+
+      // Extract the image ID from the signed GCS URL and normalize it
+      // GCS signed URLs have format: /storage/v1/b/{bucket}/o/{path}
+      const url = new URL(uploadURL);
+      const pathname = url.pathname;
+      
+      // Extract the object path from /storage/v1/b/{bucket}/o/{encodedPath}
+      const objectPathMatch = pathname.match(/\/o\/(.+)/);
+      if (!objectPathMatch) {
+        throw new Error('Invalid upload URL format');
+      }
+      
+      // Decode the percent-encoded path
+      const decodedPath = decodeURIComponent(objectPathMatch[1]);
+      
+      // Extract just the image ID (everything after /blog-images/)
+      const imageIdMatch = decodedPath.match(/blog-images\/(.+)/);
+      const imageId = imageIdMatch ? imageIdMatch[1] : decodedPath.split('/').pop();
+      const normalizedPath = `/blog-images/${imageId}`;
+      
+      // Update form data with normalized image path
+      setFormData(prev => ({ ...prev, headerImageUrl: normalizedPath }));
+      
+      toast({
+        title: "Success",
+        description: "Header image uploaded successfully.",
+      });
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload header image.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsHeaderImageUploading(false);
+      e.target.value = '';
+    }
   };
 
   const handleDelete = (id: string) => {
@@ -202,6 +277,7 @@ export default function AdminBlog() {
                       value={formData.title}
                       onChange={(e) => handleTitleChange(e.target.value)}
                       required
+                      data-testid="input-title"
                     />
                   </div>
                   <div className="space-y-2">
@@ -211,23 +287,43 @@ export default function AdminBlog() {
                       value={formData.slug}
                       onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
                       required
+                      data-testid="input-slug"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="content">Content (Markdown) *</Label>
-                  <Textarea
-                    id="content"
-                    value={formData.contentMd}
-                    onChange={(e) => setFormData(prev => ({ ...prev, contentMd: e.target.value }))}
-                    placeholder="Write your blog post content in Markdown format..."
-                    rows={15}
-                    className="font-mono text-sm"
-                    required
+                  <Label htmlFor="header-image">Header Image</Label>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      id="header-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleHeaderImageUpload}
+                      disabled={isHeaderImageUploading}
+                      data-testid="input-header-image"
+                    />
+                    {isHeaderImageUploading && (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    )}
+                  </div>
+                  {formData.headerImageUrl && (
+                    <div className="mt-2">
+                      <img 
+                        src={formData.headerImageUrl} 
+                        alt="Header preview" 
+                        className="max-w-xs h-32 object-cover rounded border"
+                        data-testid="img-header-preview"
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="content">Content *</Label>
+                  <RichTextEditor
+                    content={formData.contentHtml}
+                    onChange={(html) => setFormData(prev => ({ ...prev, contentHtml: html }))}
+                    placeholder="Write your blog post content..."
                   />
-                  <p className="text-xs text-gray-500">
-                    Use Markdown formatting: # for headers, **bold**, *italic*, etc.
-                  </p>
                 </div>
                 <div className="flex justify-end gap-3">
                   <Button 

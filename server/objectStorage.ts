@@ -143,6 +143,30 @@ export class ObjectStorageService {
     });
   }
 
+  // Gets the upload URL for blog images.
+  async getBlogImageUploadURL(): Promise<string> {
+    const privateObjectDir = this.getPrivateObjectDir();
+    if (!privateObjectDir) {
+      throw new Error(
+        "PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' " +
+          "tool and set PRIVATE_OBJECT_DIR env var."
+      );
+    }
+
+    const imageId = randomUUID();
+    const fullPath = `${privateObjectDir}/blog-images/${imageId}`;
+
+    const { bucketName, objectName } = parseObjectPath(fullPath);
+
+    // Sign URL for PUT method with TTL
+    return signObjectURL({
+      bucketName,
+      objectName,
+      method: "PUT",
+      ttlSec: 900, // 15 minutes
+    });
+  }
+
   // Gets the resource image file from the object path.
   async getResourceImageFile(objectPath: string): Promise<File> {
     if (!objectPath.startsWith("/resource-images/")) {
@@ -160,6 +184,33 @@ export class ObjectStorageService {
       entityDir = `${entityDir}/`;
     }
     const objectImagePath = `${entityDir}resource-images/${imageId}`;
+    const { bucketName, objectName } = parseObjectPath(objectImagePath);
+    const bucket = objectStorageClient.bucket(bucketName);
+    const objectFile = bucket.file(objectName);
+    const [exists] = await objectFile.exists();
+    if (!exists) {
+      throw new ObjectNotFoundError();
+    }
+    return objectFile;
+  }
+
+  // Gets the blog image file from the object path.
+  async getBlogImageFile(objectPath: string): Promise<File> {
+    if (!objectPath.startsWith("/blog-images/")) {
+      throw new ObjectNotFoundError();
+    }
+
+    const parts = objectPath.slice(1).split("/");
+    if (parts.length < 2) {
+      throw new ObjectNotFoundError();
+    }
+
+    const imageId = parts.slice(1).join("/");
+    let entityDir = this.getPrivateObjectDir();
+    if (!entityDir.endsWith("/")) {
+      entityDir = `${entityDir}/`;
+    }
+    const objectImagePath = `${entityDir}blog-images/${imageId}`;
     const { bucketName, objectName } = parseObjectPath(objectImagePath);
     const bucket = objectStorageClient.bucket(bucketName);
     const objectFile = bucket.file(objectName);
